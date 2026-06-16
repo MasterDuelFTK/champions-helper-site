@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Champions Helper — 포켓몬 챔피언스 실시간 위력 계산기</title>
+<meta name="description" content="포켓몬 챔피언스 전용 데스크탑 보조 도구. 상대 파티를 자동 인식해 내 기술의 실시간 데미지·확정 1타 여부·교체 시뮬레이션을 보여줍니다." />
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+    --ok: #6fd08a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif;
+    line-height: 1.6; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+  /* 헤더 */
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(27,29,34,0.92); backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 17px; }
+  .brand .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .nav-links { display: flex; gap: 20px; font-size: 14px; }
+  .nav-links a { color: var(--muted); }
+  .nav-links a:hover { color: var(--txt); text-decoration: none; }
+  @media (max-width: 640px) { .nav-links { display: none; } }
+
+  /* 히어로 */
+  .hero { text-align: center; padding: 72px 0 56px; }
+  .hero h1 { font-size: 42px; font-weight: 800; margin: 0 0 16px; letter-spacing: -0.5px; }
+  .hero h1 .accent { color: var(--accent2); }
+  .hero p.lead { font-size: 18px; color: var(--muted); max-width: 620px; margin: 0 auto 32px; }
+  .cta { display: inline-flex; align-items: center; gap: 9px;
+    background: var(--accent); color: #fff; font-weight: 700; font-size: 16px;
+    padding: 13px 28px; border-radius: 10px; transition: background .15s; }
+  .cta:hover { background: var(--accent2); text-decoration: none; }
+  .cta.secondary { background: transparent; border: 1px solid var(--line); color: var(--txt); margin-left: 10px; }
+  .cta.secondary:hover { background: var(--panel2); }
+  .hero .note { display: block; margin-top: 14px; font-size: 13px; color: var(--muted); }
+  @media (max-width: 640px) { .hero h1 { font-size: 32px; } .cta.secondary { margin-left: 0; margin-top: 10px; } }
+
+  /* 섹션 공통 */
+  section { padding: 48px 0; border-top: 1px solid var(--line); }
+  .section-head { text-align: center; margin-bottom: 36px; }
+  .section-head h2 { font-size: 28px; font-weight: 800; margin: 0 0 8px; }
+  .section-head p { color: var(--muted); margin: 0; }
+
+  /* 기능 그리드 */
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 880px) { .features { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .features { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+  .card .ico { font-size: 26px; margin-bottom: 12px; }
+  .card h3 { font-size: 17px; font-weight: 700; margin: 0 0 8px; }
+  .card p { color: var(--muted); font-size: 14px; margin: 0; }
+
+  /* 사용법 */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: step; }
+  @media (max-width: 720px) { .steps { grid-template-columns: 1fr; } }
+  .step { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 24px; position: relative; }
+  .step::before {
+    counter-increment: step; content: counter(step);
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: #fff;
+    font-weight: 800; font-size: 17px; margin-bottom: 14px;
+  }
+  .step h3 { font-size: 16px; margin: 0 0 6px; }
+  .step p { color: var(--muted); font-size: 14px; margin: 0; }
+
+  /* 다운로드 박스 */
+  .dl-box { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 36px; text-align: center; }
+  .dl-box h2 { font-size: 24px; margin: 0 0 10px; }
+  .dl-box p { color: var(--muted); margin: 0 0 22px; }
+  .reqs { margin-top: 18px; font-size: 13px; color: var(--muted); }
+
+  /* 광고 자리 (AdSense 승인 후 슬롯 삽입) */
+  .ad-slot { margin: 36px auto 0; min-height: 90px; max-width: 728px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--panel); border: 1px dashed var(--line); border-radius: 10px;
+    color: var(--muted); font-size: 12px; }
+
+  /* 푸터 */
+  footer { border-top: 1px solid var(--line); padding: 32px 0 48px; }
+  footer .cols { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  footer .fnav { display: flex; gap: 18px; font-size: 14px; }
+  footer .fnav a { color: var(--muted); }
+  .disclaimer { margin-top: 22px; font-size: 12px; color: var(--muted); line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="brand"><span class="dot"></span> Champions Helper</div>
+    <nav class="nav-links">
+      <a href="#features">기능</a>
+      <a href="#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="#download">다운로드</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- 히어로 -->
+  <div class="wrap hero">
+    <h1>포켓몬 챔피언스,<br><span class="accent">계산은 프로그램이.</span></h1>
+    <p class="lead">상대 파티를 자동으로 인식해 내 기술의 실시간 데미지와 확정 1타 여부, 교체 시뮬레이션까지 — 배틀에 집중하는 동안 계산은 Champions Helper가 합니다.</p>
+    <a class="cta" href="#download">⬇ 무료 다운로드</a>
+    <a class="cta secondary" href="/builder/">파티 빌더 열기</a>
+    <span class="note">Windows 10/11 · 무료 · 설치 후 게임만 켜면 자동 동작</span>
+  </div>
+
+  <!-- 기능 -->
+  <section id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>무엇을 해주나요?</h2>
+        <p>화면만 띄워두면, 매 턴 필요한 정보를 알아서 계산합니다.</p>
+      </div>
+      <div class="features">
+        <div class="card">
+          <div class="ico">🔍</div>
+          <h3>상대 파티 자동 인식</h3>
+          <p>화면 OCR로 상대 6마리의 종족·타입을 실시간으로 읽어들입니다. 직접 입력할 필요 없습니다.</p>
+        </div>
+        <div class="card">
+          <div class="ico">⚡</div>
+          <h3>실시간 위력 계산</h3>
+          <p>내 4기술 × 상대 전 포켓몬의 데미지%를 즉시 표시. 확정 1타·난수 1타를 색으로 구분합니다.</p>
+        </div>
+        <div class="card">
+          <div class="ico">🔁</div>
+          <h3>교체·랭크 시뮬레이션</h3>
+          <p>내 포켓몬 교체, 랭크 변화, 지닌도구·노력치·성격을 가정해 위력이 어떻게 바뀌는지 미리 봅니다.</p>
+        </div>
+        <div class="card">
+          <div class="ico">🌦️</div>
+          <h3>날씨·벽·순풍 반영</h3>
+          <p>쾌청·비·모래·싸라기눈, 리플렉터·빛의장막·오로라베일, 순풍을 로그에서 읽어 자동으로 계산에 적용합니다.</p>
+        </div>
+        <div class="card">
+          <div class="ico">✨</div>
+          <h3>메가진화·폼체인지</h3>
+          <p>메가진화 후 종족값·특성·날씨 변화, 돌핀맨 영웅폼, 메타몽 변신, 킬가르도 블레이드폼까지 미리 계산합니다.</p>
+        </div>
+        <div class="card">
+          <div class="ico">🛠️</div>
+          <h3>파티 빌더</h3>
+          <p>종족값·실수치 자동 계산과 노력치 검증. 브라우저에서 파티를 등록하면 프로그램에 바로 반영됩니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 사용법 -->
+  <section id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>사용법은 3단계</h2>
+        <p>복잡한 설정 없이, 켜두면 끝입니다.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <h3>다운로드 후 실행</h3>
+          <p>프로그램을 받아 실행합니다. 설치 과정 없이 바로 켜집니다.</p>
+        </div>
+        <div class="step">
+          <h3>포켓몬 챔피언스 실행</h3>
+          <p>게임을 켜면 화면을 인식해 상대 파티와 배틀 상황을 자동으로 추적합니다.</p>
+        </div>
+        <div class="step">
+          <h3>위력창 자동 표시</h3>
+          <p>브라우저에 실시간 위력창이 자동으로 열려 매 턴 필요한 계산을 보여줍니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 다운로드 -->
+  <section id="download">
+    <div class="wrap">
+      <div class="dl-box">
+        <h2>지금 무료로 시작하세요</h2>
+        <p>Windows 10/11 · 별도 설치 불필요 · 광고 외 비용 없음</p>
+        <a class="cta" href="https://github.com/MasterDuelFTK/champions-helper-site/releases/latest" id="dlBtn">⬇ 최신 버전 다운로드</a>
+        <div class="reqs">
+          요구 사양: Windows 10/11 (64bit) · 포켓몬 챔피언스 화면이 보이는 환경<br>
+          ※ 다운로드 파일은 준비되는 대로 위 버튼에 연결됩니다.
+        </div>
+      </div>
+      <!-- AdSense: 승인 후 이 자리에 반응형 광고 슬롯 삽입 -->
+      <div class="ad-slot">광고 자리 (AdSense 승인 후 게재)</div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div class="brand"><span class="dot"></span> Champions Helper</div>
+      <nav class="fnav">
+        <a href="#features">기능</a>
+        <a href="#how">사용법</a>
+        <a href="/builder/">파티 빌더</a>
+        <a href="#download">다운로드</a>
+      </nav>
+    </div>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트·프로그램은 이들과 어떠한 제휴·후원·승인 관계도 없습니다.
+      본 도구는 게임 데이터를 변조하지 않으며, 화면에 표시되는 정보를 보조적으로 계산해 보여줄 뿐입니다.<br>
+      © 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
