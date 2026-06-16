@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>포켓몬 챔피언스 도감 — 종족값·타입·특성 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스에 등장하는 포켓몬의 종족값, 타입, 특성(한글)을 한눈에. 이름·타입으로 검색하세요." />
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.5; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+
+  header { position: sticky; top: 0; z-index: 20;
+    background: rgba(27,29,34,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 17px; color: var(--txt); }
+  .brand .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .nav-links { display: flex; gap: 20px; font-size: 14px; }
+  .nav-links a { color: var(--muted); }
+  .nav-links a:hover { color: var(--txt); text-decoration: none; }
+  .nav-links a.active { color: var(--txt); }
+  @media (max-width: 640px) { .nav-links { gap: 13px; font-size: 13px; } }
+
+  .page-head { padding: 28px 0 10px; }
+  .page-head h1 { font-size: 26px; margin: 0 0 4px; font-weight: 800; }
+  .page-head p { color: var(--muted); margin: 0; font-size: 14px; }
+
+  /* 검색 + 필터 */
+  .controls { position: sticky; top: 56px; z-index: 15; background: var(--bg); padding: 12px 0 8px; }
+  .search { width: 100%; background: #1f2229; color: var(--txt); border: 1px solid var(--line);
+    border-radius: 8px; padding: 10px 13px; font-size: 15px; font-family: inherit; }
+  .search:focus { outline: 1px solid var(--accent); }
+  .typebar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+  .tchip { font-size: 12px; font-weight: 700; color: #181818; padding: 3px 10px; border-radius: 12px;
+    cursor: pointer; border: 2px solid transparent; opacity: .55; user-select: none; }
+  .tchip.on { opacity: 1; border-color: #fff; }
+  .tchip.all { background: var(--panel2); color: var(--txt); opacity: 1; }
+  .tchip.all.on { border-color: var(--accent2); }
+  .count { color: var(--muted); font-size: 13px; margin: 8px 2px 0; }
+
+  /* 그리드 */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 12px; padding: 8px 0 40px; }
+  .mon { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 8px;
+    text-align: center; cursor: pointer; transition: border-color .12s, transform .12s; }
+  .mon:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .mon .num { font-size: 11px; color: var(--muted); }
+  .mon img { width: 64px; height: 64px; object-fit: contain; image-rendering: pixelated; display: block; margin: 2px auto; }
+  .mon .nm { font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mon .tps { display: flex; justify-content: center; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
+  .tp { font-size: 10px; font-weight: 700; color: #181818; padding: 1px 7px; border-radius: 9px; }
+
+  .ad-slot { margin: 8px auto 28px; min-height: 90px; max-width: 728px; display: flex; align-items: center;
+    justify-content: center; background: var(--panel); border: 1px dashed var(--line); border-radius: 10px;
+    color: var(--muted); font-size: 12px; }
+
+  /* 모달 */
+  .ovl { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.6); display: none;
+    align-items: center; justify-content: center; padding: 16px; }
+  .ovl.show { display: flex; }
+  .modal { background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    width: 100%; max-width: 440px; max-height: 90vh; overflow: auto; padding: 22px; }
+  .modal .x { float: right; cursor: pointer; color: var(--muted); font-size: 22px; line-height: 1; }
+  .modal .x:hover { color: var(--txt); }
+  .m-top { display: flex; align-items: center; gap: 16px; }
+  .m-top img { width: 88px; height: 88px; object-fit: contain; image-rendering: pixelated; }
+  .m-name { font-size: 22px; font-weight: 800; margin: 0; }
+  .m-en { color: var(--muted); font-size: 13px; text-transform: capitalize; }
+  .m-num { color: var(--muted); font-size: 13px; }
+  .m-tps { display: flex; gap: 6px; margin-top: 7px; }
+  .m-sec { margin-top: 18px; }
+  .m-sec h3 { font-size: 13px; color: var(--muted); margin: 0 0 9px; font-weight: 700; }
+  .stat-row { display: grid; grid-template-columns: 50px 34px 1fr; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .stat-row .lab { font-size: 12px; color: var(--muted); }
+  .stat-row .val { font-size: 13px; font-weight: 700; text-align: right; }
+  .bar { height: 9px; border-radius: 5px; background: #1f2229; overflow: hidden; }
+  .bar > i { display: block; height: 100%; border-radius: 5px; }
+  .stat-total { display: flex; justify-content: space-between; font-size: 13px; margin-top: 8px;
+    padding-top: 8px; border-top: 1px solid var(--line); }
+  .stat-total b { font-weight: 800; }
+  .abil { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-bottom: 7px; }
+  .abil .an { font-weight: 700; font-size: 14px; }
+  .abil .ad { color: var(--muted); font-size: 12px; margin-top: 3px; }
+  .mega-card { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 13px; margin-bottom: 10px; }
+  .mega-head { display: flex; align-items: center; gap: 12px; margin-bottom: 11px; }
+  .mega-head img { width: 64px; height: 64px; object-fit: contain; image-rendering: pixelated; }
+  .mega-nm { font-weight: 800; font-size: 16px; }
+  .mega-abil { margin-top: 11px; }
+  .mb { display: inline-block; font-size: 10px; font-weight: 700; color: #ffd479; background: rgba(255,170,40,.16);
+        border: 1px solid rgba(255,170,40,.4); border-radius: 8px; padding: 0 6px; margin-left: 5px; vertical-align: middle; }
+  .mb.fb { color: #9fd0ff; background: rgba(60,130,220,.16); border-color: rgba(90,140,230,.45); }
+
+  footer { border-top: 1px solid var(--line); padding: 26px 0 40px; }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/" class="active">도감</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/#download">다운로드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="page-head">
+    <h1>포켓몬 챔피언스 도감</h1>
+    <p>게임에 등장하는 포켓몬의 종족값·타입·특성을 한눈에. 이름이나 타입으로 검색하세요.</p>
+  </div>
+
+  <div class="controls">
+    <input id="q" class="search" type="text" placeholder="이름으로 검색 (예: 리자몽, charizard)" autocomplete="off" />
+    <div id="typebar" class="typebar"></div>
+    <div id="count" class="count"></div>
+  </div>
+
+  <div id="grid" class="grid"></div>
+  <div class="ad-slot">광고 자리 (AdSense 승인 후 게재)</div>
+</main>
+
+<div id="ovl" class="ovl"><div class="modal" id="modal"></div></div>
+
+<footer>
+  <div class="wrap">
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+<script>
+const TYPE_KO = { NORMAL:"노말", FIRE:"불꽃", WATER:"물", ELECTRIC:"전기", GRASS:"풀", ICE:"얼음",
+  FIGHTING:"격투", POISON:"독", GROUND:"땅", FLYING:"비행", PSYCHIC:"에스퍼", BUG:"벌레", ROCK:"바위",
+  GHOST:"고스트", DRAGON:"드래곤", DARK:"악", STEEL:"강철", FAIRY:"페어리" };
+const TYPE_COLOR = { NORMAL:"#A8A77A", FIRE:"#EE8130", WATER:"#6390F0", ELECTRIC:"#F7D02C", GRASS:"#7AC74C",
+  ICE:"#96D9D6", FIGHTING:"#C22E28", POISON:"#A33EA1", GROUND:"#E2BF65", FLYING:"#A98FF3", PSYCHIC:"#F95587",
+  BUG:"#A6B91A", ROCK:"#B6A136", GHOST:"#735797", DRAGON:"#6F35FC", DARK:"#705746", STEEL:"#B7B7CE", FAIRY:"#D685AD" };
+const TYPE_ORDER = ["NORMAL","FIRE","WATER","ELECTRIC","GRASS","ICE","FIGHTING","POISON","GROUND","FLYING",
+  "PSYCHIC","BUG","ROCK","GHOST","DRAGON","DARK","STEEL","FAIRY"];
+const STATS = [["hp","HP","#FF5959"],["atk","공격","#F5AC78"],["def","방어","#FAE078"],
+  ["spa","특공","#9DB7F5"],["spd","특방","#A7DB8D"],["spe","스피드","#FA92B2"]];
+
+let DEX = [], q = "", typeOn = null;
+
+const tp = t => `<span class="tp" style="background:${TYPE_COLOR[t]}">${TYPE_KO[t]||t}</span>`;
+const num = id => "#" + String(id).padStart(4, "0");
+
+function render() {
+  const kw = q.trim().toLowerCase();
+  const list = DEX.filter(e =>
+    (!kw || e.ko.toLowerCase().includes(kw) || e.en.toLowerCase().includes(kw)) &&
+    (!typeOn || e.types.includes(typeOn)));
+  document.getElementById("count").textContent = `${list.length}마리`;
+  document.getElementById("grid").innerHTML = list.map(e => `
+    <div class="mon" data-id="${e.id}">
+      <div class="num">${num(e.id)}${e.mega && e.mega.length ? '<span class="mb">메가</span>' : ''}${e.forms && e.forms.length ? '<span class="mb fb">폼</span>' : ''}</div>
+      <img src="/sprites/${e.sprite}" alt="${e.ko}" loading="lazy" />
+      <div class="nm">${e.ko}</div>
+      <div class="tps">${e.types.map(tp).join("")}</div>
+    </div>`).join("");
+}
+
+const statBars = stats => STATS.map(([k, lab, c]) => `
+    <div class="stat-row">
+      <span class="lab">${lab}</span><span class="val">${stats[k]}</span>
+      <div class="bar"><i style="width:${Math.min(100, stats[k] / 255 * 100)}%;background:${c}"></i></div>
+    </div>`).join("");
+const statTotal = s => STATS.reduce((a, [k]) => a + s[k], 0);
+const abilCards = list => list.map(a => `<div class="abil"><div class="an">${a.ko}</div>${a.desc ? `<div class="ad">${a.desc}</div>` : ""}</div>`).join("");
+const megaCards = megas => megas.map(m => `
+    <div class="mega-card">
+      <div class="mega-head"><img src="/sprites/${m.sprite}" alt="${m.ko}" />
+        <div><div class="mega-nm">${m.ko}</div><div class="m-tps">${m.types.map(tp).join("")}</div></div></div>
+      ${statBars(m.stats)}<div class="stat-total"><span>합계</span><b>${statTotal(m.stats)}</b></div>
+      <div class="mega-abil">${abilCards(m.abil)}</div>
+    </div>`).join("");
+
+function openModal(e) {
+  const megaHtml = e.mega && e.mega.length
+    ? `<div class="m-sec"><h3>메가진화</h3>${megaCards(e.mega)}</div>` : "";
+  const formHtml = e.forms && e.forms.length
+    ? `<div class="m-sec"><h3>${e.formTitle || "폼체인지"}</h3>${megaCards(e.forms)}</div>` : "";
+  document.getElementById("modal").innerHTML = `
+    <span class="x" onclick="closeModal()">×</span>
+    <div class="m-top">
+      <img src="/sprites/${e.sprite}" alt="${e.ko}" />
+      <div>
+        <div class="m-num">${num(e.id)}</div>
+        <h2 class="m-name">${e.ko}</h2>
+        <div class="m-en">${e.en}</div>
+        <div class="m-tps">${e.types.map(tp).join("")}</div>
+      </div>
+    </div>
+    <div class="m-sec"><h3>종족값</h3>${statBars(e.stats)}
+      <div class="stat-total"><span>합계</span><b>${statTotal(e.stats)}</b></div></div>
+    <div class="m-sec"><h3>특성</h3>${abilCards(e.abil)}</div>
+    ${megaHtml}${formHtml}`;
+  document.getElementById("ovl").classList.add("show");
+}
+function closeModal() { document.getElementById("ovl").classList.remove("show"); }
+
+function buildTypeBar() {
+  const bar = document.getElementById("typebar");
+  bar.innerHTML = `<span class="tchip all on" data-t="">전체</span>` +
+    TYPE_ORDER.map(t => `<span class="tchip" data-t="${t}" style="background:${TYPE_COLOR[t]}">${TYPE_KO[t]}</span>`).join("");
+  bar.addEventListener("click", ev => {
+    const c = ev.target.closest(".tchip"); if (!c) return;
+    typeOn = c.dataset.t || null;
+    bar.querySelectorAll(".tchip").forEach(x => x.classList.toggle("on", x === c));
+    render();
+  });
+}
+
+document.getElementById("q").addEventListener("input", e => { q = e.target.value; render(); });
+document.getElementById("ovl").addEventListener("click", e => { if (e.target.id === "ovl") closeModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+document.getElementById("grid").addEventListener("click", e => {
+  const m = e.target.closest(".mon"); if (!m) return;
+  openModal(DEX.find(x => x.id == m.dataset.id));
+});
+
+fetch("/data/dex.json").then(r => r.json()).then(d => {
+  DEX = d.dex; buildTypeBar(); render();
+}).catch(() => { document.getElementById("count").textContent = "데이터를 불러오지 못했습니다."; });
+</script>
+</body>
+</html>

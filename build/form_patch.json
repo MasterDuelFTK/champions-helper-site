@@ -1,0 +1,27 @@
+{
+  "_comment": "폼체인지(메가 아님). master.json에 없는 코드 하드코딩 폼. build-dex.py가 dex entry.forms 로 추가해 도감 상세에 별도 섹션 표시. abilSlug는 ability_patch/master로 한글화. 신규 폼체인지는 'dexId': {sectionTitle, forms:[...]} 한 블록 추가.",
+  "964": {
+    "sectionTitle": "폼체인지",
+    "forms": [
+      {
+        "ko": "돌핀맨(마이티폼)",
+        "types": ["WATER"],
+        "stats": { "hp": 100, "atk": 160, "def": 97, "spa": 106, "spd": 87, "spe": 100 },
+        "abilSlug": ["zero-to-hero"],
+        "sprite": "0964_form01.png"
+      }
+    ]
+  },
+  "681": {
+    "sectionTitle": "폼체인지",
+    "forms": [
+      {
+        "ko": "킬가르도(블레이드폼)",
+        "types": ["STEEL", "GHOST"],
+        "stats": { "hp": 60, "atk": 140, "def": 50, "spa": 140, "spd": 50, "spe": 60 },
+        "abilSlug": ["stance-change"],
+        "sprite": "0681_form01.png"
+      }
+    ]
+  }
+}
