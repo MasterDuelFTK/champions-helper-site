@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>파티 빌더 — 종족값·실수치·노력치 검증 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스 파티 빌더. 종족값·실수치 자동 계산과 노력치 분배 검증. 등록한 파티는 실행 중인 Champions Helper 프로그램에 바로 반영됩니다." />
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+    --ok: #6fd08a; --warn: #e0b000; --bad: #e0605a; --up: #FF7A7A; --down: #7AB0FF;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.5; font-size: 14px; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+
+  /* 사이트 헤더 (랜딩/도감과 동일) */
+  header { position: sticky; top: 0; z-index: 20;
+    background: rgba(27,29,34,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 17px; color: var(--txt); }
+  .brand .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .nav-links { display: flex; gap: 20px; font-size: 14px; }
+  .nav-links a { color: var(--muted); } .nav-links a:hover { color: var(--txt); text-decoration: none; }
+  .nav-links a.active { color: var(--txt); }
+  @media (max-width: 640px) { .nav-links { gap: 13px; font-size: 13px; } }
+
+  /* 페이지 헤드 + 헬퍼 연결 배지 */
+  .page-head { padding: 24px 0 4px; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .page-head h1 { font-size: 26px; margin: 0 0 4px; font-weight: 800; }
+  .page-head p { color: var(--muted); margin: 0; font-size: 14px; }
+  #status { font-size: 13px; font-weight: 700; padding: 5px 12px; border-radius: 20px;
+    background: var(--panel2); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+  #status.ok { color: var(--ok); border-color: #2f5a3c; }
+  #status.warn { color: var(--warn); }
+  #status.bad { color: var(--bad); border-color: #5a2f2f; }
+
+  /* 헬퍼 미연결 안내 */
+  #offline { display: none; background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--warn);
+    border-radius: 10px; padding: 16px 18px; margin: 14px 0; }
+  #offline h3 { margin: 0 0 6px; font-size: 15px; }
+  #offline p { margin: 0 0 10px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+
+  /* 빌더 본문 — 좌 280 + 우 폼 */
+  #main { display: flex; gap: 14px; padding: 8px 0 10px; align-items: flex-start; }
+  #left { flex: 0 0 280px; display: flex; flex-direction: column; gap: 12px; }
+  #form { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+  @media (max-width: 780px) { #main { flex-direction: column; } #left { flex: none; width: 100%; } }
+
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .card h2 { font-size: 12px; color: var(--muted); margin: 0 0 8px; font-weight: 700; }
+
+  label { font-size: 12px; color: var(--muted); }
+  input[type=text], input[type=number], select {
+    background: #1f2229; color: var(--txt); border: 1px solid var(--line); border-radius: 5px;
+    padding: 5px 7px; font-size: 13px; font-family: inherit; width: 100%;
+  }
+  input:focus, select:focus { outline: 1px solid var(--accent); }
+  input[type=number] { width: 56px; text-align: center; }
+  /* placeholder = 그림자 숫자(흐림) → 0을 굳이 지울 필요 없음 */
+  input::placeholder { color: #5a606b; }
+
+  .btn { font-size: 13px; font-weight: 700; color: var(--txt); background: #353a44;
+         border: 1px solid var(--line); border-radius: 5px; padding: 6px 12px; cursor: pointer; display: inline-block; }
+  .btn:hover { background: #424955; } .btn:active { background: #2a2e36; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: #4a80d8; text-decoration: none; }
+  .btn.danger { background: #6a2f2f; border-color: #843a3a; }
+  .btn.small { padding: 3px 8px; font-size: 11px; }
+  .row { display: flex; align-items: center; gap: 8px; }
+  .row.wrap { flex-wrap: wrap; }
+
+  /* 파티 목록 */
+  .plist { display: flex; flex-direction: column; gap: 5px; }
+  .pitem { display: flex; align-items: center; gap: 6px; background: var(--panel2); border: 1px solid var(--line);
+           border-radius: 6px; padding: 6px 8px; }
+  .pitem .pname { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+                  cursor: pointer; font-weight: 700; }
+  .pitem .pname:hover { color: var(--accent); }
+  .pitem .pcount { font-size: 11px; color: var(--muted); }
+
+  /* 슬롯 6칸 */
+  .slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .slot { background: var(--panel2); border: 2px solid var(--line); border-radius: 6px; padding: 8px 6px;
+          text-align: center; cursor: pointer; min-height: 46px; display: flex; flex-direction: column;
+          justify-content: center; gap: 2px; }
+  .slot:hover { border-color: var(--accent); }
+  .slot.active { border-color: #ffee00; }
+  .slot.empty { color: var(--muted); }
+  .slot .sname { font-weight: 700; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .slot .ssub { font-size: 10px; color: var(--muted); }
+
+  /* === 공통 자동완성 드롭다운(종족·성격·기술·도구) === */
+  .ac { position: relative; flex: 1 1 auto; }
+  .ac-list {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 40; margin-top: 3px;
+    max-height: 240px; overflow: auto; background: var(--panel2); border: 1px solid var(--line);
+    border-radius: 6px; box-shadow: 0 8px 20px rgba(0,0,0,.5);
+  }
+  .ac-opt { padding: 6px 9px; cursor: pointer; }
+  .ac-opt:hover, .ac-opt.hi { background: var(--accent); color: #fff; }
+  .ac-opt .t { font-size: 10px; color: var(--muted); margin-left: 8px; }
+  .ac-opt:hover .t, .ac-opt.hi .t { color: #dfe7f5; }
+  /* 성격 보정 화살표 — 상승=빨강↑ / 하락=파랑↓ (WPF 파티창과 동일) */
+  .nat-row { display: flex; gap: 8px; align-items: center; }
+  .nat-name { min-width: 64px; }
+  .up { color: var(--up); font-weight: 700; }
+  .down { color: var(--down); font-weight: 700; }
+  .ac-opt:hover .up, .ac-opt.hi .up { color: #ffd0d0; }
+  .ac-opt:hover .down, .ac-opt.hi .down { color: #cfe2ff; }
+  #natureArrows { display: inline-flex; gap: 8px; margin-left: 4px; font-size: 12px; white-space: nowrap; }
+
+  /* 종족값/실수치 테이블 */
+  .stats { width: 100%; border-collapse: collapse; }
+  .stats th, .stats td { padding: 4px 6px; text-align: center; font-size: 12px; border-bottom: 1px solid var(--line); }
+  .stats th { color: var(--muted); font-weight: 700; }
+  .stats td.lbl { text-align: left; color: var(--muted); }
+  .stats td.real { font-weight: 700; }
+  .ev-total { font-size: 12px; } .ev-total.bad { color: var(--bad); font-weight: 700; }
+
+  .type-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 10px;
+                background: #3a3f49; color: #fff; margin-left: 4px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .field { display: flex; flex-direction: column; gap: 3px; }
+  .moves { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .hint { font-size: 11px; color: var(--muted); }
+  .hint.bad { color: var(--bad); }
+
+  /* 광고 자리 + 푸터 (랜딩/도감과 동일) */
+  .ad-slot { margin: 18px auto 26px; min-height: 90px; max-width: 728px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--panel); border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); font-size: 12px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 6px; }
+  footer .cols { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  footer .fnav { display: flex; gap: 18px; font-size: 14px; }
+  footer .fnav a { color: var(--muted); }
+  .disclaimer { margin-top: 22px; font-size: 12px; color: var(--muted); line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/" class="active">파티 빌더</a>
+      <a href="/#download">다운로드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="page-head">
+    <div>
+      <h1>파티 빌더</h1>
+      <p>종족값·실수치 자동 계산 + 노력치 검증. 등록한 파티는 실행 중인 프로그램에 바로 반영됩니다.</p>
+    </div>
+    <span id="status">헬퍼 연결 대기…</span>
+  </div>
+
+  <!-- 헬퍼(프로그램) 미연결 안내 -->
+  <div id="offline">
+    <h3>⚠ Champions Helper 프로그램이 실행되어 있지 않습니다</h3>
+    <p>파티 빌더는 PC에서 실행 중인 Champions Helper 프로그램과 통신해 종족값·실수치를 계산하고 파티를 저장합니다.
+       프로그램을 실행한 뒤 이 페이지를 새로고침하세요.</p>
+    <a class="btn primary" href="/#download">⬇ 프로그램 다운로드</a>
+  </div>
+
+  <div id="main">
+    <!-- 좌측: 파티 이름/저장 · 슬롯 6칸 · 저장된 파티 목록 -->
+    <div id="left">
+      <div class="card">
+        <h2>파티</h2>
+        <div class="field"><label>파티 이름</label><input id="partyName" type="text" value="새 파티" /></div>
+        <div class="row" style="margin-top:8px;">
+          <button class="btn primary" id="saveBtn" onclick="savePartyAsync()">저장</button>
+          <button class="btn" onclick="newParty()">새 파티</button>
+        </div>
+        <div id="saveHint" class="hint" style="margin-top:6px;"></div>
+      </div>
+
+      <div class="card">
+        <h2>슬롯 (클릭하여 편집 · 노랑=편집 중)</h2>
+        <div id="slots" class="slots"></div>
+      </div>
+
+      <div class="card">
+        <h2>저장된 파티</h2>
+        <div id="plist" class="plist"></div>
+      </div>
+    </div>
+
+    <!-- 우측: 입력 폼 -->
+    <div id="form">
+      <div class="card">
+        <h2>종족 (이름 입력 → 선택)</h2>
+        <div class="row">
+          <div class="ac" id="speciesAc"><input class="ac-input" id="speciesInput" type="text" placeholder="종족명 한글 입력…" autocomplete="off" /></div>
+        </div>
+        <div id="speciesInfo" style="margin-top:8px; display:none;">
+          <div class="row"><span style="font-weight:700; font-size:14px;" id="spName"></span><span id="spTypes"></span></div>
+        </div>
+      </div>
+
+      <div class="card" id="buildCard" style="display:none;">
+        <div class="grid2">
+          <div class="field"><label>특성</label><select id="abilitySel"></select></div>
+          <div class="field"><label>성격</label>
+            <div class="row">
+              <div class="ac" id="natureAc"><input class="ac-input" id="natureInput" type="text" placeholder="성격 선택…" autocomplete="off" /></div>
+              <span id="natureArrows"></span>
+            </div>
+          </div>
+        </div>
+
+        <h2 style="margin-top:12px;">능력치 (노력치: 칸당 ≤32 · 합계 ≤66)</h2>
+        <table class="stats">
+          <thead><tr><th class="lbl" style="text-align:left;">스탯</th><th>종족값</th><th>노력치</th><th>실수치</th></tr></thead>
+          <tbody id="statRows"></tbody>
+        </table>
+        <div class="row" style="margin-top:6px;"><span id="evTotal" class="ev-total"></span></div>
+
+        <h2 style="margin-top:12px;">기술 (1~4)</h2>
+        <div class="moves" id="moveInputs"></div>
+
+        <div class="field" style="margin-top:10px;"><label>지닌 도구</label>
+          <div class="row"><div class="ac" id="itemAc"><input class="ac-input" id="itemInput" type="text" placeholder="(없음)" autocomplete="off" /></div></div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <button class="btn primary" onclick="commitSlot()">슬롯에 추가/적용</button>
+          <button class="btn danger" onclick="clearSlot()">이 슬롯 비우기</button>
+          <span id="commitHint" class="hint"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AdSense: 승인 후 이 자리에 반응형 광고 슬롯 삽입 -->
+  <div class="ad-slot">광고 자리 (AdSense 승인 후 게재)</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div class="brand"><span class="dot"></span> Champions Helper</div>
+      <nav class="fnav">
+        <a href="/#features">기능</a>
+        <a href="/pokedex/">도감</a>
+        <a href="/#how">사용법</a>
+        <a href="/builder/">파티 빌더</a>
+        <a href="/#download">다운로드</a>
+      </nav>
+    </div>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트·프로그램은 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>
+      © 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+<script>
+"use strict";
+// === 헬퍼(데스크탑 프로그램) API 주소 ===
+// 공개 사이트(브라우저)는 PC에서 실행 중인 로컬 헬퍼(127.0.0.1:8732)에 직접 fetch한다(cross-origin).
+// 로컬 미리보기: http://localhost:8000 → 헬퍼 http://127.0.0.1:8732 (헬퍼 측 CORS 허용 필요).
+// 배포(Phase4 wss) 시 이 한 줄을 https://local.champions-helper.com:8732 로 교체.
+const API_BASE = "http://127.0.0.1:8732";
+
+const $ = (s) => document.querySelector(s);
+const STAT_LABELS = [["hp","HP"],["atk","공격"],["def","방어"],["spa","특공"],["spd","특방"],["spe","스피드"]];
+
+const state = {
+  meta: { natures: [], items: [], moves: [] },
+  slots: new Array(6).fill(null),
+  editing: 0,
+  partyId: null,
+  cur: null,        // 현재 폼 선택 종족 dto
+};
+let moveAcs = [], itemAc = null, natureAc = null;   // 자동완성 핸들
+
+function setStatus(txt, kind) { const s = $("#status"); s.textContent = txt; s.className = kind || ""; }
+function showOffline() { $("#offline").style.display = "block"; }
+function hideOffline() { $("#offline").style.display = "none"; }
+
+async function api(path, method, body) {
+  const opt = { method: method || "GET", headers: { "Content-Type": "application/json" } };
+  if (body !== undefined) opt.body = JSON.stringify(body);
+  const r = await fetch(API_BASE + path, opt);
+  if (!r.ok) throw new Error(path + " → " + r.status);
+  const ct = r.headers.get("content-type") || "";
+  return ct.includes("json") ? r.json() : r.text();
+}
+
+// ── 공통 자동완성 드롭다운 ──────────────────────────────────
+// wrap(.ac) 안의 .ac-input에 붙임. items()=후보배열, getText=표시/매칭문자열,
+// renderRow=항목 DOM(옵션), onPick=선택콜백, onType=타이핑콜백.
+function makeAutocomplete(wrap, opts) {
+  const input = wrap.querySelector(".ac-input");
+  const list = document.createElement("div"); list.className = "ac-list"; list.style.display = "none";
+  wrap.appendChild(list);
+  let hits = [], hi = -1;
+  const getText = (it) => opts.getText ? opts.getText(it) : (typeof it === "string" ? it : it.nameKo);
+  function filter() {
+    const q = input.value.trim().toLowerCase();
+    const all = opts.items() || [];
+    hits = !q ? all.slice() : all.filter((it) => getText(it).toLowerCase().includes(q));
+    hi = -1; draw();
+  }
+  function draw() {
+    if (!hits.length) { list.style.display = "none"; return; }
+    list.replaceChildren(...hits.map((it) => {
+      const d = document.createElement("div"); d.className = "ac-opt";
+      if (opts.renderRow) d.appendChild(opts.renderRow(it)); else d.textContent = getText(it);
+      d.onmousedown = (e) => { e.preventDefault(); pick(it); };   // blur 전에 선택
+      return d;
+    }));
+    list.style.display = "block";
+  }
+  function pick(it) { input.value = getText(it); list.style.display = "none"; if (opts.onPick) opts.onPick(it); }
+  function hiDraw() { [...list.children].forEach((c, i) => c.classList.toggle("hi", i === hi)); const el = list.children[hi]; if (el) el.scrollIntoView({ block: "nearest" }); }
+  input.addEventListener("focus", filter);
+  input.addEventListener("input", () => { filter(); if (opts.onType) opts.onType(input.value); });
+  input.addEventListener("blur", () => setTimeout(() => { list.style.display = "none"; }, 120));
+  input.addEventListener("keydown", (e) => {
+    if (list.style.display === "none") { if (e.key === "ArrowDown") filter(); return; }
+    if (e.key === "ArrowDown") { hi = Math.min(hi + 1, hits.length - 1); hiDraw(); e.preventDefault(); }
+    else if (e.key === "ArrowUp") { hi = Math.max(hi - 1, 0); hiDraw(); e.preventDefault(); }
+    else if (e.key === "Enter") { if (hi >= 0 && hits[hi]) pick(hits[hi]); e.preventDefault(); }
+    else if (e.key === "Escape") { list.style.display = "none"; }
+  });
+  return { input, setValue: (v) => { input.value = v == null ? "" : v; } };
+}
+
+// ── 초기 로드 ───────────────────────────────────────────────
+// 프로그램 실행 시점엔 로컬 웹서버가 막 부팅 중일 수 있어 첫 fetch가 실패할 수 있음
+// → 0.7s 간격으로 재시도(서버 준비될 때까지). 끝내 실패하면 미연결 안내 표시.
+async function init(attempt) {
+  attempt = attempt || 0;
+  try { state.meta = await api("/api/master/meta"); }
+  catch (e) {
+    if (attempt < 12) { setStatus("헬퍼 연결 대기…", "warn"); setTimeout(() => init(attempt + 1), 700); return; }
+    setStatus("헬퍼 미연결", "bad"); showOffline(); return;
+  }
+  setStatus("● 연결됨", "ok");
+  hideOffline();
+  buildStatRows();
+  buildMoveInputs();
+  setupSpeciesSearch();
+  setupNatureAc();
+  // 지닌 도구 — 자유 입력 + 자동완성
+  itemAc = makeAutocomplete($("#itemAc"), { items: () => state.meta.items });
+  renderSlots();
+  await loadParties();
+}
+
+function buildStatRows() {
+  const tb = $("#statRows");
+  tb.replaceChildren(...STAT_LABELS.map(([k, ko]) => {
+    const tr = document.createElement("tr");
+    // 노력치 input — value 없이 placeholder="0"(그림자) → 입력 시 0 지울 필요 없음
+    tr.innerHTML = `<td class="lbl">${ko}</td><td id="base_${k}">–</td>`
+      + `<td><input type="number" id="ev_${k}" min="0" max="32" placeholder="0" /></td>`
+      + `<td class="real" id="real_${k}">–</td>`;
+    return tr;
+  }));
+  STAT_LABELS.forEach(([k]) => { $("#ev_" + k).oninput = refreshStats; });
+}
+function buildMoveInputs() {
+  const host = $("#moveInputs");
+  host.replaceChildren();
+  moveAcs = [0,1,2,3].map((i) => {
+    const wrap = document.createElement("div"); wrap.className = "ac";
+    const inp = document.createElement("input"); inp.className = "ac-input"; inp.type = "text";
+    inp.id = "move_" + i; inp.placeholder = "기술 " + (i+1); inp.autocomplete = "off";
+    wrap.appendChild(inp); host.appendChild(wrap);
+    return makeAutocomplete(wrap, { items: () => state.meta.moves });
+  });
+}
+
+// ── 성격 자동완성(보정 화살표) ──────────────────────────────
+function natureRow(n) {
+  const s = document.createElement("span"); s.className = "nat-row";
+  s.innerHTML = `<span class="nat-name">${n.nameKo}</span>`
+    + (n.boost ? `<span class="up">${n.boost} ↑</span>` : "")
+    + (n.drop ? `<span class="down">${n.drop} ↓</span>` : "");
+  return s;
+}
+function natureArrows(n) {
+  if (!n) return "";
+  return (n.boost ? `<span class="up">${n.boost}↑</span>` : "") + (n.drop ? `<span class="down">${n.drop}↓</span>` : "");
+}
+function findNature(name) { return state.meta.natures.find((x) => x.nameKo === name) || null; }
+function setupNatureAc() {
+  natureAc = makeAutocomplete($("#natureAc"), {
+    items: () => state.meta.natures,
+    getText: (n) => n.nameKo,
+    renderRow: natureRow,
+    onPick: (n) => { $("#natureArrows").innerHTML = natureArrows(n); refreshStats(); },
+    onType: (v) => { $("#natureArrows").innerHTML = natureArrows(findNature(v.trim())); },
+  });
+}
+function setNature(name) {
+  natureAc.setValue(name || "");
+  $("#natureArrows").innerHTML = natureArrows(findNature(name));
+}
+
+// ── 종족 검색(서버 fuzzy) ───────────────────────────────────
+function setupSpeciesSearch() {
+  makeAutocomplete($("#speciesAc"), {
+    items: () => speciesHits,           // doSearch가 채움
+    getText: (s) => s.nameKo,
+    renderRow: (s) => { const d = document.createElement("span");
+      const t = s.type2 ? `${s.type1}/${s.type2}` : s.type1;
+      d.innerHTML = `<span>${s.nameKo}</span><span class="t">${t}</span>`; return d; },
+    onPick: selectSpecies,
+    onType: (v) => { clearTimeout(searchTimer); const q = v.trim(); if (!q) { speciesHits = []; return; } searchTimer = setTimeout(() => doSearch(q), 160); },
+  });
+}
+let speciesHits = [], searchTimer = null;
+async function doSearch(q) {
+  try { speciesHits = await api("/api/master/species?q=" + encodeURIComponent(q)); }
+  catch { speciesHits = []; return; }
+  // 목록을 즉시 다시 그리도록 input 이벤트 유발
+  const inp = $("#speciesInput"); inp.dispatchEvent(new Event("focus"));
+}
+
+// 종족 선택 → 종족값/타입/특성 채움. 노력치/성격/기술/도구는 유지.
+function selectSpecies(s) {
+  state.cur = s;
+  $("#speciesInput").value = s.nameKo;
+  $("#spName").textContent = s.nameKo;
+  $("#spTypes").innerHTML = `<span class="type-badge">${s.type1}</span>` + (s.type2 ? `<span class="type-badge">${s.type2}</span>` : "");
+  $("#speciesInfo").style.display = "block";
+  $("#buildCard").style.display = "block";
+  const ab = $("#abilitySel");
+  ab.replaceChildren(...(s.abilities || []).map((a) => { const o = document.createElement("option"); o.value = a; o.textContent = a; return o; }));
+  ab.onchange = () => {};
+  if (!natureAc.input.value) setNature(state.meta.natures[0] ? state.meta.natures[0].nameKo : "성실");
+  STAT_LABELS.forEach(([k]) => { $("#base_" + k).textContent = s.baseStats[k]; });
+  refreshStats();
+}
+
+// ── 실수치(서버 C# StatCalculator 단일 소스) ────────────────
+let statsTimer = null;
+function readEvs() { const e = {}; STAT_LABELS.forEach(([k]) => { e[k] = clampInt($("#ev_" + k).value, 0, 99); }); return e; }
+function clampInt(v, lo, hi) { v = parseInt(v, 10); if (isNaN(v)) v = 0; return Math.max(lo, Math.min(hi, v)); }
+function refreshStats() {
+  if (!state.cur) return;
+  clearTimeout(statsTimer);
+  statsTimer = setTimeout(async () => {
+    const evs = readEvs();
+    let res;
+    try { res = await api("/api/party/stats", "POST", { speciesId: state.cur.id, evs, natureKo: natureAc.input.value }); }
+    catch { return; }
+    if (!res.ok) return;
+    STAT_LABELS.forEach(([k]) => { $("#real_" + k).textContent = res.real[k]; });
+    const t = $("#evTotal");
+    t.textContent = `노력치 합계: ${res.evTotal} / 66` + (res.evValid ? "" : "  ⚠ 분배 위반(칸당≤32·합≤66)");
+    t.className = "ev-total" + (res.evValid ? "" : " bad");
+  }, 120);
+}
+
+// ── 슬롯 ────────────────────────────────────────────────────
+function renderSlots() {
+  const host = $("#slots");
+  host.replaceChildren(...state.slots.map((m, i) => {
+    const d = document.createElement("div");
+    d.className = "slot" + (i === state.editing ? " active" : "") + (m ? "" : " empty");
+    if (m) d.innerHTML = `<div class="sname">${m.nameKo}</div><div class="ssub">${m.natureKo || ""}</div>`;
+    else d.innerHTML = `<div class="sname">슬롯 ${i+1}</div><div class="ssub">비어 있음</div>`;
+    d.onclick = () => loadSlot(i);
+    return d;
+  }));
+}
+function moveValues() { return moveAcs.map((a) => (a.input.value || "").trim()); }
+function commitSlot() {
+  const hint = $("#commitHint");
+  if (!state.cur) { hint.textContent = "종족을 먼저 선택하세요."; hint.className = "hint bad"; return; }
+  const dup = state.slots.findIndex((m, i) => i !== state.editing && m && m.speciesId === state.cur.id);
+  if (dup >= 0) { hint.textContent = `같은 종족이 슬롯 ${dup+1}에 이미 있습니다.`; hint.className = "hint bad"; return; }
+  const evs = readEvs();
+  const total = STAT_LABELS.reduce((a, [k]) => a + evs[k], 0);
+  const overStat = STAT_LABELS.some(([k]) => evs[k] > 32);
+  if (overStat || total > 66) { hint.textContent = "노력치 분배 위반(칸당≤32·합≤66)."; hint.className = "hint bad"; return; }
+  state.slots[state.editing] = {
+    speciesId: state.cur.id, nameKo: state.cur.nameKo,
+    type1: state.cur.type1, type2: state.cur.type2,
+    baseStats: state.cur.baseStats, abilities: state.cur.abilities,
+    abilityKo: $("#abilitySel").value || null, natureKo: natureAc.input.value || "성실",
+    evs, movesKo: moveValues(), itemKo: (itemAc.input.value || "").trim() || null,
+  };
+  hint.textContent = "슬롯 " + (state.editing + 1) + " 적용됨."; hint.className = "hint";
+  renderSlots();
+  const next = state.slots.findIndex((m) => m === null);
+  if (next >= 0) { state.editing = next; resetForm(); renderSlots(); }
+}
+function loadSlot(i) {
+  state.editing = i; renderSlots();
+  const m = state.slots[i];
+  if (!m) { resetForm(); return; }
+  state.cur = { id: m.speciesId, nameKo: m.nameKo, type1: m.type1, type2: m.type2, baseStats: m.baseStats, abilities: m.abilities };
+  $("#speciesInput").value = m.nameKo;
+  $("#spName").textContent = m.nameKo;
+  $("#spTypes").innerHTML = `<span class="type-badge">${m.type1}</span>` + (m.type2 ? `<span class="type-badge">${m.type2}</span>` : "");
+  $("#speciesInfo").style.display = "block"; $("#buildCard").style.display = "block";
+  $("#abilitySel").replaceChildren(...(m.abilities || []).map((a) => { const o = document.createElement("option"); o.value = a; o.textContent = a; return o; }));
+  $("#abilitySel").value = m.abilityKo || (m.abilities && m.abilities[0]) || "";
+  setNature(m.natureKo || (state.meta.natures[0] && state.meta.natures[0].nameKo));
+  STAT_LABELS.forEach(([k]) => { $("#base_" + k).textContent = m.baseStats ? m.baseStats[k] : "–"; $("#ev_" + k).value = m.evs[k] ? m.evs[k] : ""; });
+  moveAcs.forEach((a, i) => a.setValue((m.movesKo && m.movesKo[i]) || ""));
+  itemAc.setValue(m.itemKo || "");
+  refreshStats();
+}
+function clearSlot() {
+  state.slots[state.editing] = null; renderSlots(); resetForm();
+  $("#commitHint").textContent = "슬롯 비움."; $("#commitHint").className = "hint";
+}
+function resetForm() {
+  state.cur = null;
+  $("#speciesInput").value = ""; $("#speciesInfo").style.display = "none"; $("#buildCard").style.display = "none";
+  STAT_LABELS.forEach(([k]) => { $("#ev_" + k).value = ""; });
+  moveAcs.forEach((a) => a.setValue(""));
+  itemAc && itemAc.setValue("");
+  setNature(state.meta.natures[0] ? state.meta.natures[0].nameKo : "성실");
+  $("#commitHint").textContent = "";
+}
+
+// ── 파티 저장/불러오기/삭제 ─────────────────────────────────
+async function loadParties() {
+  let list;
+  try { list = await api("/api/parties"); } catch { return; }
+  const host = $("#plist");
+  if (!list.length) { host.replaceChildren(Object.assign(document.createElement("div"), { className: "hint", textContent: "저장된 파티 없음" })); return; }
+  host.replaceChildren(...list.map((p) => {
+    const d = document.createElement("div"); d.className = "pitem";
+    d.innerHTML = `<span class="pname">${p.name}</span><span class="pcount">${p.members.length}마리</span>`;
+    d.querySelector(".pname").onclick = () => loadParty(p.id);
+    const del = document.createElement("button"); del.className = "btn small danger"; del.textContent = "삭제";
+    del.onclick = () => deleteParty(p.id, p.name);
+    d.appendChild(del);
+    return d;
+  }));
+}
+async function loadParty(id) {
+  let p;
+  try { p = await api("/api/parties/" + id); } catch { return; }
+  state.partyId = id; $("#partyName").value = p.name;
+  state.slots = new Array(6).fill(null);
+  p.members.forEach((m, i) => {
+    if (i >= 6) return;
+    state.slots[i] = {
+      speciesId: m.speciesId, nameKo: m.nameKo, type1: "", type2: null,
+      baseStats: null, abilities: null,
+      abilityKo: m.abilityKo, natureKo: m.natureKo, evs: m.evs, movesKo: m.movesKo, itemKo: m.itemKo,
+    };
+  });
+  await hydrateSlots();
+  state.editing = 0; renderSlots(); loadSlot(0);
+  setStatus(`'${p.name}' 불러옴`, "ok");
+}
+async function hydrateSlots() {
+  for (const m of state.slots) {
+    if (!m || m.baseStats) continue;
+    try {
+      const hits = await api("/api/master/species?q=" + encodeURIComponent(m.nameKo));
+      const sp = (hits || []).find((h) => h.id === m.speciesId) || (hits || [])[0];
+      if (sp) { m.type1 = sp.type1; m.type2 = sp.type2; m.baseStats = sp.baseStats; m.abilities = sp.abilities; }
+    } catch { /* 무시 */ }
+  }
+}
+async function savePartyAsync() {
+  const members = [];
+  state.slots.forEach((m) => {
+    if (!m) return;
+    members.push({ speciesId: m.speciesId, abilityKo: m.abilityKo, itemKo: m.itemKo,
+                   natureKo: m.natureKo, evs: m.evs, movesKo: m.movesKo });
+  });
+  const hint = $("#saveHint");
+  if (!members.length) { hint.textContent = "최소 한 마리를 슬롯에 등록하세요."; hint.className = "hint bad"; return; }
+  const body = { name: $("#partyName").value || "새 파티", members };
+  try {
+    const saved = state.partyId ? await api("/api/parties/" + state.partyId, "PUT", body)
+                                : await api("/api/parties", "POST", body);
+    state.partyId = saved.id;
+    hint.textContent = `저장됨 (${members.length}마리).`; hint.className = "hint";
+    await loadParties();
+    setStatus("저장 완료", "ok");
+  } catch (e) { hint.textContent = "저장 실패: " + e.message; hint.className = "hint bad"; }
+}
+async function deleteParty(id, name) {
+  if (!confirm(`'${name}' 파티를 삭제할까요?`)) return;
+  try { await api("/api/parties/" + id, "DELETE"); } catch { return; }
+  if (state.partyId === id) newParty();
+  await loadParties();
+}
+function newParty() {
+  state.partyId = null; state.slots = new Array(6).fill(null); state.editing = 0;
+  $("#partyName").value = "새 파티"; $("#saveHint").textContent = "";
+  renderSlots(); resetForm();
+}
+
+// 헬퍼 미연결이어도 슬롯 6칸은 즉시 그려둠(연결되면 init이 데이터 채움).
+renderSlots();
+init(0);
+</script>
+</body>
+</html>
