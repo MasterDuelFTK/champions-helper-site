@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>데미지 계산기 — Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스 전용 데미지(위력) 계산기. 종족값·노력치·성격·랭크·도구·특성·날씨·필드·벽을 반영해 확정 1타 여부와 데미지 범위를 계산합니다. 브라우저에서 바로 동작합니다." />
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+    --ok: #6fd08a; --warn: #e0b15b; --bad: #e07a7a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+  /* 헤더 (사이트 공통) */
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(27,29,34,0.92); backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 17px; }
+  .brand .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .nav-links { display: flex; gap: 20px; font-size: 14px; }
+  .nav-links a { color: var(--muted); }
+  .nav-links a:hover { color: var(--txt); text-decoration: none; }
+  .nav-links a.cur { color: var(--txt); }
+  @media (max-width: 720px) { .nav-links { gap: 13px; font-size: 13px; } }
+  @media (max-width: 520px) { .nav-links a.opt { display: none; } }
+
+  h1.page { font-size: 26px; font-weight: 800; margin: 26px 0 4px; }
+  .page-sub { color: var(--muted); font-size: 14px; margin: 0 0 18px; }
+
+  /* 환경 바 */
+  .field-bar {
+    display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 16px; margin-bottom: 16px;
+  }
+  .field-bar .fb { display: flex; align-items: center; gap: 7px; font-size: 13px; }
+  .field-bar label { color: var(--muted); }
+
+  /* 두 진영 */
+  .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 820px) { .duel { grid-template-columns: 1fr; } }
+  .side { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+  .side.atk { border-top: 3px solid var(--accent); }
+  .side.def { border-top: 3px solid var(--bad); }
+  .side h2 { font-size: 16px; margin: 0 0 14px; display: flex; align-items: center; gap: 8px; }
+  .side h2 .tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+  .atk h2 .tag { background: rgba(58,111,200,.25); color: var(--accent2); }
+  .def h2 .tag { background: rgba(224,122,122,.22); color: var(--bad); }
+
+  .row { margin-bottom: 12px; }
+  .row > label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .row.inline { display: flex; gap: 10px; }
+  .row.inline > div { flex: 1; }
+
+  input, select {
+    width: 100%; background: var(--panel2); color: var(--txt);
+    border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 14px;
+    font-family: inherit;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--accent); }
+  input[type="checkbox"] { width: auto; accent-color: var(--accent); }
+
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; min-height: 22px; }
+  .tchip { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 20px; color: #fff; }
+  .statline { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .statline b { color: var(--txt); font-weight: 600; }
+  .idxbox { display: flex; justify-content: space-between; align-items: center;
+    background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 9px 13px; margin-top: 10px; }
+  .idxbox .lbl { font-size: 12px; color: var(--muted); }
+  .idxbox .lbl small { font-size: 11px; opacity: .8; }
+  .idxbox b { font-size: 19px; font-weight: 800; }
+  .atk .idxbox b { color: var(--accent2); }
+  .def .idxbox b { color: var(--bad); }
+
+  .seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button {
+    flex: 1; background: var(--panel2); color: var(--muted); border: none;
+    padding: 7px 0; font-size: 13px; cursor: pointer; font-family: inherit;
+  }
+  .seg button.on { background: var(--accent); color: #fff; font-weight: 700; }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg.small button { padding: 4px 0; font-size: 12px; }
+
+  .movebox { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 10px; margin-top: 4px; }
+  .movebox .mline { display: flex; gap: 8px; align-items: center; }
+  .megabtns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .megabtns button {
+    background: var(--panel2); color: var(--muted); border: 1px solid var(--line);
+    border-radius: 7px; padding: 5px 11px; font-size: 12px; cursor: pointer; font-family: inherit;
+  }
+  .megabtns button.on { background: #7a5bd0; border-color: #7a5bd0; color: #fff; font-weight: 700; }
+
+  small.hint { color: var(--muted); font-size: 11px; }
+
+  /* 결과 */
+  .result { margin: 18px 0 60px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+  .result .big { font-size: 30px; font-weight: 800; letter-spacing: -.5px; }
+  .result .verdict { font-size: 16px; font-weight: 700; margin-top: 2px; }
+  .result .pct { color: var(--muted); font-size: 14px; margin-top: 6px; }
+  .v-ko { color: var(--bad); } .v-maybe { color: var(--warn); } .v-safe { color: var(--ok); }
+  .bar { height: 12px; background: var(--panel2); border-radius: 7px; overflow: hidden; margin: 14px 0 6px; position: relative; }
+  .bar > span { position: absolute; top: 0; bottom: 0; }
+  .bar .rng { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .notes { margin-top: 14px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .note { font-size: 11px; background: var(--panel2); border: 1px solid var(--line); color: var(--muted); padding: 2px 9px; border-radius: 20px; }
+  .rolls { margin-top: 12px; font-size: 11px; color: var(--muted); word-break: break-all; font-family: "Consolas", monospace; }
+
+  footer { border-top: 1px solid var(--line); padding: 26px 0 44px; }
+  footer .cols { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  footer .fnav { display: flex; gap: 16px; font-size: 14px; flex-wrap: wrap; }
+  footer .fnav a { color: var(--muted); }
+  .disclaimer { margin-top: 18px; font-size: 12px; color: var(--muted); line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="brand"><span class="dot"></span> Champions Helper</div>
+    <nav class="nav-links">
+      <a class="opt" href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a class="opt" href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a class="cur" href="/calc/">계산기</a>
+      <a class="opt" href="/#download">다운로드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="page">데미지 계산기</h1>
+  <p class="page-sub">포켓몬 챔피언스 기준(레벨 50 · 개체값 31 고정 · 노력치 직접가산). 종족·기술·노력치·성격·랭크·도구·특성·날씨·필드·벽을 넣으면 데미지 범위와 확정타를 계산합니다.</p>
+
+  <!-- 환경 -->
+  <div class="field-bar">
+    <div class="fb"><label>날씨</label>
+      <select id="weather" style="width:120px">
+        <option value="None">없음</option>
+        <option value="Sun">쾌청</option>
+        <option value="Rain">비</option>
+        <option value="Sand">모래바람</option>
+        <option value="Snow">싸라기눈</option>
+      </select>
+    </div>
+    <div class="fb"><label>필드</label>
+      <select id="terrain" style="width:130px">
+        <option value="None">없음</option>
+        <option value="Electric">일렉트릭필드</option>
+        <option value="Grassy">그래스필드</option>
+        <option value="Psychic">사이코필드</option>
+        <option value="Misty">미스트필드</option>
+      </select>
+    </div>
+    <div class="fb"><input type="checkbox" id="crit"><label for="crit">급소</label></div>
+  </div>
+
+  <div class="duel">
+    <!-- 공격자 -->
+    <section class="side atk">
+      <h2><span class="tag">공격</span> 공격하는 포켓몬</h2>
+      <div class="row">
+        <label>포켓몬</label>
+        <input id="atkName" list="speciesList" placeholder="이름 입력 (예: 리자몽)" autocomplete="off">
+        <div class="chips" id="atkTypes" style="margin-top:6px"></div>
+        <div class="megabtns" id="atkMega"></div>
+        <div class="statline" id="atkBase"></div>
+      </div>
+      <div class="row">
+        <label>특성</label>
+        <select id="atkAbil"><option value="">— 없음 —</option></select>
+      </div>
+      <div class="row">
+        <label>기술</label>
+        <input id="atkMove" list="moveList" placeholder="기술명 입력 (예: 오버히트)" autocomplete="off">
+        <div class="movebox" id="atkMoveBox" style="display:none">
+          <div class="mline">
+            <div class="chips" id="atkMoveType"></div>
+            <span id="atkMoveCat" class="note"></span>
+            <span style="flex:1"></span>
+            <label style="color:var(--muted);font-size:12px">위력</label>
+            <input id="atkPow" type="number" min="0" style="width:72px" inputmode="numeric">
+          </div>
+        </div>
+      </div>
+      <div class="row inline">
+        <div>
+          <label id="atkEvLbl">공격 노력치 0~32</label>
+          <input id="atkEv" type="number" min="0" max="32" value="32" inputmode="numeric">
+        </div>
+        <div>
+          <label>성격 보정</label>
+          <div class="seg" id="atkNat" data-v="up">
+            <button data-n="up" class="on">↑1.1</button>
+            <button data-n="neutral">무보정</button>
+            <button data-n="down">↓0.9</button>
+          </div>
+        </div>
+      </div>
+      <div class="row inline">
+        <div>
+          <label id="atkRankLbl">랭크업 (공격)</label>
+          <select id="atkRank"></select>
+        </div>
+        <div>
+          <label>체력 % (시전자)</label>
+          <input id="atkHp" type="number" min="1" max="100" value="100" inputmode="numeric">
+        </div>
+      </div>
+      <div class="row inline">
+        <div>
+          <label>지닌도구</label>
+          <select id="atkItem"></select>
+        </div>
+        <div>
+          <label>기타 배수</label>
+          <input id="atkMult" type="number" min="0" step="0.1" value="1" inputmode="decimal">
+        </div>
+      </div>
+      <div class="row">
+        <label>상태이상 <small class="hint">객기·근성 위력 / 화상 물리 ½</small></label>
+        <select id="atkStatus">
+          <option value="none">없음</option>
+          <option value="brn">화상</option>
+          <option value="psn">독</option>
+          <option value="tox">맹독</option>
+          <option value="par">마비</option>
+          <option value="slp">잠듦</option>
+        </select>
+      </div>
+      <div class="idxbox"><span class="lbl">결정력 <small>화력 지수</small></span><b id="atkIdx">—</b></div>
+      <div class="statline" id="atkReal"></div>
+    </section>
+
+    <!-- 수비자 -->
+    <section class="side def">
+      <h2><span class="tag">수비</span> 방어하는 포켓몬</h2>
+      <div class="row">
+        <label>포켓몬</label>
+        <input id="defName" list="speciesList" placeholder="이름 입력 (예: 한카리아스)" autocomplete="off">
+        <div class="chips" id="defTypes" style="margin-top:6px"></div>
+        <div class="megabtns" id="defMega"></div>
+        <div class="statline" id="defBase"></div>
+      </div>
+      <div class="row">
+        <label>특성</label>
+        <select id="defAbil"><option value="">— 없음 —</option></select>
+      </div>
+      <div class="row">
+        <label>HP 노력치 0~32</label>
+        <input id="defHpEv" type="number" min="0" max="32" value="32" inputmode="numeric">
+      </div>
+      <div class="row inline">
+        <div>
+          <label>방어 노력치 0~32</label>
+          <input id="defEv" type="number" min="0" max="32" value="0" inputmode="numeric">
+          <div class="seg small" id="defNat" data-v="neutral" style="margin-top:6px">
+            <button data-n="up">↑</button><button data-n="neutral" class="on">무</button><button data-n="down">↓</button>
+          </div>
+        </div>
+        <div>
+          <label>특방 노력치 0~32</label>
+          <input id="defSpdEv" type="number" min="0" max="32" value="0" inputmode="numeric">
+          <div class="seg small" id="defSpdNat" data-v="neutral" style="margin-top:6px">
+            <button data-n="up">↑</button><button data-n="neutral" class="on">무</button><button data-n="down">↓</button>
+          </div>
+        </div>
+      </div>
+      <div class="row inline">
+        <div>
+          <label id="defRankLbl">랭크업 (방어)</label>
+          <select id="defRank"></select>
+        </div>
+        <div>
+          <label>체력 % (피격자)</label>
+          <input id="defHp" type="number" min="1" max="100" value="100" inputmode="numeric">
+        </div>
+      </div>
+      <div class="row">
+        <label>지닌도구</label>
+        <select id="defItem"></select>
+      </div>
+      <div class="row">
+        <label style="margin-bottom:6px">벽</label>
+        <div class="chips">
+          <label><input type="checkbox" id="reflect"> 리플렉터</label>
+          <label style="margin-left:10px"><input type="checkbox" id="light"> 빛의장막</label>
+          <label style="margin-left:10px"><input type="checkbox" id="aurora"> 오로라베일</label>
+        </div>
+      </div>
+      <div class="idxbox"><span class="lbl">내구력 <small>물리 / 특수</small></span><b id="defIdx">—</b></div>
+      <div class="statline" id="defReal"></div>
+    </section>
+  </div>
+
+  <!-- 결과 -->
+  <div class="result" id="result">
+    <div class="big" id="rDmg">—</div>
+    <div class="verdict" id="rVerdict">공격·수비 포켓몬과 기술을 입력하세요.</div>
+    <div class="pct" id="rPct"></div>
+    <div class="bar"><span class="rng" id="rBar" style="left:0;width:0"></span></div>
+    <div class="notes" id="rNotes"></div>
+    <div class="rolls" id="rRolls"></div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div class="brand"><span class="dot"></span> Champions Helper</div>
+      <nav class="fnav">
+        <a href="/#features">기능</a>
+        <a href="/pokedex/">도감</a>
+        <a href="/#how">사용법</a>
+        <a href="/builder/">파티 빌더</a>
+        <a href="/calc/">계산기</a>
+        <a href="/#download">다운로드</a>
+      </nav>
+    </div>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.
+      계산 결과는 참고용이며 실제 게임과 일부 차이가 있을 수 있습니다.<br>
+      © 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+<datalist id="speciesList"></datalist>
+<datalist id="moveList"></datalist>
+
+<script src="./engine.js"></script>
+<script src="./calc.js"></script>
+</body>
+</html>
