@@ -63,7 +63,8 @@
     border-bottom: 1px solid var(--line);
   }
   .nav { display: flex; align-items: center; justify-content: space-between; height: 56px; }
-  .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 17px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 17px; color: var(--txt); text-decoration: none; }
+  .brand:hover { text-decoration: none; }
   .brand .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
   .nav-links { display: flex; gap: 20px; font-size: 14px; }
   .nav-links a { color: var(--muted); }
@@ -136,7 +137,7 @@
 
 <header>
   <div class="wrap nav">
-    <div class="brand"><span class="dot"></span> Champions Helper</div>
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
     <nav class="nav-links">
       <a href="#features">기능</a>
       <a href="/pokedex/">도감</a>
@@ -279,7 +280,7 @@
 <footer>
   <div class="wrap">
     <div class="cols">
-      <div class="brand"><span class="dot"></span> Champions Helper</div>
+      <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
       <nav class="fnav">
         <a href="#features">기능</a>
         <a href="/pokedex/">도감</a>
