@@ -62,6 +62,17 @@ function durabilities(D){
 function grounded(types, abilKo, item){ return !types.includes("FLYING") && abilKo !== "부유" && item !== "풍선"; }
 function effTypes(t, defTypes){ let e = 1; for (const d of defTypes) e *= (TYPE_CHART[t][d] ?? 1); return e; }
 
+/* ── 방어 시 물리방어를 쓰는 특수기 (Showdown overrideDefensiveStat='def') ──
+ * 사이코쇼크·사이코브레이크·신비의칼: 데미지 분류는 특수(공격자 특공 + 빛의장막에 막힘)지만
+ * 피해는 수비자 물리방어/방어 랭크 기준으로 계산한다. */
+const OVERRIDE_DEF_PHYS = new Set(["psyshock", "psystrike", "secret-sword"]);
+// 방어 스탯/랭크/방어 도구가 물리방어 기준인가? (기술 없으면 물리 가정)
+function defenderIsPhysical(move){
+  if (!move) return true;
+  if (OVERRIDE_DEF_PHYS.has(move.en)) return true;
+  return move.cat === "PHYSICAL";
+}
+
 /* ── 가변 위력기 (시전자 HP%) ─────────────────────────── */
 function variablePower(en, hpPct){
   if (["eruption","water-spout","dragon-energy"].includes(en))
@@ -149,7 +160,7 @@ function applyAbility(name, isAtk, mods, A, D, mtype, cat, ctx, typeEff, flags){
 }
 
 /* ── 도구 보정 (ItemRegistry.cs 포팅) ─────────────────── */
-function applyItem(name, isAtk, mods, mtype, cat){
+function applyItem(name, isAtk, mods, mtype, cat, defPhys){
   if (!name) return;
   const phys = cat === "PHYSICAL";
   if (isAtk){
@@ -160,8 +171,8 @@ function applyItem(name, isAtk, mods, mtype, cat){
     else if (name === "지식의안경" && !phys){ mods.powMult *= 1.1; mods.note("지식의안경 ×1.1"); }
     else if (TYPE_BOOST_ITEM[mtype] === name){ mods.powMult *= 1.2; mods.note(name + " ×1.2"); }
   } else {
-    if (name === "돌격조끼" && !phys){ mods.spdMult *= 1.5; mods.note("돌격조끼 ×1.5"); }
-    else if (name === "진화의휘석"){ if (phys) mods.defMult *= 1.5; else mods.spdMult *= 1.5; mods.note("진화의휘석 ×1.5"); }
+    if (name === "돌격조끼" && !defPhys){ mods.spdMult *= 1.5; mods.note("돌격조끼 ×1.5"); }
+    else if (name === "진화의휘석"){ if (defPhys) mods.defMult *= 1.5; else mods.spdMult *= 1.5; mods.note("진화의휘석 ×1.5"); }
   }
 }
 
@@ -169,7 +180,8 @@ function applyItem(name, isAtk, mods, mtype, cat){
 function calcDamage(A, D, move, ctx){
   const mods = { atkMult:1, spaMult:1, defMult:1, spdMult:1, powMult:1, finalMult:1,
     stabOverride:null, typeEffMult:1, pow:move.pow, _notes:[], note(s){ this._notes.push(s); } };
-  const phys = move.cat === "PHYSICAL";
+  const phys = move.cat === "PHYSICAL";       // 공격 스탯(공격/특공) + 벽(리플렉터/빛의장막) 결정
+  const defPhys = defenderIsPhysical(move);    // 방어 스탯/랭크/방어 도구/날씨 방어보정 (사이코쇼크류=물리방어)
   let mtype = move.type;
   let pow = move.pow;
 
@@ -196,8 +208,8 @@ function calcDamage(A, D, move, ctx){
   // 객기(facade): 공격자가 화상/독/맹독/마비면 위력 2배 (+ 아래에서 화상 공격감소도 무시)
   if (move.en === "facade" && ["brn","psn","tox","par"].includes(A.status)){ mods.powMult *= 2; mods.note("객기(상태이상) ×2"); }
   let typeEff = effTypes(mtype, D.types);
-  applyItem(A.item, true, mods, mtype, move.cat);
-  applyItem(D.item, false, mods, mtype, move.cat);
+  applyItem(A.item, true, mods, mtype, move.cat, defPhys);
+  applyItem(D.item, false, mods, mtype, move.cat, defPhys);
   applyAbility(A.abilKo, true, mods, A, D, mtype, move.cat, ctx, typeEff, flags);
   applyAbility(D.abilKo, false, mods, A, D, mtype, move.cat, ctx, typeEff, flags);
 
@@ -220,9 +232,9 @@ function calcDamage(A, D, move, ctx){
     ? A.atk * stageMult(A.atkStage) * mods.atkMult * burnMult
     : A.spa * stageMult(A.spaStage) * mods.spaMult;
   let weatherDefMult = 1.0;
-  if (ctx.weather === "Sand" && !phys && D.types.includes("ROCK")){ weatherDefMult = 1.5; mods.note("모래바람 바위 특방 ×1.5"); }
-  else if (ctx.weather === "Snow" && phys && D.types.includes("ICE")){ weatherDefMult = 1.5; mods.note("싸라기눈 얼음 방어 ×1.5"); }
-  const Draw = (phys
+  if (ctx.weather === "Sand" && !defPhys && D.types.includes("ROCK")){ weatherDefMult = 1.5; mods.note("모래바람 바위 특방 ×1.5"); }
+  else if (ctx.weather === "Snow" && defPhys && D.types.includes("ICE")){ weatherDefMult = 1.5; mods.note("싸라기눈 얼음 방어 ×1.5"); }
+  const Draw = (defPhys
     ? D.def * stageMult(D.defStage) * mods.defMult
     : D.spd * stageMult(D.spdStage) * mods.spdMult) * weatherDefMult;
 
@@ -297,5 +309,6 @@ function calcDamage(A, D, move, ctx){
 if (typeof module !== "undefined" && module.exports){
   module.exports = { TYPE_KO, TYPE_COLOR, TYPE_CHART, TYPE_BOOST_ITEM,
     calcStat, calcHp, stageMult, effTypes, grounded, variablePower,
-    applyAbility, applyItem, calcDamage, durabilities };
+    applyAbility, applyItem, calcDamage, durabilities,
+    OVERRIDE_DEF_PHYS, defenderIsPhysical };
 }

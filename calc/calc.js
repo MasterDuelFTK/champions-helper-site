@@ -89,15 +89,16 @@ function refreshMove(){
   $("atkMoveCat").textContent = m.cat === "PHYSICAL" ? "물리" : "특수";
   $("atkPow").value = m.pow;
   const phys = m.cat === "PHYSICAL";
+  const defPhys = defenderIsPhysical(m);   // 사이코쇼크류 = 특수기지만 물리방어/방어 랭크
   $("atkEvLbl").textContent = (phys ? "공격" : "특공") + " 노력치 0~32";
   $("atkRankLbl").textContent = "랭크업 (" + (phys ? "공격" : "특공") + ")";
-  $("defRankLbl").textContent = "랭크업 (" + (phys ? "방어(물리기 대상)" : "특방(특수기 대상)") + ")";
+  $("defRankLbl").textContent = "랭크업 (" + (defPhys ? "방어" : "특방") + ")";
 }
 
 function natMod(v){ return v === "up" ? 1.1 : v === "down" ? 0.9 : 1.0; }
 
 /* ── 한 진영의 입력 → 계산용 상태 ─────────────────────── */
-function buildSide(sideKey, cat){
+function buildSide(sideKey, cat, defPhys){
   const isAtk = sideKey === "atk";
   const sp = SPECIES_BY[$(isAtk ? "atkName" : "defName").value.trim()];
   if (!sp) return null;
@@ -121,14 +122,17 @@ function buildSide(sideKey, cat){
     out.extraMult = Math.max(0, parseFloat($("atkMult").value) || 1);
     out.realStr = `공격 <b>${out.atk}</b> / 특공 <b>${out.spa}</b>` + (phys ? " · 물리기" : " · 특수기");
   } else {
-    const ndef = natMod($("defNat").dataset.v);
-    const nspd = natMod($("defSpdNat").dataset.v);
+    // 방어 노력치/성격은 통합 입력 — 들어오는 기술이 노리는 방어 스탯에만 적용(공격쪽 미러링).
+    const nat = natMod($("defNat").dataset.v);
+    const ev = clampEv($("defEv").value);
     out.hp = calcHp(s.hp, clampEv($("defHpEv").value));
-    out.def = calcStat(s.def, clampEv($("defEv").value), ndef);
-    out.spd = calcStat(s.spd, clampEv($("defSpdEv").value), nspd);
+    out.def = calcStat(s.def, defPhys ? ev : 0, defPhys ? nat : 1);
+    out.spd = calcStat(s.spd, !defPhys ? ev : 0, !defPhys ? nat : 1);
     const rk = parseInt($("defRank").value) || 0;
     out.defStage = rk; out.spdStage = rk;
-    out.realStr = `HP <b>${out.hp}</b> / 방어 <b>${out.def}</b> / 특방 <b>${out.spd}</b>`;
+    out.realStr = defPhys
+      ? `HP <b>${out.hp}</b> / 방어 <b>${out.def}</b>`
+      : `HP <b>${out.hp}</b> / 특방 <b>${out.spd}</b>`;
   }
   return out;
 }
@@ -137,6 +141,7 @@ function buildSide(sideKey, cat){
 function recompute(){
   const move = MOVE_BY[$("atkMove").value.trim()];
   const cat = move ? move.cat : "PHYSICAL";
+  const defPhys = defenderIsPhysical(move);   // 사이코쇼크류 = 특수기지만 물리방어
   const ctx = {
     weather: $("weather").value, terrain: $("terrain").value, crit: $("crit").checked,
     reflect: $("reflect").checked, light: $("light").checked, aurora: $("aurora").checked,
@@ -144,8 +149,8 @@ function recompute(){
 
   // 공격자 빌드 (종족 있을 때)
   const A = SPECIES_BY[$("atkName").value.trim()] ? buildSide("atk", cat) : null;
-  // 수비자 빌드 (종족 있을 때) — cat 무관(방어/특방 독립 입력)
-  const D = SPECIES_BY[$("defName").value.trim()] ? buildSide("def", cat) : null;
+  // 수비자 빌드 (종족 있을 때) — 들어오는 기술이 노리는 방어 스탯에 통합 노력치 적용
+  const D = SPECIES_BY[$("defName").value.trim()] ? buildSide("def", cat, defPhys) : null;
 
   // 결정력 — 공격자 + 기술이면 상대 없이 표시
   if (A && move){
@@ -160,10 +165,11 @@ function recompute(){
     $("atkReal").innerHTML = A ? A.realStr : "";
   }
 
-  // 내구력 — 수비자만으로 물리/특수 둘 다 표시
+  // 내구력 — 들어오는 기술이 노리는 방어 스탯 기준 하나(공격쪽 결정력 미러링)
+  $("defIdxKind").textContent = defPhys ? "물리" : "특수";
   if (D){
     const du = durabilities(D);
-    $("defIdx").textContent = `${du.phys.toLocaleString()} / ${du.spec.toLocaleString()}`;
+    $("defIdx").textContent = (defPhys ? du.phys : du.spec).toLocaleString();
     $("defReal").innerHTML = D.realStr;
   } else {
     $("defIdx").textContent = "—";
@@ -225,7 +231,7 @@ function wire(){
       recompute();
     });
   });
-  ["atkAbil","defAbil","atkEv","defEv","defSpdEv","defHpEv","atkRank","defRank","atkItem","defItem",
+  ["atkAbil","defAbil","atkEv","defEv","defHpEv","atkRank","defRank","atkItem","defItem",
    "atkHp","defHp","atkMult","atkPow","atkStatus","weather","terrain","crit","reflect","light","aurora"]
     .forEach(id => {
       const el = $(id);

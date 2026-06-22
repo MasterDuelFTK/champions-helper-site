@@ -297,15 +297,13 @@
         <div>
           <label>방어 노력치 0~32</label>
           <input id="defEv" type="number" min="0" max="32" value="0" inputmode="numeric">
-          <div class="seg small" id="defNat" data-v="neutral" style="margin-top:6px">
-            <button data-n="up">↑</button><button data-n="neutral" class="on">무</button><button data-n="down">↓</button>
-          </div>
         </div>
         <div>
-          <label>특방 노력치 0~32</label>
-          <input id="defSpdEv" type="number" min="0" max="32" value="0" inputmode="numeric">
-          <div class="seg small" id="defSpdNat" data-v="neutral" style="margin-top:6px">
-            <button data-n="up">↑</button><button data-n="neutral" class="on">무</button><button data-n="down">↓</button>
+          <label>성격 보정</label>
+          <div class="seg" id="defNat" data-v="neutral">
+            <button data-n="up">↑1.1</button>
+            <button data-n="neutral" class="on">무보정</button>
+            <button data-n="down">↓0.9</button>
           </div>
         </div>
       </div>
@@ -331,7 +329,7 @@
           <label style="margin-left:10px"><input type="checkbox" id="aurora"> 오로라베일</label>
         </div>
       </div>
-      <div class="idxbox"><span class="lbl">내구력 <small>물리 / 특수</small></span><b id="defIdx">—</b></div>
+      <div class="idxbox"><span class="lbl">내구력 <small id="defIdxKind">물리</small></span><b id="defIdx">—</b></div>
       <div class="statline" id="defReal"></div>
     </section>
   </div>
