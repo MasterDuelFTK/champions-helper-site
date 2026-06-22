@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>포켓몬 챔피언스 데미지 계산 공식 완벽 정리 — 실능력치·자속·난수 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스 데미지 계산 공식을 단계별로 정리. 레벨 50 기준 실능력치 계산, 기초 데미지 공식, 자속·타입 상성·날씨·급소·난수(0.85~1.00) 보정, 확정 1타 판정까지." />
+<link rel="canonical" href="https://champions-helper.com/guide/damage-formula/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/damage-formula/" />
+<meta property="og:title" content="포켓몬 챔피언스 데미지 계산 공식 완벽 정리" />
+<meta property="og:description" content="실능력치 계산부터 기초 데미지 공식, 자속·타입·날씨·급소·난수 보정, 확정 1타 판정까지 단계별 정리." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="포켓몬 챔피언스 데미지 계산 공식" />
+<meta name="twitter:description" content="실능력치·기초 데미지·보정·난수·확정타 판정을 단계별로 정리." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "포켓몬 챔피언스 데미지 계산 공식 완벽 정리",
+  "description": "포켓몬 챔피언스의 실능력치와 데미지 계산 공식을 단계별로 정리한 가이드.",
+  "inLanguage": "ko",
+  "url": "https://champions-helper.com/guide/damage-formula/",
+  "author": { "@type": "Organization", "name": "Champions Helper" },
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  header { position: sticky; top: 0; z-index: 20;
+    background: rgba(27,29,34,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 17px; color: var(--txt); }
+  .brand .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .nav-links { display: flex; gap: 20px; font-size: 14px; }
+  .nav-links a { color: var(--muted); }
+  .nav-links a:hover { color: var(--txt); text-decoration: none; }
+  .nav-links a.active { color: var(--txt); }
+  @media (max-width: 640px) { .nav-links { gap: 13px; font-size: 13px; } }
+
+  .article { max-width: 760px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 30px; font-weight: 800; margin: 0 0 10px; letter-spacing: -0.4px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 21px; font-weight: 800; margin: 36px 0 12px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 700; margin: 22px 0 8px; }
+  .article p { margin: 0 0 14px; }
+  .article ul { margin: 0 0 16px; padding-left: 22px; }
+  .article li { margin: 0 0 7px; }
+  .article strong { color: #fff; }
+  .article table { width: 100%; border-collapse: collapse; margin: 8px 0 18px; font-size: 14px; }
+  .article th, .article td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  .article th { background: var(--panel2); }
+  .formula { background: #15171c; border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px;
+    margin: 14px 0 18px; font-family: "Consolas", "D2Coding", monospace; font-size: 14px; line-height: 1.8;
+    color: #d8e0ea; overflow-x: auto; }
+  .formula .c { color: var(--muted); }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+  .ad-slot { margin: 28px auto; min-height: 90px; max-width: 728px; display: flex; align-items: center;
+    justify-content: center; background: var(--panel); border: 1px dashed var(--line); border-radius: 10px;
+    color: var(--muted); font-size: 12px; }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 28px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 760px; margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/#download">다운로드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 데미지 계산 공식</div>
+    <h1>데미지 계산 공식 완벽 정리</h1>
+    <p class="lead">"이 기술로 상대를 한 방에 잡을 수 있을까?"를 판단하려면, 실능력치와 데미지가 어떻게 계산되는지 알아야 합니다. 포켓몬 챔피언스 기준으로 단계별로 풀어봅니다.</p>
+
+    <h2>1단계 — 실능력치 계산</h2>
+    <p>모든 포켓몬은 레벨 50, 개체값(IV) 31로 통일됩니다. 따라서 실능력치는 <strong>종족값 · 노력치 · 성격</strong>으로 결정됩니다. HP와 나머지 능력치(공격·방어·특공·특방·스피드)의 공식이 조금 다릅니다.</p>
+    <h3>HP 이외의 능력치</h3>
+    <div class="formula">
+기본 = floor( (2 × 종족값 + 31) × 50 ÷ 100 ) + 5<br>
+실능력치 = floor( (기본 + 노력치) × 성격보정 )
+    </div>
+    <p>성격보정은 올라가는 능력치 <strong>1.1배</strong>, 내려가는 능력치 <strong>0.9배</strong>, 나머지 1.0배입니다.</p>
+    <h3>HP</h3>
+    <div class="formula">
+HP 실능력치 = floor( (2 × 종족값 + 31) × 50 ÷ 100 ) + 60 + 노력치
+    </div>
+    <div class="note"><strong>챔피언스 룰</strong> — 일반 포켓몬 게임은 노력치 4당 실능력치 1이 오르지만, 포켓몬 챔피언스는 <strong>노력치를 실능력치에 직접 가산</strong>하는 방식입니다. 그래서 노력치 배분이 곧바로 능력치에 반영됩니다. <a href="/builder/">파티 빌더</a>에서 노력치를 조절하며 실능력치 변화를 바로 볼 수 있습니다.</div>
+
+    <h2>2단계 — 기초 데미지</h2>
+    <p>공격 실능력치(물리는 공격, 특수는 특공)와 상대의 방어 실능력치(물리는 방어, 특수는 특방), 그리고 기술의 위력으로 기초 데미지를 구합니다. 레벨 50이므로 앞부분 <code>(2 × 레벨 ÷ 5 + 2)</code> = <strong>22</strong>로 고정됩니다.</p>
+    <div class="formula">
+<span class="c">// 레벨 50 → 앞 계수 = floor(2 × 50 ÷ 5) + 2 = 22</span><br>
+기초 = floor( 22 × 위력 × 공격 ÷ 방어 )<br>
+기초 = floor( 기초 ÷ 50 ) + 2
+    </div>
+
+    <h2>3단계 — 보정 적용</h2>
+    <p>기초 데미지에 여러 배율이 차례로 곱해집니다. 순서대로 정리하면 다음과 같습니다.</p>
+    <table>
+      <tr><th>보정</th><th>배율</th><th>설명</th></tr>
+      <tr><td>자속(STAB)</td><td>1.5배</td><td>기술 타입이 사용자 타입과 같을 때</td></tr>
+      <tr><td>타입 상성</td><td>0 · 0.25 · 0.5 · 1 · 2 · 4배</td><td>상대 타입 조합에 따라</td></tr>
+      <tr><td>날씨</td><td>1.5 / 0.5배</td><td>쾌청=불꽃↑·물↓, 비=물↑·불꽃↓ 등</td></tr>
+      <tr><td>급소</td><td>1.5배</td><td>급소에 맞았을 때</td></tr>
+      <tr><td>특성·도구</td><td>가변</td><td>생명의 구슬 1.3, 단단한 발톱 1.3 등</td></tr>
+      <tr><td>난수</td><td>0.85 ~ 1.00</td><td>아래 4단계 참고</td></tr>
+    </table>
+    <p>화상 상태에서 물리 기술을 쓰면 공격이 0.5배가 됩니다(특성 '근성'이나 기술 '객기'는 예외). 반대로 '근성'은 상태이상일 때 물리 공격을 1.5배로, '객기'는 상태이상일 때 위력을 2배로 올립니다.</p>
+
+    <div class="ad-slot">광고 자리 (AdSense 승인 후 게재)</div>
+
+    <h2>4단계 — 난수 (0.85 ~ 1.00)</h2>
+    <p>포켓몬 배틀의 데미지는 매번 똑같지 않습니다. 마지막에 <strong>0.85부터 1.00까지 16단계</strong> 중 하나가 무작위로 곱해지기 때문입니다. 즉 같은 공격이라도 최소(0.85배)~최대(1.00배) 사이에서 16가지 데미지가 나올 수 있습니다.</p>
+    <div class="formula">
+최종 데미지 = floor( 보정데미지 × 난수 )   <span class="c">// 난수 ∈ {0.85, 0.86, …, 1.00} (16단계)</span>
+    </div>
+
+    <h2>5단계 — 확정 1타 / 난수 1타 판정</h2>
+    <p>16가지 난수 데미지 중에서 <strong>상대의 HP 실능력치 이상</strong>인 경우가 몇 개인지로 판정합니다.</p>
+    <ul>
+      <li><strong>확정 1타</strong> — 16가지 모두가 상대 HP 이상 (최소 난수에도 쓰러뜨림)</li>
+      <li><strong>난수 1타 N%</strong> — 16가지 중 일부만 HP 이상 (예: 12/16 → 75%)</li>
+      <li><strong>확정 2타 / 난수 2타</strong> — 한 방으로는 못 잡고, 두 번이면 잡히는 경우</li>
+    </ul>
+    <p>그래서 실전에서는 "확정 1타가 되는 노력치 라인"을 맞추는 것이 중요합니다. 어태커는 상대를 확정으로 잡을 만큼의 공격을, 내구형은 상대 공격을 확정으로 버틸 만큼의 HP·방어를 맞춰 노력치를 분배합니다.</p>
+
+    <h2>직접 계산하지 말고 계산기를 쓰세요</h2>
+    <p>위 과정을 매번 손으로 하긴 번거롭습니다. <a href="/calc/">데미지 계산기</a>에 공격자·수비자의 종족·노력치·성격·도구·특성과 날씨·필드·벽을 넣으면, 데미지 범위와 % 그리고 확정 1타 여부까지 한 번에 나옵니다. 위 공식을 그대로 구현했기 때문에 게임 내 계산과 동일한 결과를 보여줍니다.</p>
+    <p>게임을 플레이하는 중이라면 <a href="/#download">데스크탑 프로그램</a>이 상대 파티를 자동 인식해 매 턴 데미지를 실시간으로 계산해 줍니다.</p>
+
+    <div class="related">
+      <h3>함께 읽기</h3>
+      <a href="/guide/getting-started/">포켓몬 챔피언스 시작 가이드 →</a>
+      <a href="/calc/">데미지 계산기 열기 →</a>
+    </div>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

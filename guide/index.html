@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>포켓몬 챔피언스 가이드 — 룰·데미지 계산 공략 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스 입문부터 데미지 계산 공식까지. 배틀 룰, 실능력치 계산법, 타입 상성, 메가진화를 한글로 정리한 공략 가이드 모음." />
+<link rel="canonical" href="https://champions-helper.com/guide/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/" />
+<meta property="og:title" content="포켓몬 챔피언스 가이드 — 룰·데미지 계산 공략" />
+<meta property="og:description" content="포켓몬 챔피언스 입문부터 데미지 계산 공식까지 한글로 정리한 공략 가이드 모음." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="포켓몬 챔피언스 가이드" />
+<meta name="twitter:description" content="배틀 룰·실능력치·데미지 계산 공식을 정리한 포켓몬 챔피언스 공략 가이드." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "포켓몬 챔피언스 가이드",
+  "url": "https://champions-helper.com/guide/",
+  "inLanguage": "ko",
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.6; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  header { position: sticky; top: 0; z-index: 20;
+    background: rgba(27,29,34,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 17px; color: var(--txt); }
+  .brand .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .nav-links { display: flex; gap: 20px; font-size: 14px; }
+  .nav-links a { color: var(--muted); }
+  .nav-links a:hover { color: var(--txt); text-decoration: none; }
+  .nav-links a.active { color: var(--txt); }
+  @media (max-width: 640px) { .nav-links { gap: 13px; font-size: 13px; } }
+
+  .page-head { padding: 32px 0 8px; }
+  .page-head h1 { font-size: 28px; margin: 0 0 6px; font-weight: 800; }
+  .page-head p { color: var(--muted); margin: 0; font-size: 15px; }
+
+  .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 28px 0 40px; }
+  @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
+  .gcard { display: block; background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 24px; color: var(--txt); transition: border-color .15s, background .15s; }
+  .gcard:hover { border-color: var(--accent); background: var(--panel2); text-decoration: none; }
+  .gcard .tag { font-size: 12px; color: var(--accent2); font-weight: 700; }
+  .gcard h2 { font-size: 19px; margin: 8px 0 8px; font-weight: 800; }
+  .gcard p { color: var(--muted); font-size: 14px; margin: 0; }
+
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 12px; }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/#download">다운로드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="page-head">
+    <h1>포켓몬 챔피언스 가이드</h1>
+    <p>게임 입문부터 데미지 계산 공식까지. 배틀에 필요한 핵심을 한글로 정리했습니다.</p>
+  </div>
+
+  <div class="cards">
+    <a class="gcard" href="/guide/getting-started/">
+      <span class="tag">입문</span>
+      <h2>포켓몬 챔피언스 시작 가이드</h2>
+      <p>게임이 어떤 룰로 굴러가는지 — 싱글 배틀 픽, 레벨 50 고정, 노력치 직접 분배, 타입 상성과 메가진화의 기본을 정리합니다.</p>
+    </a>
+    <a class="gcard" href="/guide/damage-formula/">
+      <span class="tag">계산</span>
+      <h2>데미지 계산 공식 완벽 정리</h2>
+      <p>실능력치는 어떻게 정해지고, 데미지는 어떤 순서로 계산되는지. 자속·타입 상성·날씨·급소·난수까지 단계별로 풀어봅니다.</p>
+    </a>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

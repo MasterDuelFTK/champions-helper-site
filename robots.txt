@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://champions-helper.com/sitemap.xml

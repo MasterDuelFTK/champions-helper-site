@@ -5,6 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>데미지 계산기 — Champions Helper</title>
 <meta name="description" content="포켓몬 챔피언스 전용 데미지(위력) 계산기. 종족값·노력치·성격·랭크·도구·특성·날씨·필드·벽을 반영해 확정 1타 여부와 데미지 범위를 계산합니다. 브라우저에서 바로 동작합니다." />
+<link rel="canonical" href="https://champions-helper.com/calc/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/calc/" />
+<meta property="og:title" content="포켓몬 챔피언스 데미지 계산기" />
+<meta property="og:description" content="종족값·노력치·성격·랭크·도구·특성·날씨·필드·벽을 반영해 확정 1타 여부와 데미지 범위를 계산하는 포켓몬 챔피언스 전용 계산기. 브라우저에서 바로 동작합니다." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="포켓몬 챔피언스 데미지 계산기" />
+<meta name="twitter:description" content="확정 1타 여부와 데미지 범위를 계산하는 포켓몬 챔피언스 전용 데미지 계산기." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "포켓몬 챔피언스 데미지 계산기",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All",
+  "url": "https://champions-helper.com/calc/",
+  "description": "포켓몬 챔피언스 기준으로 종족값·노력치·성격·랭크·도구·특성·날씨·필드·벽을 반영해 데미지 범위와 확정타를 계산하는 계산기입니다.",
+  "inLanguage": "ko",
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
 <style>
   :root {
     --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
@@ -137,6 +160,7 @@
       <a class="opt" href="/#how">사용법</a>
       <a href="/builder/">파티 빌더</a>
       <a class="cur" href="/calc/">계산기</a>
+      <a href="/guide/">가이드</a>
       <a class="opt" href="/#download">다운로드</a>
     </nav>
   </div>
@@ -316,6 +340,11 @@
     <div class="notes" id="rNotes"></div>
     <div class="rolls" id="rRolls"></div>
   </div>
+  <section style="max-width:860px;margin:24px auto 0;padding:22px 0 4px;border-top:1px solid var(--line);color:var(--muted);font-size:14px;line-height:1.75;">
+    <h2 style="font-size:18px;color:var(--txt);margin:0 0 12px;font-weight:800;">데미지 계산기 소개</h2>
+    <p style="margin:0 0 12px;">이 계산기는 포켓몬 챔피언스의 데미지 공식을 그대로 구현했습니다. 공격자와 수비자의 <strong style="color:var(--txt)">종족·노력치·성격·랭크·지닌 도구·특성</strong>, 그리고 <strong style="color:var(--txt)">날씨·필드·벽</strong> 같은 환경을 입력하면 데미지 범위(%)와 확정 1타 여부, 16난수 분포를 즉시 계산합니다. 모든 계산은 브라우저에서 바로 처리되어 프로그램 설치 없이 사용할 수 있습니다.</p>
+    <p style="margin:0;">데미지가 어떤 순서로 계산되는지 궁금하다면 <a href="/guide/damage-formula/">데미지 계산 공식 가이드</a>를, 포켓몬별 종족값·타입·특성을 찾아보려면 <a href="/pokedex/">도감</a>을 참고하세요.</p>
+  </section>
 </main>
 
 <footer>
@@ -328,6 +357,7 @@
         <a href="/#how">사용법</a>
         <a href="/builder/">파티 빌더</a>
         <a href="/calc/">계산기</a>
+        <a href="/guide/">가이드</a>
         <a href="/#download">다운로드</a>
       </nav>
     </div>
