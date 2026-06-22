@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>포켓몬 챔피언스 타입 상성표 — 18타입 약점·강점 정리 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스(9세대 기준) 18타입 상성표. 각 공격 타입이 어떤 타입에 2배·0.5배·0배인지 한글로 정리. 자속(STAB)과 이중 타입 상성 계산까지." />
+<link rel="canonical" href="https://champions-helper.com/guide/type-chart/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/type-chart/" />
+<meta property="og:title" content="포켓몬 챔피언스 타입 상성표 — 18타입 약점·강점" />
+<meta property="og:description" content="각 공격 타입이 어떤 타입에 2배·0.5배·0배인지 한글로 정리한 포켓몬 챔피언스 타입 상성표." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="포켓몬 챔피언스 타입 상성표" />
+<meta name="twitter:description" content="18타입 약점·강점·무효를 정리한 포켓몬 챔피언스 타입 상성표." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "포켓몬 챔피언스 타입 상성표 — 18타입 약점·강점 정리",
+  "description": "포켓몬 챔피언스 18타입 상성을 공격 타입별로 정리한 표.",
+  "inLanguage": "ko",
+  "url": "https://champions-helper.com/guide/type-chart/",
+  "author": { "@type": "Organization", "name": "Champions Helper" },
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+    --good: #6fd08a; --bad: #e0807a; --zero: #9aa0a8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  header { position: sticky; top: 0; z-index: 20;
+    background: rgba(27,29,34,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 17px; color: var(--txt); text-decoration: none; }
+  .brand:hover { text-decoration: none; }
+  .brand .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .nav-links { display: flex; gap: 20px; font-size: 14px; }
+  .nav-links a { color: var(--muted); }
+  .nav-links a:hover { color: var(--txt); text-decoration: none; }
+  .nav-links a.active { color: var(--txt); }
+  @media (max-width: 640px) { .nav-links { gap: 13px; font-size: 13px; } }
+
+  .article { max-width: 820px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 28px; font-weight: 800; margin: 0 0 10px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 20px; font-weight: 800; margin: 34px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .article p { margin: 0 0 14px; }
+  .article strong { color: #fff; }
+
+  .tlist { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (max-width: 680px) { .tlist { grid-template-columns: 1fr; } }
+  .tcard { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .tcard .th { font-weight: 800; font-size: 15px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .chip { display: inline-block; padding: 1px 9px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #1b1d22; }
+  .tcard .row { font-size: 13px; margin: 3px 0; color: var(--muted); }
+  .tcard .row b { display: inline-block; width: 96px; }
+  .g { color: var(--good); } .b { color: var(--bad); } .z { color: var(--txt); }
+
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 28px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .foot-links { font-size: 13px; margin: 0 0 12px; }
+  .foot-links a { color: var(--muted); }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 820px; margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/pokedex/">도감</a>
+      <a href="/calc/">계산기</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/#download">다운로드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 타입 상성표</div>
+    <h1>포켓몬 챔피언스 타입 상성표</h1>
+    <p class="lead">공격 기술의 타입이 상대 타입에 얼마나 효과적인지 정리한 표입니다. 배틀에서 가장 먼저 외워야 할 기본이며, 데미지 계산의 핵심입니다.</p>
+
+    <div class="note"><strong>읽는 법</strong> — 각 카드는 <strong>공격하는 기술의 타입</strong> 기준입니다. <span class="g">효과 굉장(2배)</span>, <span class="b">효과 별로(0.5배)</span>, <span class="z">효과 없음(0배)</span>으로 표시했습니다. 상대가 이중 타입이면 두 배율이 곱해집니다(예: 2배 × 2배 = 4배).</div>
+
+    <h2>공격 타입별 상성</h2>
+    <div class="tlist">
+      <div class="tcard"><div class="th"><span class="chip" style="background:#A8A77A">노말</span> 노말 기술</div>
+        <div class="row"><b class="b">0.5배</b> 바위, 강철</div>
+        <div class="row"><b class="z">0배</b> 고스트</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#EE8130">불꽃</span> 불꽃 기술</div>
+        <div class="row"><b class="g">2배</b> 풀, 얼음, 벌레, 강철</div>
+        <div class="row"><b class="b">0.5배</b> 불꽃, 물, 바위, 드래곤</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#6390F0">물</span> 물 기술</div>
+        <div class="row"><b class="g">2배</b> 불꽃, 땅, 바위</div>
+        <div class="row"><b class="b">0.5배</b> 물, 풀, 드래곤</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#F7D02C">전기</span> 전기 기술</div>
+        <div class="row"><b class="g">2배</b> 물, 비행</div>
+        <div class="row"><b class="b">0.5배</b> 전기, 풀, 드래곤</div>
+        <div class="row"><b class="z">0배</b> 땅</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#7AC74C">풀</span> 풀 기술</div>
+        <div class="row"><b class="g">2배</b> 물, 땅, 바위</div>
+        <div class="row"><b class="b">0.5배</b> 불꽃, 풀, 독, 비행, 벌레, 드래곤, 강철</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#96D9D6">얼음</span> 얼음 기술</div>
+        <div class="row"><b class="g">2배</b> 풀, 땅, 비행, 드래곤</div>
+        <div class="row"><b class="b">0.5배</b> 불꽃, 물, 얼음, 강철</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#C22E28;color:#fff">격투</span> 격투 기술</div>
+        <div class="row"><b class="g">2배</b> 노말, 얼음, 바위, 악, 강철</div>
+        <div class="row"><b class="b">0.5배</b> 독, 비행, 에스퍼, 벌레, 페어리</div>
+        <div class="row"><b class="z">0배</b> 고스트</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#A33EA1;color:#fff">독</span> 독 기술</div>
+        <div class="row"><b class="g">2배</b> 풀, 페어리</div>
+        <div class="row"><b class="b">0.5배</b> 독, 땅, 바위, 고스트</div>
+        <div class="row"><b class="z">0배</b> 강철</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#E2BF65">땅</span> 땅 기술</div>
+        <div class="row"><b class="g">2배</b> 불꽃, 전기, 독, 바위, 강철</div>
+        <div class="row"><b class="b">0.5배</b> 풀, 벌레</div>
+        <div class="row"><b class="z">0배</b> 비행</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#A98FF3">비행</span> 비행 기술</div>
+        <div class="row"><b class="g">2배</b> 풀, 격투, 벌레</div>
+        <div class="row"><b class="b">0.5배</b> 전기, 바위, 강철</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#F95587">에스퍼</span> 에스퍼 기술</div>
+        <div class="row"><b class="g">2배</b> 격투, 독</div>
+        <div class="row"><b class="b">0.5배</b> 에스퍼, 강철</div>
+        <div class="row"><b class="z">0배</b> 악</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#A6B91A">벌레</span> 벌레 기술</div>
+        <div class="row"><b class="g">2배</b> 풀, 에스퍼, 악</div>
+        <div class="row"><b class="b">0.5배</b> 불꽃, 격투, 독, 비행, 고스트, 강철, 페어리</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#B6A136">바위</span> 바위 기술</div>
+        <div class="row"><b class="g">2배</b> 불꽃, 얼음, 비행, 벌레</div>
+        <div class="row"><b class="b">0.5배</b> 격투, 땅, 강철</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#735797;color:#fff">고스트</span> 고스트 기술</div>
+        <div class="row"><b class="g">2배</b> 에스퍼, 고스트</div>
+        <div class="row"><b class="b">0.5배</b> 악</div>
+        <div class="row"><b class="z">0배</b> 노말</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#6F35FC;color:#fff">드래곤</span> 드래곤 기술</div>
+        <div class="row"><b class="g">2배</b> 드래곤</div>
+        <div class="row"><b class="b">0.5배</b> 강철</div>
+        <div class="row"><b class="z">0배</b> 페어리</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#705746;color:#fff">악</span> 악 기술</div>
+        <div class="row"><b class="g">2배</b> 에스퍼, 고스트</div>
+        <div class="row"><b class="b">0.5배</b> 격투, 악, 페어리</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#B7B7CE">강철</span> 강철 기술</div>
+        <div class="row"><b class="g">2배</b> 얼음, 바위, 페어리</div>
+        <div class="row"><b class="b">0.5배</b> 불꽃, 물, 전기, 강철</div></div>
+      <div class="tcard"><div class="th"><span class="chip" style="background:#D685AD">페어리</span> 페어리 기술</div>
+        <div class="row"><b class="g">2배</b> 격투, 드래곤, 악</div>
+        <div class="row"><b class="b">0.5배</b> 불꽃, 독, 강철</div></div>
+    </div>
+
+    <h2>자속(STAB)도 함께 기억하기</h2>
+    <p>자신의 타입과 같은 타입의 기술을 쓰면 위력이 추가로 <strong>1.5배</strong>가 됩니다(자속, STAB). 그래서 상성상 2배인 데다 자속까지 받으면 데미지가 크게 뛰어오릅니다. 어떤 기술을 채용할지 정할 때 "자속 + 상성"을 함께 고려하는 것이 기본입니다.</p>
+    <p>실제 데미지가 얼마나 나오는지는 <a href="/calc/">데미지 계산기</a>에서 타입 상성·자속이 자동 반영된 결과로 확인할 수 있습니다.</p>
+
+    <div class="related">
+      <h3>함께 읽기</h3>
+      <a href="/guide/damage-formula/">데미지 계산 공식 →</a>
+      <a href="/guide/abilities-items/">특성·지닌도구 효과 →</a>
+    </div>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
