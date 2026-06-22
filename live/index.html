@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />   <!-- 실시간 데이터 페이지 — 검색 색인 불필요 -->
+<title>Pokémon Champions Helper — Live</title>
+<!-- 87차 — Google AdSense 로더. 승인(ca-pub-XXXXXXXX 발급) 후 아래 주석을 해제하고 #ads의 ins도 활성화:
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXX" crossorigin="anonymous"></script>
+-->
+<script>
+  // 87차(feedback#4) — 위력창을 공개 사이트(champions-helper.com/live)에서도 띄울 수 있게.
+  //   데이터(WS)·sprite·type-icon·시뮬 POST는 항상 로컬 헬퍼(127.0.0.1:8732)로 향해야 한다.
+  //   ① 헬퍼가 직접 서빙(127.0.0.1/localhost로 접속) → same-origin(빈 prefix) = 종전과 100% 동일.
+  //   ② 사이트(champions-helper.com)에서 접속 → 로컬 헬퍼 절대주소로 연결(애드센스는 공개 도메인에서만 표시 가능하므로 사이트 경유가 필수).
+  //   https 사이트 → ws://127.0.0.1 은 loopback이라 브라우저가 mixed-content로 막지 않음(Chrome/Edge: localhost는 secure context 예외).
+  (function () {
+    // local = 헬퍼가 직접 서빙하는 페이지(127.0.0.1:8732)일 때만. 그 외(사이트·python 미리보기 localhost:8000 등)는
+    //   전부 로컬 헬퍼 절대주소로 연결 → 미리보기/사이트 양쪽에서 동일하게 헬퍼(8732)에 붙는다.
+    var loopback = location.hostname === "127.0.0.1" || location.hostname === "localhost";
+    var local = loopback && location.port === "8732";
+    window.PCH_HTTP = local ? "" : "http://127.0.0.1:8732";
+    window.PCH_WS   = local ? ("ws://" + location.host) : "ws://127.0.0.1:8732";
+  })();
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif;
+    font-size: 12px; display: flex; flex-direction: column; height: 100vh;
+    overflow: hidden;  /* body 스크롤바 차단 — 스크롤은 #top/#mid 각자 담당 */
+  }
+  /* 상태/칩 바 */
+  #bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 5px 10px; background: var(--panel2); border-bottom: 1px solid var(--line);
+    flex: 0 0 auto; flex-wrap: wrap;
+  }
+  #status { font-size: 12px; color: var(--muted); }
+  #status.ok { color: #6fd08a; }
+  #status.warn { color: #e0b000; }
+  /* 매치업 타이틀 바: [내 필드칩(좌)] [매치업+날씨(중앙)] [상대 필드칩(우)] */
+  .mu-title-bar { display: flex; align-items: center; gap: 8px; margin: 0 0 2px 2px; }
+  .field-chips { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  #mu-my-field, #mu-opp-field { flex: 1 1 0; }
+  #mu-opp-field { justify-content: flex-end; }
+  .mu-title-center { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; }
+  .mu-label { margin: 0; }
+  /* 83차 — 필드 시뮬 드롭다운(날씨=중앙, 벽=상대측). 타이틀바 한 줄 유지(작게). 펼침은 네이티브라 세로 안 밀림. */
+  .field-sel { font-size: 10px; font-weight: 700; color: var(--txt); background: #2a2e36; border: 1px solid var(--line); border-radius: 4px; padding: 1px 2px; cursor: pointer; max-width: 94px; vertical-align: middle; }
+  .field-sel.sim-on { border-color: #FFEE00; border-width: 1.5px; color: #FFEE00; }
+  .chip {
+    font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 10px;
+    line-height: 1.5; white-space: nowrap;
+  }
+  /* 레이아웃 B: 상단 상대6(3열×2행, 가변) · 중앙 매치업+파티 · 하단 광고 */
+  #top { flex: 0 1 auto; max-height: 46vh; overflow: auto; padding: 6px; border-bottom: 1px solid var(--line); }
+  /* min-height:0 = flex 자식 축소 허용 → 내용 많아도 body 밖으로 안 넘침(스크롤은 이 안에서) */
+  #mid { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 6px; display: flex; flex-direction: column; gap: 8px; }
+  #ads {
+    flex: 0 0 auto; min-height: 70px; display: flex; align-items: center; justify-content: center;
+    background: var(--panel); border-top: 1px solid var(--line); color: var(--muted); font-size: 12px;
+  }
+  .section-title { font-size: 11px; color: var(--muted); margin: 0 0 4px 2px; font-weight: 700; }
+
+  /* 상대 6슬롯 — 3열×2행 기본, 창 좁아지면 2열·1열로 가변 */
+  .opps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 1000px) { .opps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 640px)  { .opps { grid-template-columns: 1fr; } }
+  /* 위력창 배치: 왼쪽 [sprite/이름/스피드] 세로 · 오른쪽 [기술 4개] */
+  .oppslot { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px; display: flex; align-items: flex-start; gap: 8px; }
+  .slot-left { flex: 0 0 auto; width: 78px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .slot-left .spr { width: 52px; height: 52px; object-fit: contain; image-rendering: pixelated; }
+  .slot-name { font-weight: 700; font-size: 12px; text-align: center; line-height: 1.2; }
+  .slot-moves { flex: 1 1 0; min-width: 0; }
+
+  /* 매치업 */
+  /* 83차 — 매치업 타이틀("매치업"+필드칩)을 박스 안 첫 줄로 통합(외부 별도 줄 제거 → 세로 절약). */
+  .mu-box { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+  #matchup { padding: 0; }
+  /* 내(좌끝) | 기술+VS(중앙, 위 정렬) | 상대(우끝). 랭크칩은 sprite 옆 세로 — 내=왼/상대=오른. */
+  .matchup-row { display: flex; align-items: stretch; gap: 16px; }
+  .mu-side { display: flex; align-items: flex-start; gap: 6px; flex: 0 0 auto; }
+  .mu-info { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .mu-info .spr { width: 60px; height: 60px; object-fit: contain; image-rendering: pixelated; }
+  .mu-name { font-weight: 700; font-size: 14px; text-align: center; }
+  /* 위력은 내 포켓몬 쪽(왼쪽)으로 — 중앙 정렬 안 함 */
+  /* min-height: 메가 가능 포켓몬(내 원래 4행+내 메가 4행=8줄)일 때의 높이를 항상 예약 →
+     비메가 포켓몬(4줄)을 내도 매치업 카드 세로가 고정되어 아래 시뮬 필드가 안 밀림(feedback#4). */
+  .mu-center { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; min-height: 280px; }  /* 83차 — 226→280: 메가 8행 실측이 226 초과해 박스가 아래로 늘어나던 문제. 메가 높이를 충분히 예약해 고정. */
+  .mu-vs { color: var(--muted); font-weight: 700; text-align: center; margin-bottom: 4px; }
+
+  /* 위력 행/샘플 (PowerRowRenderer 포팅) */
+  .col { display: flex; flex-direction: column; gap: 1px; }
+  .row { display: grid; grid-template-columns: 72px 1fr; align-items: center; gap: 4px; }
+  .mname { font-weight: 700; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .samples { display: flex; flex-wrap: wrap; gap: 2px; }
+  /* 모든 위력칩 동일 폭(세자리수~세자리수 "147~173%" 기준 고정) */
+  .sample {
+    font-size: 11px; color: #181818; padding: 1px 3px; border-radius: 3px;
+    width: 64px; box-sizing: border-box; text-align: center; line-height: 1.5;
+  }
+  .muted { color: var(--muted); font-size: 11px; }
+
+  /* 방어자 변형 블록 (원래 | 메가X | 메가Y) */
+  .dblock { display: flex; align-items: flex-start; }
+  .dblock .sep { width: 1px; align-self: stretch; background: rgba(255,255,255,0.3); margin: 0 6px; }
+  .lcol { flex: 1 1 0; min-width: 0; }
+  .lhdr { font-size: 10px; font-weight: 700; margin-bottom: 2px; }
+  .asec { margin-bottom: 6px; }
+  .ahdr { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+
+  /* 스피드 칩 */
+  .spline { display: flex; gap: 2px; margin-top: 2px; }
+  .spchip { font-size: 10px; font-weight: 700; color: #181818; padding: 0 4px; border-radius: 3px; min-width: 22px; text-align: center; }
+  .myspchip { font-size: 11px; font-weight: 700; color: #fff; background: var(--accent); padding: 1px 8px; border-radius: 3px; display: inline-block; }
+  .fhdr { font-size: 9px; font-weight: 700; color: #b0b0b0; margin-top: 1px; }
+
+  /* 랭크 배지 */
+  /* 고정폭 + 배경/경계로 명시적 칸. align-self stretch → 매치업 카드 세로 전체에 맞춤(포켓몬 높이 X) */
+  .ranks-v {
+    display: flex; flex-direction: column; gap: 2px;
+    flex: 0 0 64px; width: 64px; box-sizing: border-box; align-self: stretch;
+    background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line); border-radius: 5px; padding: 3px;
+  }
+  /* 랭크칩 색 = 위력창 stat별 색(JS가 배경 인라인). 밝은 배경 → 어두운 글자 */
+  .rank { font-size: 10px; font-weight: 700; padding: 1px 4px; border-radius: 6px; text-align: center; white-space: nowrap; color: #181818; }
+
+  /* 파티 화이트리스트 */
+  .parties { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .pcol { flex: 0 1 auto; }
+  .pcol.right { text-align: right; }
+  .pcol.right .party { justify-content: flex-end; }
+  .party { display: flex; gap: 5px; flex-wrap: wrap; }
+  .pmon { background: var(--panel2); border: 2px solid transparent; border-radius: 6px; padding: 3px; width: 64px; text-align: center; }
+  .pmon.cur { border-color: var(--accent); }
+  .pmon.sim { border-color: #ffee00; }
+  .pmon .spr { width: 48px; height: 48px; object-fit: contain; image-rendering: pixelated; }
+  .pname { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* 81차 — sprite 옆/아래 타입 아이콘(변환자재·메가로 바뀐 타입 실시간 반영). */
+  .type-row { display: flex; gap: 2px; justify-content: center; flex-wrap: wrap; }
+  .type-ic { height: 14px; width: auto; object-fit: contain; image-rendering: auto; border-radius: 2px; }
+  .mu-info .type-ic { height: 16px; }
+  .sim-tag { font-size: 11px; color: #ffee00; font-weight: 700; margin-left: 6px; }
+
+  /* 74차(Phase3) — 시뮬 조작 패널(브라우저→데스크탑 POST /api/sim/*) */
+  .pmon.clickable { cursor: pointer; }
+  .pmon.clickable:hover { border-color: #ffee00; }
+  .sim-panel {
+    margin-top: 4px; background: var(--panel2); border: 1px solid var(--line);
+    border-radius: 6px; padding: 4px 6px; text-align: left; max-width: 360px;
+  }
+  .pcol.right .sim-panel { margin-left: auto; }   /* 상대 패널 우측 정렬되 내용은 좌측 */
+  .sim-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+  .sim-head-name { font-weight: 700; font-size: 13px; color: #ffee00; }
+  .sim-sub { font-size: 10px; color: var(--muted); font-weight: 700; margin: 2px 0 0; }
+  .adj-row { display: grid; grid-template-columns: 52px 24px 1fr 24px; align-items: center; gap: 5px; margin: 0; }
+  .adj-label { font-size: 11px; }
+  .adj-val { font-size: 12px; font-weight: 700; text-align: center; min-width: 38px; }
+  .btn {
+    font-size: 12px; font-weight: 700; color: var(--txt); background: #353a44;
+    border: 1px solid var(--line); border-radius: 4px; padding: 0; cursor: pointer; line-height: 1.15;
+  }
+  .btn:hover { background: #424955; }
+  .btn:active { background: #2a2e36; }
+  .btn.mega { padding: 2px 12px; background: #9f4fc0; color: #fff; }
+  .btn.mega:hover { background: #b266d4; }
+  .btn.mega.on { background: #6f2e90; }
+  /* 지닌도구 드롭다운(헤더 클릭 펼침) */
+  .dropdown { position: relative; max-width: 200px; }
+  .dd-header {
+    width: 100%; display: flex; align-items: center; justify-content: space-between;
+    font-size: 12px; font-weight: 700; color: var(--txt); background: #353a44;
+    border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; cursor: pointer;
+  }
+  .dd-header:hover { background: #424955; }
+  .dd-arrow { color: var(--muted); font-size: 10px; margin-left: 8px; }
+  /* 펼침 목록은 흐름 밖(absolute)으로 띄워 아래 노력치/성격 행을 밀어내지 않음 */
+  .dd-list {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 50; margin-top: 2px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 4px;
+    overflow: hidden; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  }
+  .dd-opt { font-size: 12px; padding: 5px 8px; cursor: pointer; }
+  .dd-opt:hover { background: #424955; }
+  .dd-opt.sel { background: var(--accent); color: #fff; font-weight: 700; }
+  /* 83차 — 지닌도구+특성 수평 2칸(세로 스크롤 제거). 각 칸 안에서 드롭다운이 칸 폭 채움 */
+  .sim-cols { display: flex; gap: 10px; align-items: flex-start; }
+  .sim-cols > .sim-col { flex: 1 1 0; min-width: 0; }
+  /* 82차 — 상대 시뮬 특성: 이름 + 그 아래 작은 글씨 효과 설명 */
+  .ab-name { font-size: 12px; font-weight: 700; }
+  .ab-desc { font-size: 10px; color: var(--muted); line-height: 1.35; margin-top: 2px; white-space: normal; }
+  .ab-fixed { max-width: 200px; padding: 4px 8px; background: #353a44; border: 1px solid var(--line); border-radius: 4px; }
+  .ab-cur-desc { max-width: 200px; font-size: 10px; color: var(--muted); line-height: 1.35; margin-top: 3px; white-space: normal; }
+</style>
+</head>
+<body>
+  <div id="bar">
+    <span id="status">로컬 헬퍼 연결 대기…</span>
+  </div>
+  <section id="top">
+    <div class="section-title">상대 파티 (내 현재 포켓몬 기준 위력)</div>
+    <div id="opps" class="opps"></div>
+  </section>
+  <section id="mid">
+    <div class="mu-box">
+      <!-- 매치업 글자 중앙 · 측별 필드칩(벽/순풍)은 그 플레이어 쪽 끝(내=좌/상대=우) · 날씨는 공통이라 중앙 -->
+      <div class="mu-title-bar">
+        <div id="mu-my-field" class="field-chips left"></div>
+        <div class="mu-title-center">
+          <span class="section-title mu-label">매치업</span>
+          <span id="mu-weather" class="field-chips"></span>
+        </div>
+        <div id="mu-opp-field" class="field-chips right"></div>
+      </div>
+      <div id="matchup"></div>
+    </div>
+    <div>
+      <div class="section-title">파티 (현재=파랑테 · 시뮬=노랑테)</div>
+      <div id="parties" class="parties"></div>
+    </div>
+  </section>
+  <footer id="ads">
+    <!-- 87차 — Google AdSense 자리. 승인 후 head 로더 주석 해제 + 아래 ins 활성화(ca-pub/슬롯 발급값 기입):
+    <ins class="adsbygoogle" style="display:block;width:100%" data-ad-client="ca-pub-XXXXXXXX" data-ad-slot="XXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    -->
+    광고 영역 (애드센스 승인 후 표시 — 공개 도메인 champions-helper.com/live에서만)
+  </footer>
+
+<script>
+"use strict";
+const $ = (s) => document.querySelector(s);
+let lastModel = null;      // 74차 — 드롭다운 펼침 토글 시 재렌더용 최신 모델
+let oppItemOpen = false;   // 74차 — 상대 도구 드롭다운 펼침 상태(WS 갱신에도 유지)
+let oppAbilityOpen = false; // 82차 — 상대 특성 드롭다운 펼침 상태
+
+// ── 색 규칙 (PowerRowRenderer 포팅) ──────────────────────────
+const LABEL_BG = { White: "#FFFFFF", LightGreen: "#C8F0C0", Orange: "#FFC880", LightPink: "#FFC8DC" };
+const FORM = { base: "#C8C8C8", megaX: "#FF9F9F", megaY: "#FFC890", myMega: "#9FD0FF" };
+const STAT_KO = ["공", "방", "특공", "특방", "스피드"];   // 랭크·성격 인덱스(0~4)
+const EV_KO = ["HP", "공", "방", "특공", "특방", "스피드"]; // 노력치 인덱스(0~5)
+const OPP_ITEMS = ["없음", "돌격조끼", "구애스카프", "진화의휘석"]; // 66차 가정 도구 목록
+// 위력창 stat별 색(공=붉은/방=주황/특공=보라/특방=연분홍/스피드=하늘)
+const STAT_COLOR = ["#F09B9B", "#FFC880", "#C8A2E0", "#FFC8DC", "#B0E0F0"];
+const WEATHER = {
+  Rain: ["비", "#2E6FD8", "#fff"], Sand: ["모래바람", "#E0B000", "#1a1a1a"],
+  Snow: ["눈", "#F0F0F0", "#1a1a1a"], Hail: ["눈", "#F0F0F0", "#1a1a1a"],
+  Sun: ["쾌청", "#D83A3A", "#fff"],
+};
+
+function el(tag, cls, txt) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (txt != null) e.textContent = txt;
+  return e;
+}
+// hex 색을 흰색 쪽으로 amt(0~1) 섞어 연하게(채도↓·밝기↑). 랭크 다운 칩에 사용.
+function lighten(hex, amt) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  const mix = (c) => Math.round(c + (255 - c) * amt);
+  return "#" + [mix(r), mix(g), mix(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
+}
+
+// ── 위력 컬럼/행/샘플 ────────────────────────────────────────
+function renderColumn(col) {
+  if (!col || !col.rows || !col.rows.length) return null;
+  const d = el("div", "col");
+  col.rows.forEach((r) => d.appendChild(renderRow(r)));
+  return d;
+}
+function renderRow(row) {
+  const g = el("div", "row");
+  const n = el("div", "mname", row.moveNameKo);
+  n.title = row.moveNameKo;
+  g.appendChild(n);
+  const sp = el("div", "samples");
+  if (row.unknown) sp.appendChild(el("span", "muted", "미등록"));
+  else if (row.isStatus || !row.samples || !row.samples.length) sp.appendChild(el("span", "muted", "변화기"));
+  else row.samples.forEach((s) => sp.appendChild(renderSample(s)));
+  g.appendChild(sp);
+  return g;
+}
+function renderSample(s) {
+  // s.text / s.canKo / s.guaranteedKo 는 C# 계산 프로퍼티 → JSON에 포함됨.
+  const b = el("span", "sample", s.text);
+  b.style.background = LABEL_BG[s.color] || "#fff";
+  if (s.guaranteedKo) b.style.fontWeight = "bold";
+  if (s.simulated) b.style.border = "2px solid #FFEE00";          // 시뮬 노력치/성격 반영 (KO보다 우선)
+  else if (s.guaranteedKo) b.style.border = "2px solid #D22020";  // 확정 1타
+  else if (s.canKo) b.style.border = "1.5px solid #E08000";       // 난수 1타
+  else b.style.border = "1px solid rgba(0,0,0,0.375)";
+  b.title = (s.simulated ? s.bulkName + " (시뮬)" : s.bulkName) + " · " + s.text;
+  return b;
+}
+
+// ── 방어자 변형 블록 ─────────────────────────────────────────
+function labeledColumn(label, color, col) {
+  const d = el("div", "lcol");
+  if (label) { const h = el("div", "lhdr", label); h.style.color = color; d.appendChild(h); }
+  const c = renderColumn(col);
+  if (c) d.appendChild(c);
+  return d;
+}
+function defenderBlock(baseVar, megaVars) {
+  if (!megaVars.length) return renderColumn(baseVar.col) || el("div", "col");
+  const grid = el("div", "dblock");
+  grid.appendChild(labeledColumn(baseVar.label, baseVar.color, baseVar.col));
+  megaVars.forEach((v) => {
+    grid.appendChild(el("div", "sep"));
+    grid.appendChild(labeledColumn(v.label, v.color, v.col));
+  });
+  return grid;
+}
+function centerMegaVariants(megaX, megaY, formX, formY) {
+  const list = [];
+  if (megaX) list.push({ label: formX ? "메가" + formX + " 시" : "상대 메가 시", color: FORM.megaX, col: megaX });
+  if (megaY) list.push({ label: "메가" + formY + " 시", color: FORM.megaY, col: megaY });
+  return list;
+}
+function attackerSection(label, color, baseCol, megaXCol, megaYCol, formX, formY) {
+  const p = el("div", "asec");
+  const h = el("div", "ahdr", label); h.style.color = color; p.appendChild(h);
+  const mv = [];
+  if (megaXCol) mv.push({ label: formX ? "vs 메가" + formX : "vs 메가", color: FORM.megaX, col: megaXCol });
+  if (megaYCol) mv.push({ label: "vs 메가" + formY, color: FORM.megaY, col: megaYCol });
+  p.appendChild(defenderBlock({ label: "vs 원래", color: FORM.base, col: baseCol }, mv));
+  return p;
+}
+function renderCenter(m) {
+  const host = el("div", "col");
+  const hasMyMega = m.myMegaName && (m.centerMyMegaColumn || m.centerMyMegaVsOppMegaColumn);
+  // 83차 — 메가 불가 포켓몬이거나, 내가 이미 다른 포켓몬으로 메가를 소모(myMegaConsumed)했으면
+  //   이 포켓몬은 메가 못 함 → 일반폼("원래")만 표시(+상대 메가 대응 컬럼). 메가 섹션 안 띄움.
+  //   (기존 버그: 소모해도 메가 섹션만 뜨고 일반폼이 사라짐.)
+  if (!hasMyMega || m.myMegaConsumed) {
+    host.appendChild(defenderBlock(
+      { label: "원래", color: FORM.base, col: m.centerColumn },
+      centerMegaVariants(m.centerMegaColumn, m.centerMegaColumnY, m.oppMegaFormX, m.oppMegaFormY)));
+    return host;
+  }
+  // 메가 가능 + 미소모 → 내 원래 + 내 메가 둘 다.
+  host.appendChild(attackerSection("내 원래", FORM.base, m.centerColumn, m.centerMegaColumn, m.centerMegaColumnY, m.oppMegaFormX, m.oppMegaFormY));
+  host.appendChild(attackerSection(m.myMegaName, FORM.myMega, m.centerMyMegaColumn, m.centerMyMegaVsOppMegaColumn, m.centerMyMegaVsOppMegaColumnY, m.oppMegaFormX, m.oppMegaFormY));
+  return host;
+}
+
+// ── 스피드 ──────────────────────────────────────────────────
+function spChip(v, bg, tip) { const c = el("span", "spchip", v); c.style.background = bg; c.title = tip + " · " + v; return c; }
+function speedLine(s) {
+  const l = el("div", "spline");
+  l.appendChild(spChip(s.natureMax, "#FFC8DC", "최속 (성격+풀노력)"));
+  l.appendChild(spChip(s.max, "#ECECEC", "풀노력"));
+  l.appendChild(spChip(s.min, "#C8F0C0", "무보정·무노력"));
+  return l;
+}
+function renderMySpeed(rows) {
+  if (!rows || !rows.length) return null;
+  const d = el("div");
+  rows.forEach((r) => {
+    if (r.label) d.appendChild(el("div", "fhdr", r.label));
+    const c = el("span", "myspchip", r.value); c.title = r.tip || "현재 스피드 실수치"; d.appendChild(c);
+  });
+  return d;
+}
+function renderOppSpeed(rows) {
+  if (!rows || !rows.length) return null;
+  const d = el("div");
+  rows.forEach((r) => { if (r.label) d.appendChild(el("div", "fhdr", r.label)); d.appendChild(speedLine(r.spread)); });
+  return d;
+}
+
+// ── 랭크/상태 배지 ───────────────────────────────────────────
+// 위력창처럼 sprite 옆 세로 랭크칩. 색 = 위력창 stat별 색. 화상/마비는 맨 위. 변동 없으면 빈 칸.
+function rankBadges(stages, burned, paralyzed) {
+  const d = el("div", "ranks-v");
+  if (burned) { const b = el("span", "rank", "화상"); b.style.background = "#E66A4F"; d.appendChild(b); }
+  if (paralyzed) { const b = el("span", "rank", "마비"); b.style.background = "#E6C44F"; d.appendChild(b); }
+  (stages || []).forEach((v, i) => {
+    if (v) {
+      const b = el("span", "rank", STAT_KO[i] + (v > 0 ? "+" + v : v));
+      // 74차 — 업=선명(원색) / 다운=연하게(흰색 쪽 블렌딩, 같은 계열 채도↓·밝기↑)
+      b.style.background = v > 0 ? STAT_COLOR[i] : lighten(STAT_COLOR[i], 0.55);
+      d.appendChild(b);
+    }
+  });
+  return d;
+}
+
+// 81차 — 타입 아이콘 행. types=영문 key 배열(["fire","flying"]). /type-icons/{key}.png. 메가/변환자재 반영된 최종 타입.
+function typeIcons(types) {
+  const row = el("div", "type-row");
+  (types || []).forEach((t) => {
+    const ic = el("img", "type-ic");
+    ic.src = PCH_HTTP + "/type-icons/" + t + ".png";
+    ic.alt = t;
+    row.appendChild(ic);
+  });
+  return row;
+}
+
+// ── 상대 6슬롯 ───────────────────────────────────────────────
+function renderOpponents(list) {
+  const wrap = el("div", "opps");
+  (list || []).forEach((o) => {
+    const c = el("div", "oppslot");
+    // 왼쪽 = sprite / 이름 / 스피드 (세로)
+    const left = el("div", "slot-left");
+    if (o.spritePath) { const img = el("img", "spr"); img.src = PCH_HTTP + o.spritePath; img.alt = o.name; left.appendChild(img); }
+    if (o.types && o.types.length) left.appendChild(typeIcons(o.types));
+    left.appendChild(el("div", "slot-name", o.name));
+    if (o.speed) left.appendChild(speedLine(o.speed));
+    c.appendChild(left);
+    // 오른쪽 = 기술 4개
+    const moves = el("div", "slot-moves");
+    const col = renderColumn(o.column);
+    if (col) moves.appendChild(col);
+    c.appendChild(moves);
+    wrap.appendChild(c);
+  });
+  if (!wrap.children.length) wrap.appendChild(el("div", "muted", "상대 파티 정보 없음"));
+  return wrap;
+}
+
+// ── 매치업 ───────────────────────────────────────────────────
+function muSide(name, sprite, stages, burned, paralyzed, speedEl, mirror, types) {
+  const s = el("div", "mu-side" + (mirror ? " mirror" : ""));
+  // info = sprite(위) / 타입 / 이름 / 스피드 (세로). 랭크칩은 sprite 옆 — 내=왼/상대=오른.
+  const info = el("div", "mu-info");
+  if (sprite) { const i = el("img", "spr"); i.src = PCH_HTTP + sprite; i.alt = name; info.appendChild(i); }
+  if (types && types.length) info.appendChild(typeIcons(types));
+  info.appendChild(el("div", "mu-name", name || "—"));
+  if (speedEl) info.appendChild(speedEl);
+  const ranks = rankBadges(stages, burned, paralyzed);
+  if (mirror) { s.appendChild(info); s.appendChild(ranks); }
+  else { s.appendChild(ranks); s.appendChild(info); }
+  return s;
+}
+function renderMatchup(m) {
+  const host = el("div", "matchup-row");
+  host.appendChild(muSide(m.myName, m.mySpritePath, m.myStages, m.myBurned, m.myParalyzed, renderMySpeed(m.mySpeeds), false, m.myTypes));
+  // 중앙: 기술 리스트(위 정렬)
+  const center = el("div", "mu-center");
+  center.appendChild(renderCenter(m));
+  host.appendChild(center);
+  host.appendChild(muSide(m.oppName, m.oppSpritePath, m.oppStages, m.oppBurned, m.oppParalyzed, renderOppSpeed(m.oppSpeeds), true, m.oppTypes));
+  return host;
+}
+
+// ── 파티 화이트리스트 + 시뮬 조작 ────────────────────────────
+// 74차(Phase3) — 브라우저→데스크탑 시뮬 조작 POST. 모델 갱신은 WS push로 자동 반영(별도 응답처리 불요).
+function sim(path, body) {
+  fetch(PCH_HTTP + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) })
+    .catch(() => {});
+}
+function renderParty(list, side) {
+  const w = el("div", "party");
+  (list || []).forEach((p) => {
+    const c = el("div", "pmon clickable");
+    if (p.isCurrent) c.classList.add("cur");
+    if (p.isSimTarget) c.classList.add("sim");
+    if (p.spritePath) { const img = el("img", "spr"); img.src = PCH_HTTP + p.spritePath; img.alt = p.name; c.appendChild(img); }
+    if (p.types && p.types.length) c.appendChild(typeIcons(p.types));
+    c.appendChild(el("div", "pname", p.name));
+    c.title = p.isSimTarget ? "클릭: 시뮬 종료" : "클릭: 이 포켓몬으로 시뮬";
+    c.onclick = () => {
+      if (p.isSimTarget) sim("/api/sim/" + side + "/exit");          // 노란테 재클릭 → 시뮬 종료
+      else sim("/api/sim/" + side + "/start", { index: p.index });
+    };
+    w.appendChild(c);
+  });
+  return w;
+}
+// [라벨] [−] [값] [+] 조정 행
+function adjRow(label, valueText, onMinus, onPlus, minusLabel, plusLabel, valueColor) {
+  const r = el("div", "adj-row");
+  r.appendChild(el("span", "adj-label", label));
+  const mn = el("button", "btn", minusLabel || "−"); mn.onclick = onMinus; r.appendChild(mn);
+  const val = el("span", "adj-val", valueText); if (valueColor) val.style.color = valueColor; r.appendChild(val);
+  const pl = el("button", "btn", plusLabel || "+"); pl.onclick = onPlus; r.appendChild(pl);
+  return r;
+}
+// 74차 — 상대 시뮬 지닌도구 드롭다운(헤더 클릭 펼침/접힘). 항목 클릭 → POST + 접힘.
+function oppItemDropdown(m) {
+  const wrap = el("div", "dropdown");
+  const sel = m.oppSimItemKo || "없음";
+  const header = el("button", "dd-header");
+  header.appendChild(el("span", null, sel));
+  header.appendChild(el("span", "dd-arrow", oppItemOpen ? "▲" : "▼"));
+  header.onclick = () => { oppItemOpen = !oppItemOpen; if (lastModel) render(lastModel); };
+  wrap.appendChild(header);
+  if (oppItemOpen) {
+    const list = el("div", "dd-list");
+    OPP_ITEMS.forEach((it) => {
+      const cur = it === "없음" ? !m.oppSimItemKo : m.oppSimItemKo === it;
+      const opt = el("div", "dd-opt" + (cur ? " sel" : ""), it + (cur ? "  ✓" : ""));
+      opt.onclick = () => { oppItemOpen = false; sim("/api/sim/opp/item", { itemKo: it === "없음" ? "" : it }); };
+      list.appendChild(opt);
+    });
+    wrap.appendChild(list);
+  }
+  return wrap;
+}
+// 82차 — 상대 시뮬 특성 드롭다운. 메가 폼 = 특성 1개 자동(고정 표시) / 비메가 = 후보 드롭다운(각 항목 이름+효과설명).
+//   항목 클릭 → POST /api/sim/opp/ability. "선택 안 함" = 미반영(정책대로). 헤더 아래 현재 선택 효과설명 표시.
+function oppAbilityDropdown(m) {
+  const choices = m.oppSimAbilityChoices || [];
+  const wrap = el("div", "dropdown");
+  // 메가 등 자동 고정 — 드롭다운 대신 표시만
+  if (m.oppSimAbilityLocked) {
+    const sel = choices[0];
+    const box = el("div", "ab-fixed");
+    box.appendChild(el("div", "ab-name", (sel ? sel.ko : (m.oppSimAbilityKo || "")) + "  (자동)"));
+    // 83차 — 메가 자동 특성도 설명줄 숨김(세로 스크롤 방지). 이름만 표시.
+    wrap.appendChild(box);
+    return wrap;
+  }
+  const curKo = m.oppSimAbilityKo || null;
+  const header = el("button", "dd-header");
+  header.appendChild(el("span", null, curKo || "선택 안 함"));
+  header.appendChild(el("span", "dd-arrow", oppAbilityOpen ? "▲" : "▼"));
+  header.onclick = () => { oppAbilityOpen = !oppAbilityOpen; if (lastModel) render(lastModel); };
+  wrap.appendChild(header);
+  // 83차 — 접힌 상태(선택만)엔 효과설명 숨김(세로 스크롤 방지). 설명은 펼친 드롭다운 항목에서만.
+  if (oppAbilityOpen) {
+    const list = el("div", "dd-list");
+    const none = el("div", "dd-opt" + (!curKo ? " sel" : ""), "선택 안 함" + (!curKo ? "  ✓" : ""));
+    none.onclick = () => { oppAbilityOpen = false; sim("/api/sim/opp/ability", { abilityKo: "" }); };
+    list.appendChild(none);
+    choices.forEach((c) => {
+      const cur = curKo === c.ko;
+      const opt = el("div", "dd-opt" + (cur ? " sel" : ""));
+      opt.appendChild(el("div", "ab-name", c.ko + (cur ? "  ✓" : "")));
+      if (c.desc) opt.appendChild(el("div", "ab-desc", c.desc));
+      opt.onclick = () => { oppAbilityOpen = false; sim("/api/sim/opp/ability", { abilityKo: c.ko }); };
+      list.appendChild(opt);
+    });
+    wrap.appendChild(list);
+  }
+  return wrap;
+}
+function simHead(label, canMega, isMega, megaPath) {
+  const h = el("div", "sim-head");
+  h.appendChild(el("span", "sim-head-name", label));
+  // 시뮬 종료는 sprite(노란테) 재클릭으로 — 헤더 버튼은 메가진화(메가 가능 시만). 토글.
+  if (canMega) {
+    const mb = el("button", "btn mega" + (isMega ? " on" : ""), isMega ? "메가 해제" : "메가진화");
+    mb.onclick = () => sim(megaPath);
+    h.appendChild(mb);
+  }
+  return h;
+}
+// 81차 — 상대 시뮬 헤더: 메가폼 개수만큼 버튼(단일="메가진화", 듀얼=리자몽/라이츄 "메가진화X"/"메가진화Y").
+//   forms = 폼 라벨 배열, activeIndex = 현재 활성 폼(-1=메가 안 함). 활성 버튼 재클릭 = 해제(서버 토글).
+function oppSimHead(label, forms, activeIndex) {
+  const h = el("div", "sim-head");
+  h.appendChild(el("span", "sim-head-name", label));
+  (forms || []).forEach((name, i) => {
+    const active = i === activeIndex;
+    const mb = el("button", "btn mega" + (active ? " on" : ""), active ? name + " 해제" : name);
+    mb.onclick = () => sim("/api/sim/opp/mega", { form: i });
+    h.appendChild(mb);
+  });
+  return h;
+}
+function mySimPanel(m) {
+  const p = el("div", "sim-panel");
+  p.appendChild(simHead("내 시뮬: " + (m.myName || ""), m.simCanMega, m.simMega, "/api/sim/my/mega"));
+  p.appendChild(el("div", "sim-sub", "랭크"));
+  STAT_KO.forEach((name, i) => {
+    const v = (m.myStages && m.myStages[i]) || 0;
+    p.appendChild(adjRow(name, v > 0 ? "+" + v : "" + v,
+      () => sim("/api/sim/my/rank", { stat: i, delta: -1 }),
+      () => sim("/api/sim/my/rank", { stat: i, delta: 1 })));
+  });
+  return p;
+}
+function oppSimPanel(m) {
+  const p = el("div", "sim-panel");
+  p.appendChild(oppSimHead("상대 시뮬: " + (m.oppName || ""), m.oppSimMegaForms, m.oppSimMegaIndex));
+  // 83차 — 지닌도구 + 특성을 수평 2칸으로(세로 스크롤 제거). 각 드롭다운 펼침은 absolute라 옆칸 안 밀림.
+  const cols = el("div", "sim-cols");
+  const itemCol = el("div", "sim-col");
+  itemCol.appendChild(el("div", "sim-sub", "지닌도구"));
+  itemCol.appendChild(oppItemDropdown(m));
+  cols.appendChild(itemCol);
+  // 82차 — 특성 (메가=자동 고정 / 비메가=후보 드롭다운, 효과설명 표시). 후보 있을 때만 둘째 칸.
+  if ((m.oppSimAbilityChoices && m.oppSimAbilityChoices.length) || m.oppSimAbilityLocked) {
+    const abCol = el("div", "sim-col");
+    abCol.appendChild(el("div", "sim-sub", "특성"));
+    abCol.appendChild(oppAbilityDropdown(m));
+    cols.appendChild(abCol);
+  }
+  p.appendChild(cols);
+  // 노력치(무보정 칩 반영)
+  p.appendChild(el("div", "sim-sub", "노력치 (±4 · 스탯≤32 · 합≤66)"));
+  EV_KO.forEach((name, i) => {
+    const v = (m.oppSimEvs && m.oppSimEvs[i]) || 0;
+    p.appendChild(adjRow(name, "" + v,
+      () => sim("/api/sim/opp/ev", { stat: i, delta: -4 }),
+      () => sim("/api/sim/opp/ev", { stat: i, delta: 4 })));
+  });
+  // 성격 화살표(실수치 배수 ↑1.1/↓0.9)
+  p.appendChild(el("div", "sim-sub", "성격 화살표 (실수치 ×)"));
+  STAT_KO.forEach((name, i) => {
+    const mult = (m.oppSimNatureMult && m.oppSimNatureMult[i]) || 1.0;
+    const up = mult > 1.001, down = mult < 0.999;
+    const txt = up ? "×1.1" : (down ? "×0.9" : "×1.0");
+    const color = up ? "#FF7A7A" : (down ? "#7AB0FF" : null);   // 보정 ↑=붉은 / ↓=파랑
+    p.appendChild(adjRow(name, txt,
+      () => sim("/api/sim/opp/nature", { stat: i, dir: -1 }),
+      () => sim("/api/sim/opp/nature", { stat: i, dir: 1 }), "▼", "▲", color));
+  });
+  // 랭크
+  p.appendChild(el("div", "sim-sub", "랭크"));
+  STAT_KO.forEach((name, i) => {
+    const v = (m.oppStages && m.oppStages[i]) || 0;
+    p.appendChild(adjRow(name, v > 0 ? "+" + v : "" + v,
+      () => sim("/api/sim/opp/rank", { stat: i, delta: -1 }),
+      () => sim("/api/sim/opp/rank", { stat: i, delta: 1 })));
+  });
+  return p;
+}
+function renderPartiesBlock(m) {
+  const host = el("div", "parties");
+  const mine = el("div", "pcol");
+  const mh = el("div", "section-title", "내 파티");
+  if (m.simActive) mh.appendChild(el("span", "sim-tag", "시뮬 중"));
+  mine.appendChild(mh);
+  mine.appendChild(renderParty(m.myParty, "my"));
+  if (m.simActive) mine.appendChild(mySimPanel(m));
+  host.appendChild(mine);
+
+  const opp = el("div", "pcol right");
+  const oh = el("div", "section-title", "상대 파티");
+  if (m.oppSimActive) {
+    oh.appendChild(el("span", "sim-tag", "시뮬 중" + (m.oppSimItemKo && m.oppSimItemKo !== "없음" ? " · " + m.oppSimItemKo : "")));
+  }
+  opp.appendChild(oh);
+  opp.appendChild(renderParty(m.oppParty, "opp"));
+  if (m.oppSimActive) opp.appendChild(oppSimPanel(m));
+  host.appendChild(opp);
+  return host;
+}
+
+// ── 날씨/벽/순풍 칩 ──────────────────────────────────────────
+function mkChip(label, bg, fg) { const c = el("span", "chip", label); c.style.background = bg; c.style.color = fg; return c; }
+// 83차 — 필드 시뮬 드롭다운(네이티브 select). active=시뮬 중(노란테). onchange → POST(빈 key=시뮬 해제).
+//   selected는 attribute로 설정 — applyRegion이 innerHTML 비교라 property면 값 변화가 감지 안 됨(DOM 갱신 skip 버그 방지).
+const WEATHER_OPTS = [["", "날씨"], ["none", "없음"], ["sun", "쾌청"], ["rain", "비"], ["sand", "모래바람"], ["snow", "눈"]];
+const SCREEN_OPTS = [["", "벽"], ["none", "없음"], ["reflect", "리플렉터"], ["light", "빛의장막"], ["aurora", "오로라베일"]];
+// 84차 — 타입 시뮬(테라스탈/타입변경 수동 단일화). 첫 옵션 "타입"(빈)=기본 해제 / 타입 선택=단일타입 강제.
+//   key는 백엔드 PokemonType.ToString().ToLowerInvariant()와 일치(/type-icons/{key}.png 동일).
+const TYPE_OPTS = [["", "타입"],
+  ["normal", "노말"], ["fire", "불꽃"], ["water", "물"], ["electric", "전기"], ["grass", "풀"], ["ice", "얼음"],
+  ["fighting", "격투"], ["poison", "독"], ["ground", "땅"], ["flying", "비행"], ["psychic", "에스퍼"], ["bug", "벌레"],
+  ["rock", "바위"], ["ghost", "고스트"], ["dragon", "드래곤"], ["dark", "악"], ["steel", "강철"], ["fairy", "페어리"]];
+const WEATHER_TO_KEY = { None: "none", Sun: "sun", Rain: "rain", Sand: "sand", Snow: "snow", Hail: "snow" };
+function fieldSelect(opts, curVal, active, path) {
+  const sel = el("select", "field-sel" + (active ? " sim-on" : ""));
+  opts.forEach(([v, label]) => {
+    const o = el("option", null, label); o.value = v;
+    if (v === curVal) o.setAttribute("selected", "selected");
+    sel.appendChild(o);
+  });
+  sel.onchange = () => sim(path, { key: sel.value });
+  return sel;
+}
+// 측별 벽/순풍 칩 + (상대측만) 벽 시뮬 드롭다운. 측은 위치(매치업 좌/우)로 구분 → 라벨에 "내/상대" 접두 없음.
+function fieldChips(m, side) {
+  const f = document.createDocumentFragment();
+  // 84차 — 타입 시뮬 드롭다운(측 = 위치로 구분: 내=좌/상대=우). 네이티브 select라 팝업이 흐름 밖 → 세로 스크롤 안 생김.
+  const tKey = side === "my" ? m.simMyType : m.simOppType;
+  f.appendChild(fieldSelect(TYPE_OPTS, tKey || "", !!tKey, "/api/sim/" + side + "/type"));
+  const reflect = side === "my" ? m.myReflect : m.oppReflect;
+  const light = side === "my" ? m.myLightScreen : m.oppLightScreen;
+  const aurora = side === "my" ? m.myAuroraVeil : m.oppAuroraVeil;
+  const tail = side === "my" ? m.myTailwind : m.oppTailwind;
+  // 상대측(opp)에만 벽 시뮬 드롭다운(절반 위력). 시뮬 중엔 실제 벽 칩 숨김(드롭다운이 대체 표시).
+  if (side === "opp") {
+    const curVal = m.simOppScreenActive
+      ? (m.simOppReflect ? "reflect" : m.simOppLightScreen ? "light" : m.simOppAuroraVeil ? "aurora" : "none")
+      : "";
+    f.appendChild(fieldSelect(SCREEN_OPTS, curVal, m.simOppScreenActive, "/api/sim/opp/screen"));
+  }
+  const hideRealScreen = side === "opp" && m.simOppScreenActive;
+  if (!hideRealScreen) {
+    if (reflect) f.appendChild(mkChip("리플렉터", "#E08000", "#1a1a1a"));
+    if (light) f.appendChild(mkChip("빛의장막", "#2E6FD8", "#fff"));
+    if (aurora) f.appendChild(mkChip("오로라베일", "#20B0B0", "#fff"));
+  }
+  if (tail) f.appendChild(mkChip("순풍", "#2EB050", "#fff"));
+  return f;
+}
+// 날씨 = 필드 공통(측 무관) → 중앙. 드롭다운(시뮬) + 실제 날씨 칩(시뮬 중엔 숨김).
+function weatherControl(m) {
+  const f = document.createDocumentFragment();
+  const curVal = m.simWeatherActive ? (WEATHER_TO_KEY[m.simWeather] || "none") : "";
+  f.appendChild(fieldSelect(WEATHER_OPTS, curVal, m.simWeatherActive, "/api/sim/weather"));
+  if (!m.simWeatherActive) { const w = WEATHER[m.weather]; if (w) f.appendChild(mkChip(w[0], w[1], w[2])); }
+  return f;
+}
+
+// ── 전체 렌더 ────────────────────────────────────────────────
+// NEXT-1 fix② 부분 DOM 갱신: 매 push마다 6영역 통째 replaceChildren = 풀 DOM 재구축(reflow+repaint+GPU 재컴포지팅).
+//   WPF ApplyModel(변경분만 갱신)이 조용했던 이유 = 효율적 부분갱신. 웹도 영역단위로 흉내낸다.
+//   각 영역의 새 노드를 detached div에서 만들어(reflow 0) innerHTML 직렬화 → 직전과 동일하면 그 영역 DOM 적용 skip.
+//   전투중 보통 1~2영역만 변함 → 나머지 4~5영역의 비싼 reflow/repaint/컴포지팅을 통째 건너뜀.
+//   렌더 결과가 byte 동일할 때만 skip이라 화면 결과는 항상 종전과 동일(회귀 0).
+const _lastRegion = {};
+function applyRegion(sel, nodes) {
+  const tmp = document.createElement("div");
+  tmp.append(...nodes);                 // fragment는 자식 펼쳐짐 / element·노드배열은 그대로 — 기존 구조 1:1 보존
+  const html = tmp.innerHTML;
+  if (_lastRegion[sel] === html) return; // 직전과 동일 → reflow/repaint 안 일으킴
+  _lastRegion[sel] = html;
+  $(sel).replaceChildren(...tmp.childNodes);
+}
+function render(m) {
+  lastModel = m;
+  setStatus("데이터 수신 중", "ok");
+  applyRegion("#mu-my-field", [fieldChips(m, "my")]);
+  applyRegion("#mu-opp-field", [fieldChips(m, "opp")]);
+  applyRegion("#mu-weather", [weatherControl(m)]);
+  applyRegion("#opps", [...renderOpponents(m.opponents).childNodes]);
+  applyRegion("#matchup", [renderMatchup(m)]);
+  applyRegion("#parties", [...renderPartiesBlock(m).childNodes]);
+}
+
+// ── WebSocket ────────────────────────────────────────────────
+function setStatus(txt, kind) {
+  const s = $("#status");
+  s.textContent = txt;
+  s.className = kind || "";
+}
+let ws;
+let shuttingDown = false;   // 75차 — 헬퍼(오버레이) 종료 신호 받으면 true → 재연결 안 함
+function connect() {
+  ws = new WebSocket(PCH_WS + "/ws/power");   // 87차 — 로컬 헬퍼 WS(사이트 경유 시 절대주소)
+  ws.onopen = () => setStatus("연결됨 — 게임 매치 시작 시 데이터 표시", "ok");
+  ws.onmessage = (e) => {
+    let data; try { data = JSON.parse(e.data); } catch (err) { console.error(err); return; }
+    if (data && data.__shutdown) { handleShutdown(); return; }   // 헬퍼 중지 → 탭 닫기/안내
+    render(data);
+  };
+  ws.onclose = () => { if (shuttingDown) return; setStatus("연결 끊김 — 재연결 시도…", "warn"); setTimeout(connect, 1500); };
+  ws.onerror = () => { try { ws.close(); } catch (_) {} };
+}
+// 75차 — 헬퍼 중지: WS 닫고(서버 소켓 정리 → 헬퍼 재시작 시 새 위력창 열림) 탭 닫기 시도.
+//   브라우저가 직접 연 탭은 window.close()를 거부할 수 있음 → 그땐 종료 안내 화면으로 전환.
+function handleShutdown() {
+  shuttingDown = true;
+  try { ws.close(); } catch (_) {}
+  try { window.close(); } catch (_) {}
+  document.body.innerHTML =
+    '<div style="display:flex;height:100vh;align-items:center;justify-content:center;flex-direction:column;'
+    + 'gap:12px;color:#9aa0a8;font-family:Malgun Gothic,sans-serif;text-align:center;">'
+    + '<div style="font-size:44px;">⏹</div>'
+    + '<div style="font-size:16px;color:#e8eaed;">헬퍼(오버레이)가 종료되었습니다.</div>'
+    + '<div style="font-size:13px;">이 탭은 닫아도 됩니다. 헬퍼를 다시 시작하면 새 위력창이 열립니다.</div></div>';
+}
+connect();
+</script>
+</body>
+</html>
