@@ -134,6 +134,20 @@
 
   small.hint { color: var(--muted); font-size: 11px; }
 
+  /* 노력치 입력 + 원클릭 0/32 버튼 */
+  .ev-row { display: flex; gap: 6px; align-items: stretch; }
+  .ev-row > input { flex: 1; min-width: 0; }
+  .ev-btns { display: flex; flex-direction: column; gap: 3px; width: 34px; flex: none; }
+  .ev-btns button {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    border: none; border-radius: 6px; padding: 0; cursor: pointer; color: #1b1d22;
+  }
+  .ev-btns button svg { width: 15px; height: 15px; display: block; }
+  .ev-btns .ev-max { background: var(--warn); }
+  .ev-btns .ev-min { background: var(--bad); }
+  .ev-btns button:hover { filter: brightness(1.08); }
+  .ev-btns button:active { filter: brightness(0.9); }
+
   /* 결과 */
   .result { margin: 18px 0 60px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
   .result .big { font-size: 30px; font-weight: 800; letter-spacing: -.5px; }
@@ -229,7 +243,13 @@
       <div class="row inline">
         <div>
           <label id="atkEvLbl">공격 노력치 0~32</label>
-          <input id="atkEv" type="number" min="0" max="32" value="32" inputmode="numeric">
+          <div class="ev-row">
+            <input id="atkEv" type="number" min="0" max="32" value="32" inputmode="numeric">
+            <div class="ev-btns">
+              <button type="button" class="ev-max" data-target="atkEv" title="최대 투자 (32)" aria-label="최대 투자"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 13 12 7 19 13"></polyline><polyline points="5 18 12 12 19 18"></polyline></svg></button>
+              <button type="button" class="ev-min" data-target="atkEv" title="0으로" aria-label="0으로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 6 12 12 19 6"></polyline><polyline points="5 11 12 17 19 11"></polyline></svg></button>
+            </div>
+          </div>
         </div>
         <div>
           <label>성격 보정</label>
@@ -291,12 +311,24 @@
       </div>
       <div class="row">
         <label>HP 노력치 0~32</label>
-        <input id="defHpEv" type="number" min="0" max="32" value="32" inputmode="numeric">
+        <div class="ev-row">
+          <input id="defHpEv" type="number" min="0" max="32" value="0" inputmode="numeric">
+          <div class="ev-btns">
+            <button type="button" class="ev-max" data-target="defHpEv" title="최대 투자 (32)" aria-label="최대 투자"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 13 12 7 19 13"></polyline><polyline points="5 18 12 12 19 18"></polyline></svg></button>
+            <button type="button" class="ev-min" data-target="defHpEv" title="0으로" aria-label="0으로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 6 12 12 19 6"></polyline><polyline points="5 11 12 17 19 11"></polyline></svg></button>
+          </div>
+        </div>
       </div>
       <div class="row inline">
         <div>
           <label>방어 노력치 0~32</label>
-          <input id="defEv" type="number" min="0" max="32" value="0" inputmode="numeric">
+          <div class="ev-row">
+            <input id="defEv" type="number" min="0" max="32" value="0" inputmode="numeric">
+            <div class="ev-btns">
+              <button type="button" class="ev-max" data-target="defEv" title="최대 투자 (32)" aria-label="최대 투자"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 13 12 7 19 13"></polyline><polyline points="5 18 12 12 19 18"></polyline></svg></button>
+              <button type="button" class="ev-min" data-target="defEv" title="0으로" aria-label="0으로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 6 12 12 19 6"></polyline><polyline points="5 11 12 17 19 11"></polyline></svg></button>
+            </div>
+          </div>
         </div>
         <div>
           <label>성격 보정</label>
