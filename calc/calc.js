@@ -223,14 +223,12 @@ function wire(){
     state[side].megaIdx = state[side].megaIdx === mi ? -1 : mi;
     refreshSpecies(side); recompute();
   });
-  // 노력치 원클릭 0/32 버튼
-  document.querySelectorAll(".ev-btns button").forEach(b => {
-    b.addEventListener("click", () => {
-      const inp = $(b.dataset.target);
-      if (!inp) return;
-      inp.value = b.classList.contains("ev-max") ? 32 : 0;
-      recompute();
-    });
+  // 노력치 원클릭 0/32 버튼 (이벤트 위임 — 버튼 안 svg 클릭도 closest로 버튼 포착)
+  document.body.addEventListener("click", e => {
+    const b = e.target.closest(".ev-btns button"); if (!b) return;
+    const inp = $(b.dataset.target); if (!inp) return;
+    inp.value = b.classList.contains("ev-max") ? 32 : 0;
+    recompute();
   });
   document.querySelectorAll(".seg").forEach(seg => {
     seg.addEventListener("click", e => {
