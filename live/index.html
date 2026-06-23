@@ -172,6 +172,16 @@
   .btn.mega { padding: 2px 12px; background: #9f4fc0; color: #fff; }
   .btn.mega:hover { background: #b266d4; }
   .btn.mega.on { background: #6f2e90; }
+  /* 91차 — 파티 블록 중앙(좌=내 시뮬/우=상대 시뮬 사이 빈 공간)의 "모든 시뮬 취소" 버튼.
+     좌우와 동일한 세로 구조(column, 위→아래)로 두고 빈 제목 placeholder로 sprite 행 높이에 맞춤 →
+     버튼이 포켓몬 sprite 라인에 고정(시뮬 패널이 길어져도 세로로 안 밀림). align-items=가로 중앙만. */
+  .pcol.center { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; min-width: 0; }
+  .btn.sim-reset {
+    padding: 9px 16px; font-size: 12px; white-space: nowrap; border-radius: 6px;
+    background: #B03030; color: #fff; border: 1px solid #E05656;
+  }
+  .btn.sim-reset:hover { background: #C84242; }
+  .btn.sim-reset:active { background: #952626; }
   /* 지닌도구 드롭다운(헤더 클릭 펼침) */
   .dropdown { position: relative; max-width: 200px; }
   .dd-header {
@@ -637,6 +647,20 @@ function renderPartiesBlock(m) {
   mine.appendChild(renderParty(m.myParty, "my"));
   if (m.simActive) mine.appendChild(mySimPanel(m));
   host.appendChild(mine);
+
+  // 91차 — 중앙 빈 공간(좌=내 시뮬/우=상대 시뮬 사이)에 "모든 시뮬 취소" 버튼.
+  //   포켓몬·날씨·벽·타입 시뮬 중 하나라도 활성일 때만 표시. 누르면 전부 해제 → 현재 실제 필드로.
+  const anySim = m.simActive || m.oppSimActive || m.simWeatherActive
+    || m.simOppScreenActive || !!m.simMyType || !!m.simOppType;
+  if (anySim) {
+    const mid = el("div", "pcol center");
+    mid.appendChild(el("div", "section-title", " "));   // 좌우 "내/상대 파티" 제목 높이 맞춤 → 버튼을 sprite 라인에 정렬
+    const btn = el("button", "btn sim-reset", "모든 시뮬 취소");
+    btn.title = "내/상대 포켓몬·날씨·벽·타입 시뮬을 전부 해제하고 현재 실제 필드 상황으로 복귀";
+    btn.onclick = () => sim("/api/sim/reset-all");
+    mid.appendChild(btn);
+    host.appendChild(mid);
+  }
 
   const opp = el("div", "pcol right");
   const oh = el("div", "section-title", "상대 파티");
