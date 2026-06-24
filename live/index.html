@@ -108,6 +108,21 @@
   }
   .muted { color: var(--muted); font-size: 11px; }
 
+  /* 93차 — 조건부 위력 기술 -/+ 버튼. 위력칩 위치를 절대 안 밀도록:
+     −버튼 + +n 지표는 기술명 칸(grid col0, 고정폭) 안에, +버튼은 위력칩 뒤에 둔다.
+     → 위력칩(.samples)은 항상 grid 1fr 칸 시작 = 모든 행(조건부/비조건부) 동일 x좌표로 수직 정렬. 기술명은 잘려도 됨. */
+  .mname.has-ctl { display: flex; align-items: center; gap: 2px; }
+  .mname.has-ctl .mtext { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pdelta { flex: 0 0 auto; font-size: 9px; font-weight: 700; color: #ffd54f; }
+  .samples-ctl { display: flex; align-items: center; gap: 3px; }
+  .pbtn {
+    flex: 0 0 auto; cursor: pointer; user-select: none;
+    min-width: 15px; height: 16px; line-height: 14px; text-align: center; padding: 0 1px;
+    font-size: 12px; font-weight: 700; color: var(--txt);
+    background: var(--panel2); border: 1px solid var(--line); border-radius: 3px;
+  }
+  .pbtn:hover { border-color: var(--accent); color: var(--accent2); }
+
   /* 방어자 변형 블록 (원래 | 메가X | 메가Y) */
   .dblock { display: flex; align-items: flex-start; }
   .dblock .sep { width: 1px; align-self: stretch; background: rgba(255,255,255,0.3); margin: 0 6px; }
@@ -280,22 +295,49 @@ function lighten(hex, amt) {
 }
 
 // ── 위력 컬럼/행/샘플 ────────────────────────────────────────
-function renderColumn(col) {
+function renderColumn(col, withControls) {
   if (!col || !col.rows || !col.rows.length) return null;
   const d = el("div", "col");
-  col.rows.forEach((r) => d.appendChild(renderRow(r)));
+  col.rows.forEach((r) => d.appendChild(renderRow(r, withControls)));
   return d;
 }
-function renderRow(row) {
+function renderRow(row, withControls) {
   const g = el("div", "row");
-  const n = el("div", "mname", row.moveNameKo);
+  // 93차 — withControls(오리지널 컬럼) + 조건부 위력 기술이면 기술명 옆 +n + 위력칩 양쪽 -/+ 버튼.
+  const ctl = withControls && !!row.moveKey;
+  const n = el("div", "mname");
+  if (ctl) {
+    n.classList.add("has-ctl");
+    n.appendChild(el("span", "mtext", row.moveNameKo));
+    const delta = (row.currentPower || 0) - (row.basePower || 0);
+    if (delta !== 0) n.appendChild(el("span", "pdelta", (delta > 0 ? "+" : "") + delta));
+    // −버튼은 기술명 칸(고정폭) 오른쪽 끝 = 위력칩 바로 왼쪽. 위력칩 위치는 안 밀린다.
+    const minus = el("span", "pbtn", "−");
+    minus.title = "위력 단계 내리기";
+    minus.onclick = () => sim("/api/sim/move-power", { moveKey: row.moveKey, delta: -1 });
+    n.appendChild(minus);
+  } else {
+    n.textContent = row.moveNameKo;
+  }
   n.title = row.moveNameKo;
   g.appendChild(n);
+
   const sp = el("div", "samples");
   if (row.unknown) sp.appendChild(el("span", "muted", "미등록"));
   else if (row.isStatus || !row.samples || !row.samples.length) sp.appendChild(el("span", "muted", "변화기"));
   else row.samples.forEach((s) => sp.appendChild(renderSample(s)));
-  g.appendChild(sp);
+
+  if (ctl) {
+    // 위력칩(sp)은 grid 1fr 칸 시작 그대로 → 비조건부 행과 동일 x. +버튼만 위력칩 오른쪽에 붙는다.
+    const wrap = el("div", "samples-ctl");
+    const plus = el("span", "pbtn", "+");
+    plus.title = "위력 단계 올리기";
+    plus.onclick = () => sim("/api/sim/move-power", { moveKey: row.moveKey, delta: 1 });
+    wrap.appendChild(sp); wrap.appendChild(plus);
+    g.appendChild(wrap);
+  } else {
+    g.appendChild(sp);
+  }
   return g;
 }
 function renderSample(s) {
@@ -312,17 +354,18 @@ function renderSample(s) {
 }
 
 // ── 방어자 변형 블록 ─────────────────────────────────────────
-function labeledColumn(label, color, col) {
+function labeledColumn(label, color, col, withControls) {
   const d = el("div", "lcol");
   if (label) { const h = el("div", "lhdr", label); h.style.color = color; d.appendChild(h); }
-  const c = renderColumn(col);
+  const c = renderColumn(col, withControls);
   if (c) d.appendChild(c);
   return d;
 }
-function defenderBlock(baseVar, megaVars) {
-  if (!megaVars.length) return renderColumn(baseVar.col) || el("div", "col");
+function defenderBlock(baseVar, megaVars, withControls) {
+  // 93차 — withControls는 base(원래) 컬럼에만 전달 → -/+ 버튼은 오리지널 한 곳만. 메가 변형 컬럼은 버튼 없음.
+  if (!megaVars.length) return renderColumn(baseVar.col, withControls) || el("div", "col");
   const grid = el("div", "dblock");
-  grid.appendChild(labeledColumn(baseVar.label, baseVar.color, baseVar.col));
+  grid.appendChild(labeledColumn(baseVar.label, baseVar.color, baseVar.col, withControls));
   megaVars.forEach((v) => {
     grid.appendChild(el("div", "sep"));
     grid.appendChild(labeledColumn(v.label, v.color, v.col));
@@ -335,30 +378,22 @@ function centerMegaVariants(megaX, megaY, formX, formY) {
   if (megaY) list.push({ label: "메가" + formY + " 시", color: FORM.megaY, col: megaY });
   return list;
 }
-function attackerSection(label, color, baseCol, megaXCol, megaYCol, formX, formY) {
+function attackerSection(label, color, baseCol, megaXCol, megaYCol, formX, formY, withControls) {
   const p = el("div", "asec");
   const h = el("div", "ahdr", label); h.style.color = color; p.appendChild(h);
   const mv = [];
   if (megaXCol) mv.push({ label: formX ? "vs 메가" + formX : "vs 메가", color: FORM.megaX, col: megaXCol });
   if (megaYCol) mv.push({ label: "vs 메가" + formY, color: FORM.megaY, col: megaYCol });
-  p.appendChild(defenderBlock({ label: "vs 원래", color: FORM.base, col: baseCol }, mv));
+  p.appendChild(defenderBlock({ label: "vs 원래", color: FORM.base, col: baseCol }, mv, withControls));
   return p;
 }
 function renderCenter(m) {
+  // 93차 — 중앙 매치업의 메가 변형 컬럼(상대 메가X/Y 시, 내 메가 섹션)을 전부 제거.
+  //   메가진화는 하단 시뮬에서 내/상대 다 조절 가능하므로 중복 + 정보 과다. 중앙은 "현재 상황"(내 원래 × 상대 원래)
+  //   단일 컬럼만 표시 → 위력칩이 한 줄에 다 들어가 줄바꿈도 사라짐. -/+ 버튼은 이 단일 컬럼에.
   const host = el("div", "col");
-  const hasMyMega = m.myMegaName && (m.centerMyMegaColumn || m.centerMyMegaVsOppMegaColumn);
-  // 83차 — 메가 불가 포켓몬이거나, 내가 이미 다른 포켓몬으로 메가를 소모(myMegaConsumed)했으면
-  //   이 포켓몬은 메가 못 함 → 일반폼("원래")만 표시(+상대 메가 대응 컬럼). 메가 섹션 안 띄움.
-  //   (기존 버그: 소모해도 메가 섹션만 뜨고 일반폼이 사라짐.)
-  if (!hasMyMega || m.myMegaConsumed) {
-    host.appendChild(defenderBlock(
-      { label: "원래", color: FORM.base, col: m.centerColumn },
-      centerMegaVariants(m.centerMegaColumn, m.centerMegaColumnY, m.oppMegaFormX, m.oppMegaFormY)));
-    return host;
-  }
-  // 메가 가능 + 미소모 → 내 원래 + 내 메가 둘 다.
-  host.appendChild(attackerSection("내 원래", FORM.base, m.centerColumn, m.centerMegaColumn, m.centerMegaColumnY, m.oppMegaFormX, m.oppMegaFormY));
-  host.appendChild(attackerSection(m.myMegaName, FORM.myMega, m.centerMyMegaColumn, m.centerMyMegaVsOppMegaColumn, m.centerMyMegaVsOppMegaColumnY, m.oppMegaFormX, m.oppMegaFormY));
+  const c = renderColumn(m.centerColumn, true);
+  if (c) host.appendChild(c);
   return host;
 }
 
@@ -651,7 +686,7 @@ function renderPartiesBlock(m) {
   // 91차 — 중앙 빈 공간(좌=내 시뮬/우=상대 시뮬 사이)에 "모든 시뮬 취소" 버튼.
   //   포켓몬·날씨·벽·타입 시뮬 중 하나라도 활성일 때만 표시. 누르면 전부 해제 → 현재 실제 필드로.
   const anySim = m.simActive || m.oppSimActive || m.simWeatherActive
-    || m.simOppScreenActive || !!m.simMyType || !!m.simOppType;
+    || m.simOppScreenActive || !!m.simMyType || !!m.simOppType || m.movePowerActive;
   if (anySim) {
     const mid = el("div", "pcol center");
     mid.appendChild(el("div", "section-title", " "));   // 좌우 "내/상대 파티" 제목 높이 맞춤 → 버튼을 sprite 라인에 정렬
