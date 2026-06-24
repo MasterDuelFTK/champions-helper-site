@@ -98,7 +98,7 @@
 
   /* 위력 행/샘플 (PowerRowRenderer 포팅) */
   .col { display: flex; flex-direction: column; gap: 1px; }
-  .row { display: grid; grid-template-columns: 72px 1fr; align-items: center; gap: 4px; }
+  .row { display: grid; grid-template-columns: 72px 1fr; align-items: center; gap: 4px; position: relative; }  /* position: 급소 체크박스 absolute 기준 */
   .mname { font-weight: 700; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .samples { display: flex; flex-wrap: wrap; gap: 2px; }
   /* 모든 위력칩 동일 폭(세자리수~세자리수 "147~173%" 기준 고정) */
@@ -123,11 +123,22 @@
   }
   .pbtn:hover { border-color: var(--accent); color: var(--accent2); }
 
+  /* (feedback#1) 중앙 매치업 위력칩은 한 줄 강제 — -/+ 버튼·메가 컬럼이 함께 있어도 칩이 아래로 줄바꿈되지 않게
+     (원래 컬럼이 넓어지면 메가 컬럼이 자연히 오른쪽으로 밀린다). 6슬롯(.slot-moves)·기타는 기존 wrap 유지. */
+  .mu-center .samples { flex-wrap: nowrap; }
+  /* (feedback#2 재수정) 급소 체크박스·"급소" 라벨은 grid 칸을 차지하지 않고 absolute로 기술명 왼쪽 "얇은 틈"
+     (매치업 gap)에 띄운다 → 위력칩 grid(72px 1fr)는 급소 없을 때와 100% 동일.
+     ⇒ 내 원래/내 메가 섹션 칩이 정확히 같은 라인 + 위력칩 위치 안 밀림. -/+ 버튼은 lcol(내용폭) 안이라 sep는 +버튼 오른쪽. */
+  .crit-label { position: absolute; left: -17px; top: 50%; transform: translateY(-50%);
+    font-size: 8px; color: var(--muted); font-weight: 700; line-height: 1; white-space: nowrap; }
+  .crit-box { position: absolute; left: -16px; top: 50%; transform: translateY(-50%);
+    width: 13px; height: 13px; margin: 0; cursor: pointer; accent-color: #E05656; }
+
   /* 방어자 변형 블록 (원래 | 메가X | 메가Y) */
   .dblock { display: flex; align-items: flex-start; }
   .dblock .sep { width: 1px; align-self: stretch; background: rgba(255,255,255,0.3); margin: 0 6px; }
-  .lcol { flex: 1 1 0; min-width: 0; }
-  .lhdr { font-size: 10px; font-weight: 700; margin-bottom: 2px; }
+  .lcol { flex: 0 0 auto; min-width: 0; }   /* 내용폭(칩+버튼)만큼 → sep(구분선)가 +버튼 오른쪽에 위치, 옆 컬럼 침범 안 함 */
+  .lhdr { font-size: 10px; font-weight: 700; margin-bottom: 2px; position: relative; }  /* position: "급소" 라벨 absolute 기준 */
   .asec { margin-bottom: 6px; }
   .ahdr { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
 
@@ -175,7 +186,7 @@
   .sim-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
   .sim-head-name { font-weight: 700; font-size: 13px; color: #ffee00; }
   .sim-sub { font-size: 10px; color: var(--muted); font-weight: 700; margin: 2px 0 0; }
-  .adj-row { display: grid; grid-template-columns: 52px 24px 1fr 24px; align-items: center; gap: 5px; margin: 0; }
+  .adj-row { display: grid; grid-template-columns: 52px 24px 1fr 24px; align-items: center; gap: 5px; margin: 3px 0; }  /* feedback#3 — 상하 간격 약간 넓힘 */
   .adj-label { font-size: 11px; }
   .adj-val { font-size: 12px; font-weight: 700; text-align: center; min-width: 38px; }
   .btn {
@@ -305,6 +316,15 @@ function renderRow(row, withControls) {
   const g = el("div", "row");
   // 93차 — withControls(오리지널 컬럼) + 조건부 위력 기술이면 기술명 옆 +n + 위력칩 양쪽 -/+ 버튼.
   const ctl = withControls && !!row.moveKey;
+  // feedback#2 — 급소 체크박스(모든 기술). withControls(원래 컬럼)만, 기술명 왼쪽 얇은 틈에 absolute(칩 배치 영향 0).
+  if (withControls && row.moveNameEn) {
+    const cb = el("input", "crit-box");
+    cb.type = "checkbox";
+    cb.checked = !!row.critActive;
+    cb.title = "급소 (체크 시 위력 ×1.5)";
+    cb.onchange = () => sim("/api/sim/crit", { moveNameEn: row.moveNameEn });
+    g.appendChild(cb);
+  }
   const n = el("div", "mname");
   if (ctl) {
     n.classList.add("has-ctl");
@@ -356,19 +376,31 @@ function renderSample(s) {
 // ── 방어자 변형 블록 ─────────────────────────────────────────
 function labeledColumn(label, color, col, withControls) {
   const d = el("div", "lcol");
-  if (label) { const h = el("div", "lhdr", label); h.style.color = color; d.appendChild(h); }
+  // feedback#2 — withControls(원래 컬럼)면 헤더에 "급소" 라벨(체크박스 칸 위, 박스 최상단). 라벨/withControls 중 하나라도 있으면 헤더 행.
+  if (label || withControls) {
+    const h = el("div", "lhdr");
+    if (withControls) h.appendChild(el("span", "crit-label", "급소"));   // 헤더 왼쪽 얇은 틈에 absolute
+    const lt = el("span", null, label || "");
+    lt.style.color = color;
+    h.appendChild(lt);
+    d.appendChild(h);
+  }
   const c = renderColumn(col, withControls);
   if (c) d.appendChild(c);
   return d;
 }
 function defenderBlock(baseVar, megaVars, withControls) {
-  // 93차 — withControls는 base(원래) 컬럼에만 전달 → -/+ 버튼은 오리지널 한 곳만. 메가 변형 컬럼은 버튼 없음.
-  if (!megaVars.length) return renderColumn(baseVar.col, withControls) || el("div", "col");
+  // 93차 — withControls는 base(원래) 컬럼에만 전달 → -/+ 버튼·급소 체크는 오리지널 한 곳만. 메가 변형 컬럼은 없음.
+  if (!megaVars.length) {
+    // 상대 메가 불가 = 단일 컬럼. withControls면 labeledColumn으로 감싸 "급소" 헤더만 표시(라벨 빈 문자열).
+    if (withControls) return labeledColumn("", baseVar.color, baseVar.col, true);
+    return renderColumn(baseVar.col, false) || el("div", "col");
+  }
   const grid = el("div", "dblock");
   grid.appendChild(labeledColumn(baseVar.label, baseVar.color, baseVar.col, withControls));
   megaVars.forEach((v) => {
     grid.appendChild(el("div", "sep"));
-    grid.appendChild(labeledColumn(v.label, v.color, v.col));
+    grid.appendChild(labeledColumn(v.label, v.color, v.col, false));
   });
   return grid;
 }
@@ -388,12 +420,22 @@ function attackerSection(label, color, baseCol, megaXCol, megaYCol, formX, formY
   return p;
 }
 function renderCenter(m) {
-  // 93차 — 중앙 매치업의 메가 변형 컬럼(상대 메가X/Y 시, 내 메가 섹션)을 전부 제거.
-  //   메가진화는 하단 시뮬에서 내/상대 다 조절 가능하므로 중복 + 정보 과다. 중앙은 "현재 상황"(내 원래 × 상대 원래)
-  //   단일 컬럼만 표시 → 위력칩이 한 줄에 다 들어가 줄바꿈도 사라짐. -/+ 버튼은 이 단일 컬럼에.
+  // feedback#1 — 메가진화 위력칩 복원(93차에 제거했던 것). 중앙에 상대 메가X/Y 컬럼 + (내 메가 가능 시) 내 메가 섹션 표시.
+  //   줄바꿈 방지: 원래 컬럼의 -/+ 버튼·급소칸이 폭을 더 먹어도 .mu-center .samples=nowrap이라 칩이 아래로 안 내려가고
+  //   메가 컬럼이 오른쪽으로 밀린다(사용자 요구: 모든 위력칩 한 줄). -/+ 버튼·급소 체크는 "원래" 컬럼(withControls=true)만.
   const host = el("div", "col");
-  const c = renderColumn(m.centerColumn, true);
-  if (c) host.appendChild(c);
+  const hasMyMega = m.myMegaName && (m.centerMyMegaColumn || m.centerMyMegaVsOppMegaColumn);
+  // 메가 불가/소모 → 원래 + 상대 메가 대응 컬럼만(내 메가 섹션 없음).
+  if (!hasMyMega || m.myMegaConsumed) {
+    host.appendChild(defenderBlock(
+      { label: "원래", color: FORM.base, col: m.centerColumn },
+      centerMegaVariants(m.centerMegaColumn, m.centerMegaColumnY, m.oppMegaFormX, m.oppMegaFormY),
+      true));
+    return host;
+  }
+  // 메가 가능 + 미소모 → 내 원래 섹션(-/+·급소) + 내 메가 섹션(버튼·급소 없음).
+  host.appendChild(attackerSection("내 원래", FORM.base, m.centerColumn, m.centerMegaColumn, m.centerMegaColumnY, m.oppMegaFormX, m.oppMegaFormY, true));
+  host.appendChild(attackerSection(m.myMegaName, FORM.myMega, m.centerMyMegaColumn, m.centerMyMegaVsOppMegaColumn, m.centerMyMegaVsOppMegaColumnY, m.oppMegaFormX, m.oppMegaFormY, false));
   return host;
 }
 
@@ -644,17 +686,19 @@ function oppSimPanel(m) {
     cols.appendChild(abCol);
   }
   p.appendChild(cols);
-  // 노력치(무보정 칩 반영)
+  // 노력치 — feedback#3: 내 위력 계산엔 상대 HP/방어/특방만 영향(공/특공/스피드는 내→상대 데미지 무관) → 그 3개만 표시.
   p.appendChild(el("div", "sim-sub", "노력치 (±4 · 스탯≤32 · 합≤66)"));
-  EV_KO.forEach((name, i) => {
+  [0, 2, 4].forEach((i) => {   // EV_KO 인덱스: 0=HP, 2=방어, 4=특방
+    const name = EV_KO[i];
     const v = (m.oppSimEvs && m.oppSimEvs[i]) || 0;
     p.appendChild(adjRow(name, "" + v,
       () => sim("/api/sim/opp/ev", { stat: i, delta: -4 }),
       () => sim("/api/sim/opp/ev", { stat: i, delta: 4 })));
   });
-  // 성격 화살표(실수치 배수 ↑1.1/↓0.9)
+  // 성격 화살표 — feedback#3: 방어/특방만(공/특공/스피드 성격 보정 제거).
   p.appendChild(el("div", "sim-sub", "성격 화살표 (실수치 ×)"));
-  STAT_KO.forEach((name, i) => {
+  [1, 3].forEach((i) => {      // STAT_KO 인덱스: 1=방어, 3=특방
+    const name = STAT_KO[i];
     const mult = (m.oppSimNatureMult && m.oppSimNatureMult[i]) || 1.0;
     const up = mult > 1.001, down = mult < 0.999;
     const txt = up ? "×1.1" : (down ? "×0.9" : "×1.0");
@@ -686,7 +730,7 @@ function renderPartiesBlock(m) {
   // 91차 — 중앙 빈 공간(좌=내 시뮬/우=상대 시뮬 사이)에 "모든 시뮬 취소" 버튼.
   //   포켓몬·날씨·벽·타입 시뮬 중 하나라도 활성일 때만 표시. 누르면 전부 해제 → 현재 실제 필드로.
   const anySim = m.simActive || m.oppSimActive || m.simWeatherActive
-    || m.simOppScreenActive || !!m.simMyType || !!m.simOppType || m.movePowerActive;
+    || m.simOppScreenActive || !!m.simMyType || !!m.simOppType || m.movePowerActive || m.critOverrideActive;
   if (anySim) {
     const mid = el("div", "pcol center");
     mid.appendChild(el("div", "section-title", " "));   // 좌우 "내/상대 파티" 제목 높이 맞춤 → 버튼을 sprite 라인에 정렬
