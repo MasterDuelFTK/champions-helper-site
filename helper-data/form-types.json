@@ -1,0 +1,25 @@
+{
+  "comment": "리전 폼(히스이/알로라/갈라/팔데아) 등 default와 타입이 다른 폼들의 타입 매핑. master.json은 dexId당 default 폼 1종만 가짐 → 정확 타입 세트 매칭에서 리전 폼 dex가 풀에서 빠지는 문제 해결용. _dexTypesCache 빌드 시 master default와 통합하여 dexId의 가능한 type set 목록을 만든다.",
+  "forms": [
+    { "dexId": 26,  "formKey": "alola",         "types": ["ELECTRIC", "PSYCHIC"] },
+    { "dexId": 38,  "formKey": "alola",         "types": ["ICE", "FAIRY"] },
+    { "dexId": 59,  "formKey": "hisui",         "types": ["FIRE", "ROCK"] },
+    { "dexId": 80,  "formKey": "galar",         "types": ["POISON", "PSYCHIC"] },
+    { "dexId": 128, "formKey": "paldeaCombat",  "types": ["FIGHTING"] },
+    { "dexId": 128, "formKey": "paldeaBlaze",   "types": ["FIGHTING", "FIRE"] },
+    { "dexId": 128, "formKey": "paldeaWater",   "types": ["FIGHTING", "WATER"] },
+    { "dexId": 157, "formKey": "hisui",         "types": ["FIRE", "ROCK"] },
+    { "dexId": 199, "formKey": "galar",         "types": ["POISON", "PSYCHIC"] },
+    { "dexId": 503, "formKey": "hisui",         "types": ["WATER", "DARK"] },
+    { "dexId": 571, "formKey": "hisui",         "types": ["NORMAL", "GHOST"] },
+    { "dexId": 618, "formKey": "galar",         "types": ["STEEL", "GROUND"] },
+    { "dexId": 706, "formKey": "hisui",         "types": ["STEEL", "DRAGON"] },
+    { "dexId": 713, "formKey": "hisui",         "types": ["ICE", "ROCK"] },
+    { "dexId": 724, "formKey": "hisui",         "types": ["GRASS", "FIGHTING"] },
+    { "dexId": 479, "formKey": "rotomHeat",      "types": ["ELECTRIC", "FIRE"] },
+    { "dexId": 479, "formKey": "rotomWash",      "types": ["ELECTRIC", "WATER"] },
+    { "dexId": 479, "formKey": "rotomFrost",     "types": ["ELECTRIC", "ICE"] },
+    { "dexId": 479, "formKey": "rotomFan",       "types": ["ELECTRIC", "FLYING"] },
+    { "dexId": 479, "formKey": "rotomMow",       "types": ["ELECTRIC", "GRASS"] }
+  ]
+}
