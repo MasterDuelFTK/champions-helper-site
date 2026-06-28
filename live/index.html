@@ -234,11 +234,12 @@
   .dd-list {
     position: absolute; top: 100%; left: 0; right: 0; z-index: 50; margin-top: 2px;
     background: var(--panel); border: 1px solid var(--line); border-radius: 4px;
-    overflow: hidden; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+    max-height: 264px; overflow-y: auto; overflow-x: hidden; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
   }
   .dd-opt { font-size: 12px; padding: 5px 8px; cursor: pointer; }
   .dd-opt:hover { background: #424955; }
   .dd-opt.sel { background: var(--accent); color: #fff; font-weight: 700; }
+  .dd-grp { font-size: 10px; color: var(--muted); font-weight: 700; padding: 6px 8px 2px; border-top: 1px solid #3a3f48; }
   /* 83차 — 지닌도구+특성 수평 2칸(세로 스크롤 제거). 각 칸 안에서 드롭다운이 칸 폭 채움 */
   .sim-cols { display: flex; gap: 10px; align-items: flex-start; }
   .sim-cols > .sim-col { flex: 1 1 0; min-width: 0; }
@@ -252,7 +253,7 @@
 <body>
   <div id="bar">
     <span id="status">로컬 헬퍼 연결 대기…</span>
-    <span id="version">v0.106</span>
+    <span id="version">v0.107</span>
   </div>
   <section id="top">
     <div class="section-title">상대 파티 (내 현재 포켓몬 기준 위력)</div>
@@ -289,6 +290,7 @@
 const $ = (s) => document.querySelector(s);
 let lastModel = null;      // 74차 — 드롭다운 펼침 토글 시 재렌더용 최신 모델
 let oppItemOpen = false;   // 74차 — 상대 도구 드롭다운 펼침 상태(WS 갱신에도 유지)
+let myItemOpen = false;    // 107차 — 내 도구 드롭다운 펼침 상태
 let oppAbilityOpen = false; // 82차 — 상대 특성 드롭다운 펼침 상태
 
 // ── 색 규칙 (PowerRowRenderer 포팅) ──────────────────────────
@@ -296,7 +298,13 @@ const LABEL_BG = { White: "#FFFFFF", LightGreen: "#C8F0C0", Orange: "#FFC880", L
 const FORM = { base: "#C8C8C8", megaX: "#FF9F9F", megaY: "#FFC890", myMega: "#9FD0FF" };
 const STAT_KO = ["공", "방", "특공", "특방", "스피드"];   // 랭크·성격 인덱스(0~4)
 const EV_KO = ["HP", "공", "방", "특공", "특방", "스피드"]; // 노력치 인덱스(0~5)
-const OPP_ITEMS = ["없음", "돌격조끼", "구애스카프", "진화의휘석"]; // 66차 가정 도구 목록
+const OPP_ITEMS = ["없음", "돌격조끼", "구애스카프", "진화의휘석", "검은철구"]; // 66차 가정 도구(107차 검은철구=스피드½ 추가)
+// 107차 — 내 도구 시뮬 목록(탁쳐떨구기로 제거/트릭으로 교체된 도구 대응). 그룹별 분류 표시.
+const MY_ITEM_GROUPS = [
+  { label: "위력", items: ["생명의구슬", "달인의띠", "힘의머리띠", "박식안경", "구애머리띠", "구애안경", "전기구슬"] },
+  { label: "스피드", items: ["구애스카프", "검은철구"] },
+  { label: "타입강화 ×1.2", items: ["실크스카프", "목탄", "신비의물방울", "기적의씨", "자석", "부드러운모래", "용의이빨", "검은띠", "독바늘", "예리한부리", "휘어진스푼", "은빛가루", "딱딱한돌", "저주의부적", "검은안경", "금속코트", "녹지않는얼음", "요정의깃털"] },
+];
 // 위력창 stat별 색(공=붉은/방=주황/특공=보라/특방=연분홍/스피드=하늘)
 const STAT_COLOR = ["#F09B9B", "#FFC880", "#C8A2E0", "#FFC8DC", "#B0E0F0"];
 const WEATHER = {
@@ -609,6 +617,33 @@ function oppItemDropdown(m) {
   }
   return wrap;
 }
+// 107차 — 내 시뮬 지닌도구 드롭다운(탁쳐떨구기/트릭 대응). "시뮬 해제"=빌더 도구 복귀, "없음"=도구 제거, 그 외=교체.
+function myItemDropdown(m) {
+  const wrap = el("div", "dropdown");
+  const cur = m.mySimItemKo; // null=미시뮬(실제 도구), "none"=제거, else=도구명
+  const selLabel = cur == null ? "실제 도구" : (cur === "none" ? "없음 (제거)" : cur);
+  const header = el("button", "dd-header");
+  header.appendChild(el("span", null, selLabel));
+  header.appendChild(el("span", "dd-arrow", myItemOpen ? "▲" : "▼"));
+  header.onclick = () => { myItemOpen = !myItemOpen; if (lastModel) render(lastModel); };
+  wrap.appendChild(header);
+  if (myItemOpen) {
+    const list = el("div", "dd-list");
+    const addOpt = (label, itemKo, isCur) => {
+      const opt = el("div", "dd-opt" + (isCur ? " sel" : ""), label + (isCur ? "  ✓" : ""));
+      opt.onclick = () => { myItemOpen = false; sim("/api/sim/my/item", { itemKo }); };
+      list.appendChild(opt);
+    };
+    addOpt("시뮬 해제 (실제 도구)", "", cur == null);
+    addOpt("없음 (도구 제거)", "none", cur === "none");
+    MY_ITEM_GROUPS.forEach((g) => {
+      list.appendChild(el("div", "dd-grp", g.label));
+      g.items.forEach((it) => addOpt(it, it, cur === it));
+    });
+    wrap.appendChild(list);
+  }
+  return wrap;
+}
 // 82차 — 상대 시뮬 특성 드롭다운. 메가 폼 = 특성 1개 자동(고정 표시) / 비메가 = 후보 드롭다운(각 항목 이름+효과설명).
 //   항목 클릭 → POST /api/sim/opp/ability. "선택 안 함" = 미반영(정책대로). 헤더 아래 현재 선택 효과설명 표시.
 function oppAbilityDropdown(m) {
@@ -674,6 +709,8 @@ function oppSimHead(label, forms, activeIndex) {
 function mySimPanel(m) {
   const p = el("div", "sim-panel");
   p.appendChild(simHead("내 시뮬: " + (m.myName || ""), m.simCanMega, m.simMega, "/api/sim/my/mega"));
+  p.appendChild(el("div", "sim-sub", "지닌도구"));
+  p.appendChild(myItemDropdown(m));
   p.appendChild(el("div", "sim-sub", "상태이상"));
   p.appendChild(statusControl(m, "my"));
   p.appendChild(el("div", "sim-sub", "랭크"));
