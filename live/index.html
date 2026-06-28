@@ -10,17 +10,23 @@
 -->
 <script>
   // 87차(feedback#4) — 위력창을 공개 사이트(champions-helper.com/live)에서도 띄울 수 있게.
-  //   데이터(WS)·sprite·type-icon·시뮬 POST는 항상 로컬 헬퍼(127.0.0.1:8732)로 향해야 한다.
+  //   데이터(WS)·시뮬 POST는 항상 로컬 헬퍼(127.0.0.1:8732)로 향해야 한다(헬퍼만 실시간 모델 보유).
   //   ① 헬퍼가 직접 서빙(127.0.0.1/localhost로 접속) → same-origin(빈 prefix) = 종전과 100% 동일.
-  //   ② 사이트(champions-helper.com)에서 접속 → 로컬 헬퍼 절대주소로 연결(애드센스는 공개 도메인에서만 표시 가능하므로 사이트 경유가 필수).
+  //   ② 사이트(champions-helper.com)에서 접속 → WS/POST는 로컬 헬퍼 절대주소, 그 외(애드센스는 공개 도메인에서만 표시 가능하므로 사이트 경유가 필수).
   //   https 사이트 → ws://127.0.0.1 은 loopback이라 브라우저가 mixed-content로 막지 않음(Chrome/Edge: localhost는 secure context 예외).
+  // 106차 — Mixed Content 경고 제거: sprite/type-icon "이미지"는 로컬 헬퍼(http://127.0.0.1, IP host)에서 받으면
+  //   https 페이지마다 "host is an IP address" 경고가 WS push마다 수십 개씩 폭증(콘솔 1000+). 이미지는 정적자산이라
+  //   사이트 same-origin https(champions-helper.com/helper-data)에서 받게 분기 = http-IP 서브리소스 요청 자체가 사라짐.
+  //   sprite 716개는 helper-data/sprites에 동일 파일명으로 호스팅 중, type-icon 18개는 helper-data/type-icons.
   (function () {
     // local = 헬퍼가 직접 서빙하는 페이지(127.0.0.1:8732)일 때만. 그 외(사이트·python 미리보기 localhost:8000 등)는
     //   전부 로컬 헬퍼 절대주소로 연결 → 미리보기/사이트 양쪽에서 동일하게 헬퍼(8732)에 붙는다.
     var loopback = location.hostname === "127.0.0.1" || location.hostname === "localhost";
     var local = loopback && location.port === "8732";
-    window.PCH_HTTP = local ? "" : "http://127.0.0.1:8732";
-    window.PCH_WS   = local ? ("ws://" + location.host) : "ws://127.0.0.1:8732";
+    window.PCH_HTTP  = local ? "" : "http://127.0.0.1:8732";
+    window.PCH_WS    = local ? ("ws://" + location.host) : "ws://127.0.0.1:8732";
+    // PCH_ASSET = sprite/type-icon 이미지 prefix. 헬퍼 직접 서빙이면 same-origin(""), 사이트 경유면 same-origin https(helper-data).
+    window.PCH_ASSET = local ? "" : "https://champions-helper.com/helper-data";
   })();
 </script>
 <style>
@@ -246,7 +252,7 @@
 <body>
   <div id="bar">
     <span id="status">로컬 헬퍼 연결 대기…</span>
-    <span id="version">v0.98</span>
+    <span id="version">v0.106</span>
   </div>
   <section id="top">
     <div class="section-title">상대 파티 (내 현재 포켓몬 기준 위력)</div>
@@ -494,7 +500,7 @@ function typeIcons(types) {
   const row = el("div", "type-row");
   (types || []).forEach((t) => {
     const ic = el("img", "type-ic");
-    ic.src = PCH_HTTP + "/type-icons/" + t + ".png";
+    ic.src = PCH_ASSET + "/type-icons/" + t + ".png";
     ic.alt = t;
     row.appendChild(ic);
   });
@@ -508,7 +514,7 @@ function renderOpponents(list) {
     const c = el("div", "oppslot");
     // 왼쪽 = sprite / 이름 / 스피드 (세로)
     const left = el("div", "slot-left");
-    if (o.spritePath) { const img = el("img", "spr"); img.src = PCH_HTTP + o.spritePath; img.alt = o.name; left.appendChild(img); }
+    if (o.spritePath) { const img = el("img", "spr"); img.src = PCH_ASSET + o.spritePath; img.alt = o.name; left.appendChild(img); }
     if (o.types && o.types.length) left.appendChild(typeIcons(o.types));
     left.appendChild(el("div", "slot-name", o.name));
     if (o.speed) left.appendChild(speedLine(o.speed));
@@ -529,7 +535,7 @@ function muSide(name, sprite, stages, burned, paralyzed, speedEl, mirror, types)
   const s = el("div", "mu-side" + (mirror ? " mirror" : ""));
   // info = sprite(위) / 타입 / 이름 / 스피드 (세로). 랭크칩은 sprite 옆 — 내=왼/상대=오른.
   const info = el("div", "mu-info");
-  if (sprite) { const i = el("img", "spr"); i.src = PCH_HTTP + sprite; i.alt = name; info.appendChild(i); }
+  if (sprite) { const i = el("img", "spr"); i.src = PCH_ASSET + sprite; i.alt = name; info.appendChild(i); }
   if (types && types.length) info.appendChild(typeIcons(types));
   info.appendChild(el("div", "mu-name", name || "—"));
   if (speedEl) info.appendChild(speedEl);
@@ -561,7 +567,7 @@ function renderParty(list, side) {
     const c = el("div", "pmon clickable");
     if (p.isCurrent) c.classList.add("cur");
     if (p.isSimTarget) c.classList.add("sim");
-    if (p.spritePath) { const img = el("img", "spr"); img.src = PCH_HTTP + p.spritePath; img.alt = p.name; c.appendChild(img); }
+    if (p.spritePath) { const img = el("img", "spr"); img.src = PCH_ASSET + p.spritePath; img.alt = p.name; c.appendChild(img); }
     if (p.types && p.types.length) c.appendChild(typeIcons(p.types));
     c.appendChild(el("div", "pname", p.name));
     c.title = p.isSimTarget ? "클릭: 시뮬 종료" : "클릭: 이 포켓몬으로 시뮬";
