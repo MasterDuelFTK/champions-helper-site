@@ -253,7 +253,7 @@
 <body>
   <div id="bar">
     <span id="status">로컬 헬퍼 연결 대기…</span>
-    <span id="version">v0.107</span>
+    <span id="version">v0.108</span>
   </div>
   <section id="top">
     <div class="section-title">상대 파티 (내 현재 포켓몬 기준 위력)</div>
@@ -317,6 +317,10 @@ function el(tag, cls, txt) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
   if (txt != null) e.textContent = txt;
+  // 108차 — form field(select/input/textarea)는 id/name 없으면 DevTools가 autofill 권고 경고를 띄운다
+  //   ("A form field element should have an id or name attribute"). 동적 생성이라 의미있는 고유 id가 없으므로
+  //   className 첫 토큰을 name으로 부여해 경고만 제거(form 태그 없어 submit 무관, 기능 영향 0).
+  if (cls && (tag === "select" || tag === "input" || tag === "textarea")) e.name = cls.split(" ")[0];
   return e;
 }
 // hex 색을 흰색 쪽으로 amt(0~1) 섞어 연하게(채도↓·밝기↑). 랭크 다운 칩에 사용.
