@@ -102,6 +102,12 @@
   .mu-side { display: flex; align-items: flex-start; gap: 6px; flex: 0 0 auto; }
   .mu-info { display: flex; flex-direction: column; align-items: center; gap: 3px; }
   .mu-info .spr { width: 60px; height: 60px; object-fit: contain; image-rendering: pixelated; }
+  /* 110차 — 킬가르도 폼 전환 표식. sprite 우상단 원형화살표(클릭 시 블레이드↔실드 토글). */
+  .spr-wrap { position: relative; display: inline-block; line-height: 0; }
+  .spr-wrap.aegis { cursor: pointer; }
+  .aegis-badge { position: absolute; top: -3px; right: -3px; width: 16px; height: 16px; line-height: 15px;
+    font-size: 12px; font-weight: 700; text-align: center; color: #ffd24a; background: rgba(0,0,0,0.72);
+    border: 1px solid #ffd24a; border-radius: 50%; pointer-events: none; }
   .mu-name { font-weight: 700; font-size: 14px; text-align: center; }
   /* 위력은 내 포켓몬 쪽(왼쪽)으로 — 중앙 정렬 안 함 */
   /* min-height: 메가 가능 포켓몬(내 원래 4행+내 메가 4행=8줄)일 때의 높이를 항상 예약 →
@@ -253,7 +259,7 @@
 <body>
   <div id="bar">
     <span id="status">로컬 헬퍼 연결 대기…</span>
-    <span id="version">v0.108</span>
+    <span id="version">v0.110</span>
   </div>
   <section id="top">
     <div class="section-title">상대 파티 (내 현재 포켓몬 기준 위력)</div>
@@ -543,11 +549,23 @@ function renderOpponents(list) {
 }
 
 // ── 매치업 ───────────────────────────────────────────────────
-function muSide(name, sprite, stages, burned, paralyzed, speedEl, mirror, types) {
+function muSide(name, sprite, stages, burned, paralyzed, speedEl, mirror, types, aegisToggle, aegisBlade, side) {
   const s = el("div", "mu-side" + (mirror ? " mirror" : ""));
   // info = sprite(위) / 타입 / 이름 / 스피드 (세로). 랭크칩은 sprite 옆 — 내=왼/상대=오른.
   const info = el("div", "mu-info");
-  if (sprite) { const i = el("img", "spr"); i.src = PCH_ASSET + sprite; i.alt = name; info.appendChild(i); }
+  if (sprite) {
+    // 110차 — 킬가르도(폼 전환 가능)면 sprite를 클릭 가능 래퍼로 + 원형화살표 표식. 클릭 → 폼 토글 POST.
+    if (aegisToggle) {
+      const wrap = el("div", "spr-wrap aegis");
+      const i = el("img", "spr"); i.src = PCH_ASSET + sprite; i.alt = name; wrap.appendChild(i);
+      const badge = el("div", "aegis-badge"); badge.textContent = "↺"; wrap.appendChild(badge);
+      wrap.title = aegisBlade ? "클릭: 실드폼으로" : "클릭: 블레이드폼으로";
+      wrap.onclick = () => sim("/api/sim/" + side + "/aegislash");
+      info.appendChild(wrap);
+    } else {
+      const i = el("img", "spr"); i.src = PCH_ASSET + sprite; i.alt = name; info.appendChild(i);
+    }
+  }
   if (types && types.length) info.appendChild(typeIcons(types));
   info.appendChild(el("div", "mu-name", name || "—"));
   if (speedEl) info.appendChild(speedEl);
@@ -558,12 +576,12 @@ function muSide(name, sprite, stages, burned, paralyzed, speedEl, mirror, types)
 }
 function renderMatchup(m) {
   const host = el("div", "matchup-row");
-  host.appendChild(muSide(m.myName, m.mySpritePath, m.myStages, m.myBurned, m.myParalyzed, renderMySpeed(m.mySpeeds), false, m.myTypes));
+  host.appendChild(muSide(m.myName, m.mySpritePath, m.myStages, m.myBurned, m.myParalyzed, renderMySpeed(m.mySpeeds), false, m.myTypes, m.myAegisToggle, m.myAegisBlade, "my"));
   // 중앙: 기술 리스트(위 정렬)
   const center = el("div", "mu-center");
   center.appendChild(renderCenter(m));
   host.appendChild(center);
-  host.appendChild(muSide(m.oppName, m.oppSpritePath, m.oppStages, m.oppBurned, m.oppParalyzed, renderOppSpeed(m.oppSpeeds), true, m.oppTypes));
+  host.appendChild(muSide(m.oppName, m.oppSpritePath, m.oppStages, m.oppBurned, m.oppParalyzed, renderOppSpeed(m.oppSpeeds), true, m.oppTypes, m.oppAegisToggle, m.oppAegisBlade, "opp"));
   return host;
 }
 
