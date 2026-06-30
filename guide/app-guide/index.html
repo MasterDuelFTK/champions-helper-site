@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>Champions Helper 프로그램 사용법 — 위력창 보는 법·영역 편집 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스 헬퍼 프로그램 사용 가이드. 위력창이 보여주는 정보를 읽는 법과, 게임 화면을 인식하도록 영역(빨간 박스)을 맞추는 영역 편집 방법을 캡처와 함께 설명합니다." />
+<link rel="canonical" href="https://champions-helper.com/guide/app-guide/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/app-guide/" />
+<meta property="og:title" content="Champions Helper 프로그램 사용법 — 위력창 보는 법·영역 편집" />
+<meta property="og:description" content="위력창 정보를 읽는 법과 게임 화면을 인식하도록 영역을 맞추는 영역 편집 방법을 캡처와 함께 설명합니다." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Champions Helper 프로그램 사용법" />
+<meta name="twitter:description" content="위력창 보는 법·환경별 영역 편집을 캡처와 함께 정리한 사용 가이드." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Champions Helper 프로그램 사용법 — 위력창 보는 법·영역 편집",
+  "description": "포켓몬 챔피언스 헬퍼의 위력창 정보를 읽는 법과, 게임 화면을 인식하도록 영역을 맞추는 영역 편집 방법.",
+  "inLanguage": "ko",
+  "url": "https://champions-helper.com/guide/app-guide/",
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  header { position: sticky; top: 0; z-index: 20;
+    background: rgba(27,29,34,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 17px; color: var(--txt); }
+  .brand .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .nav-links { display: flex; gap: 20px; font-size: 14px; }
+  .nav-links a { color: var(--muted); }
+  .nav-links a:hover { color: var(--txt); text-decoration: none; }
+  .nav-links a.active { color: var(--txt); }
+  @media (max-width: 640px) { .nav-links { gap: 13px; font-size: 13px; } }
+
+  .article { max-width: 860px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 30px; font-weight: 800; margin: 0 0 10px; letter-spacing: -0.4px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 21px; font-weight: 800; margin: 40px 0 12px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 700; margin: 24px 0 8px; }
+  .article p { margin: 0 0 14px; }
+  .article ul { margin: 0 0 16px; padding-left: 22px; }
+  .article li { margin: 0 0 7px; }
+  .article strong { color: #fff; }
+  .article table { width: 100%; border-collapse: collapse; margin: 8px 0 18px; font-size: 14px; }
+  .article th, .article td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  .article th { background: var(--panel2); white-space: nowrap; }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+
+  /* 스크린샷 */
+  figure.shot { margin: 20px 0 10px; }
+  figure.shot a { display: block; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #0e0f12; }
+  figure.shot img { width: 100%; display: block; }
+  figure.shot figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.6; }
+  figure.shot figcaption b { color: var(--accent2); font-weight: 700; }
+  .shot-hint { font-size: 12px; color: var(--muted); text-align: right; margin: 4px 2px 0; }
+
+  /* 영역 라벨 칩 */
+  .chip { display: inline-block; background: #5a1f24; color: #ff8a8a; border: 1px solid #8a3a3a;
+    border-radius: 5px; padding: 1px 7px; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+
+  .ad-slot { margin: 28px auto; min-height: 90px; max-width: 728px; display: flex; align-items: center;
+    justify-content: center; background: var(--panel); border: 1px dashed var(--line); border-radius: 10px;
+    color: var(--muted); font-size: 12px; }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 32px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 860px; margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/#download">다운로드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 프로그램 사용법</div>
+    <h1>Champions Helper 프로그램 사용법</h1>
+    <p class="lead">프로그램을 처음 켠 사람을 위해, <strong>위력창이 보여주는 정보를 읽는 법</strong>과 <strong>게임 화면을 인식하도록 영역을 맞추는 영역 편집</strong>을 실제 캡처와 함께 정리했습니다.</p>
+
+    <h2>먼저 — 이 프로그램은 무엇을 하나요?</h2>
+    <p>Champions Helper는 <strong>게임 화면을 실시간으로 인식</strong>하는 보조 도구입니다. 게임을 변조하지 않고, 화면에 이미 표시되는 정보(상대 파티·내 포켓몬 이름·로그·능력치 표시)를 읽어들여 <strong>내 기술이 상대에게 몇 %의 데미지를 주는지</strong>를 매 턴 자동으로 계산해 보여줍니다.</p>
+    <p>계산 결과는 브라우저의 <strong>위력창</strong>에 실시간으로 표시됩니다. 직접 데미지를 손으로 계산할 필요가 없습니다.</p>
+
+    <h2>1. 위력창이 보여주는 정보</h2>
+    <p>게임에 진입하면 상대 파티가 자동 인식되고, 아래와 같은 위력창이 채워집니다. 각 영역이 무엇을 의미하는지 알아봅시다.</p>
+
+    <figure class="shot">
+      <a href="/guide/screenshots/power-overview.png" target="_blank" rel="noopener">
+        <img src="/guide/screenshots/power-overview.png" alt="위력창 전체 화면 — 상대 파티별 데미지, 매치업, 내 파티/상대 파티" loading="lazy" />
+      </a>
+      <figcaption>위력창 전체 화면. <b>맨 위</b>는 상대 6마리 각각에 대한 내 기술별 데미지(%), <b>가운데</b>는 현재 맞붙은 두 포켓몬의 상세 매치업, <b>맨 아래</b>는 내 파티와 상대 파티입니다.</figcaption>
+      <div class="shot-hint">이미지를 누르면 원본 크기로 볼 수 있습니다</div>
+    </figure>
+
+    <ul>
+      <li><strong>맨 위 — 상대 파티 위력</strong>: 상대 6마리 각각에 대해, 내 현재 포켓몬의 기술이 주는 데미지 범위를 칸으로 표시합니다. <strong>빨간 테두리</strong>가 쳐진 칸은 그 기술로 <strong>확정 1타(반드시 쓰러뜨림)</strong>가 가능하다는 뜻입니다. 칸이 진한 초록일수록 큰 데미지입니다.</li>
+      <li><strong>가운데 — 매치업</strong>: 지금 서로 맞붙은 내 포켓몬과 상대 포켓몬의 상세 데미지를 보여줍니다. 날씨(쾌청·비·모래·싸라기눈)나 순풍 같은 상황이 잡히면 가운데 위쪽에 표시되고, 계산에도 자동으로 반영됩니다.</li>
+      <li><strong>맨 아래 — 내 파티 / 상대 파티</strong>: 인식된 양쪽 파티를 아이콘으로 보여줍니다. 아이콘을 <strong>클릭하면 교체·시뮬레이션</strong>을 할 수 있습니다(아래 참고).</li>
+    </ul>
+
+    <h3>메가진화·교체를 미리 시뮬레이션</h3>
+    <p>파티 아이콘을 클릭하면 <strong>실제 배틀과 별개로</strong> "이 포켓몬으로 교체하면", "메가진화하면", "이 도구·특성·노력치라면" 위력이 어떻게 바뀌는지 미리 볼 수 있습니다.</p>
+
+    <figure class="shot">
+      <a href="/guide/screenshots/power-mega-sim.png" target="_blank" rel="noopener">
+        <img src="/guide/screenshots/power-mega-sim.png" alt="메가진화·교체 시뮬레이션이 적용된 위력창" loading="lazy" />
+      </a>
+      <figcaption>시뮬레이션 예시. 가운데 매치업에서 <b>메가진화 전/후</b> 위력을 나란히 비교하고(메가 솔라빔 등 강조), 매치업 날씨(<b>모래바람</b>)도 반영됩니다. 아래쪽 시뮬 패널에서는 상대의 <b>지닌도구·특성·노력치·성격·랭크</b>를 가정해 데미지를 다시 계산할 수 있습니다.</figcaption>
+      <div class="shot-hint">이미지를 누르면 원본 크기로 볼 수 있습니다</div>
+    </figure>
+
+    <div class="ad-slot">광고 자리 (AdSense 승인 후 게재)</div>
+
+    <h2>2. 영역 편집 — 화면 인식 위치 맞추기 (가장 중요)</h2>
+    <p>프로그램은 게임 화면의 <strong>정해진 위치</strong>를 읽어 정보를 인식합니다. 그런데 플레이 환경(해상도·캡처보드·모바일 에뮬레이터 등)에 따라 게임 요소가 화면에서 조금씩 다른 곳에 표시됩니다. 그래서 <strong>읽어야 할 영역(빨간 박스)을 게임의 해당 요소 위에 정확히 겹쳐 주는 작업</strong>이 필요합니다. 이것이 <strong>영역 편집</strong>입니다.</p>
+    <div class="note"><strong>대부분은 그대로 작동</strong> — 16:9 전체화면용과 블루스택 전체화면용 <strong>기본 프리셋 2개</strong>가 들어 있습니다. 같은 화면 비율이면 바로 인식되며, 인식이 어긋날 때만 아래처럼 직접 맞추면 됩니다. 헬퍼 본체 창에서 영역 편집을 켜면 게임 화면 위에 빨간 박스들이 나타납니다.</div>
+
+    <h3>빨간 박스가 각각 무엇을 읽나요?</h3>
+    <table>
+      <tr><th>빨간 박스</th><th>무엇을 인식하나</th></tr>
+      <tr><td><span class="chip">랭크/싱글</span></td><td>화면 위쪽의 <strong>"랭크배틀 / 싱글배틀"</strong> 글자. 배틀에 진입했는지를 감지합니다.</td></tr>
+      <tr><td><span class="chip">능력치표시</span></td><td>화면의 <strong>"능력치 표시 ON"</strong>(Y 버튼) 부분. 배틀 진입 감지를 보조합니다.</td></tr>
+      <tr><td><span class="chip">log</span></td><td>화면 아래쪽 <strong>로그(메시지)창</strong>. 날씨·랭크 변화·상태이상·메가진화 등을 글자로 읽습니다.</td></tr>
+      <tr><td><span class="chip">상대슬롯</span></td><td>상대가 내보낸 <strong>포켓몬의 이름</strong>(우측 위).</td></tr>
+      <tr><td><span class="chip">자기슬롯</span></td><td><strong>내 포켓몬의 이름</strong>(좌측 아래).</td></tr>
+      <tr><td><span class="chip">상대1</span> ~ <span class="chip">상대6</span></td><td>대전 시작 시 보이는 <strong>상대 파티 6마리</strong>의 종족을 인식합니다.</td></tr>
+      <tr><td><span class="chip">타입1</span> ~ <span class="chip">타입6</span></td><td>상대 파티 옆의 <strong>타입 아이콘</strong>. 후보를 좁혀 인식 정확도를 높입니다.</td></tr>
+    </table>
+
+    <h3>① PC + 캡처보드 (능력치 표시가 Y와 함께 뜨는 경우)</h3>
+    <p>닌텐도 스위치를 <strong>캡처보드로 컴퓨터에 연결해서 플레이</strong>하는 경우입니다. 이때는 화면 아래쪽 <strong>능력치 표시가 Y 버튼과 함께</strong> 나타납니다. <span class="chip">능력치표시</span> 박스를 그 위치에 맞춰 주세요.</p>
+    <figure class="shot">
+      <a href="/guide/screenshots/region-pc.png" target="_blank" rel="noopener">
+        <img src="/guide/screenshots/region-pc.png" alt="PC + 캡처보드 환경의 영역 편집 — 능력치 표시가 Y 버튼과 함께 하단에 위치" loading="lazy" />
+      </a>
+      <figcaption>PC·캡처보드 환경. 하단의 <b>능력치 표시(Y)</b> 위치에 <span class="chip">능력치표시</span> 박스를 맞춥니다.</figcaption>
+    </figure>
+
+    <h3>② 모바일 에뮬레이터 (블루스택·LD플레이어 등)</h3>
+    <p>블루스택, LD플레이어 등으로 <strong>모바일 버전을 PC에서 실행</strong>하는 경우입니다. 이때는 능력치 표시가 <strong>화면 중앙에서 약간 오른쪽</strong>에 뜨므로, <span class="chip">능력치표시</span> 박스를 그 위치로 옮겨 줍니다.</p>
+    <figure class="shot">
+      <a href="/guide/screenshots/region-mobile.png" target="_blank" rel="noopener">
+        <img src="/guide/screenshots/region-mobile.png" alt="모바일 에뮬레이터 환경의 영역 편집 — 능력치 표시가 중앙에서 약간 오른쪽" loading="lazy" />
+      </a>
+      <figcaption>블루스택·LD플레이어 등 모바일 에뮬 환경. 능력치 표시가 <b>중앙에서 약간 오른쪽</b>에 뜹니다.</figcaption>
+    </figure>
+
+    <h3>③ 로그 영역</h3>
+    <p><span class="chip">log</span> 박스는 화면 아래쪽의 <strong>로그(메시지)창</strong>에 맞춥니다. 이 영역에서 날씨 변화, 랭크 상승·하락, 화상·마비 같은 상태이상, 메가진화 메시지 등을 읽어 계산에 반영합니다. 글자가 지나가는 가로 영역 전체를 덮도록 맞춰 주세요.</p>
+    <figure class="shot">
+      <a href="/guide/screenshots/region-log.png" target="_blank" rel="noopener">
+        <img src="/guide/screenshots/region-log.png" alt="로그 영역의 영역 편집 — 하단 메시지창에 log 박스를 맞춤" loading="lazy" />
+      </a>
+      <figcaption><span class="chip">log</span> 박스를 하단 로그(메시지)창 영역에 맞춥니다.</figcaption>
+    </figure>
+
+    <h3>④ 포켓몬 이름 영역 (내 포켓몬 · 상대 포켓몬)</h3>
+    <p>배틀 중 서로의 포켓몬 이름을 읽는 두 박스입니다. <span class="chip">자기슬롯</span>은 <strong>내 포켓몬 이름</strong>에, <span class="chip">상대슬롯</span>은 <strong>상대 포켓몬 이름</strong>에 각각 맞춥니다. 이름 글자가 박스 안에 들어오도록 위치와 크기를 조정해 주세요.</p>
+    <figure class="shot">
+      <a href="/guide/screenshots/region-name.png" target="_blank" rel="noopener">
+        <img src="/guide/screenshots/region-name.png" alt="포켓몬 이름 영역의 영역 편집 — 자기슬롯과 상대슬롯 박스" loading="lazy" />
+      </a>
+      <figcaption><span class="chip">자기슬롯</span>은 내 포켓몬 이름, <span class="chip">상대슬롯</span>은 상대 포켓몬 이름에 맞춥니다.</figcaption>
+    </figure>
+
+    <div class="note"><strong>편집 후</strong> — 맞춘 영역은 저장되어 다음 실행에도 유지됩니다. 환경이 여러 개라면 프리셋으로 따로 저장해 두고 전환할 수 있고, 본체 창의 <strong>초기화</strong> 버튼으로 기본값으로 되돌릴 수도 있습니다.</div>
+
+    <div class="related">
+      <h3>이어서 읽기</h3>
+      <a href="/guide/getting-started/">포켓몬 챔피언스 시작 가이드 →</a>
+      <a href="/guide/damage-formula/">데미지 계산 공식 →</a>
+      <a href="/#download">프로그램 다운로드 →</a>
+    </div>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links" style="font-size:13px;margin:0 0 12px;"><a href="https://forms.gle/vzavUFn5xFDtdpu66" target="_blank" rel="noopener" style="color:var(--muted)">🐞 버그 제보</a> · <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener" style="color:var(--muted)">💬 디스코드</a> · <a href="/privacy/" style="color:var(--muted)">개인정보처리방침</a> · <a href="/terms/" style="color:var(--muted)">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.
+      본 도구는 게임 데이터를 변조하지 않으며, 화면에 표시되는 정보를 보조적으로 계산해 보여줄 뿐입니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
