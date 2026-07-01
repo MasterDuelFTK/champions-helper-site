@@ -1,0 +1,623 @@
+# 포켓몬 상세페이지 정적 생성 (SSG) — AdSense 고유 텍스트 콘텐츠 확보
+#
+# data/dex.json → pokedex/{en}/index.html  (종족값 + 타입상성표 자동계산 + 특성설명 + 메가 + 운용코멘트)
+#   + pokedex/index.html 에 정적 "전체 목록" 링크 주입 (마커 <!--ALLLIST-->…<!--/ALLLIST-->)
+#   + sitemap.xml 전체 재생성 (정적 라우트 + 209 상세페이지)
+#
+# 실행:  python build/build-mon-pages.py
+# dex.json 갱신(build-all.py) 후 이 스크립트를 돌리면 상세페이지가 자동 재생성된다.
+import json, os, re, html
+
+SITE = r"C:\개인\Claude\champions-helper-site"
+LASTMOD = "2026-07-01"
+BASE = "https://champions-helper.com"
+
+with open(os.path.join(SITE, "data", "dex.json"), encoding="utf-8") as f:
+    DEX = json.load(f)["dex"]
+
+def _norm(s):
+    return re.sub(r"[^a-z0-9]", "", str(s).lower())
+
+# 실전 사용률(선택) — helper-data/move-usage.json 이 있으면 상세페이지 + 배틀데이터 페이지에 반영.
+#   championsbattledata.com API 유래(출처표기 필수, api-rules 준수). key = 정규화된 slug/base.
+USAGE, USAGE_SEASON = {}, ""
+try:
+    with open(os.path.join(SITE, "helper-data", "move-usage.json"), encoding="utf-8") as f:
+        _u = json.load(f)
+    USAGE_SEASON = _u.get("season", "")
+    USAGE = {_norm(k): v for k, v in _u.get("pokemon", {}).items()}
+except FileNotFoundError:
+    print("  (move-usage.json 없음 — 사용률 섹션 생략)")
+
+ATTRIB = ('Battle data provided by <a href="https://championsbattledata.com/" '
+          'target="_blank" rel="noopener">Pok&eacute;mon Champions Battle Data</a>')
+
+# dense 순위: 소스의 전역 순위(폼·비도감종 포함 → 구멍 발생)를 그대로 쓰지 않고,
+#   우리 도감에 실재하는 종만 사용률 높은 순으로 1..N 연속 재부여(빈 순위 제거).
+_ranked_dex = sorted((e for e in DEX if USAGE.get(_norm(e["en"]), {}).get("rank")),
+                     key=lambda e: (USAGE[_norm(e["en"])]["rank"], e["id"]))
+DENSE_RANK = {_norm(e["en"]): i + 1 for i, e in enumerate(_ranked_dex)}
+
+# ── 한글/색상 ──────────────────────────────────────────────────────────
+TYPE_KO = {"NORMAL":"노말","FIRE":"불꽃","WATER":"물","ELECTRIC":"전기","GRASS":"풀","ICE":"얼음",
+  "FIGHTING":"격투","POISON":"독","GROUND":"땅","FLYING":"비행","PSYCHIC":"에스퍼","BUG":"벌레","ROCK":"바위",
+  "GHOST":"고스트","DRAGON":"드래곤","DARK":"악","STEEL":"강철","FAIRY":"페어리"}
+TYPE_COLOR = {"NORMAL":"#A8A77A","FIRE":"#EE8130","WATER":"#6390F0","ELECTRIC":"#F7D02C","GRASS":"#7AC74C",
+  "ICE":"#96D9D6","FIGHTING":"#C22E28","POISON":"#A33EA1","GROUND":"#E2BF65","FLYING":"#A98FF3","PSYCHIC":"#F95587",
+  "BUG":"#A6B91A","ROCK":"#B6A136","GHOST":"#735797","DRAGON":"#6F35FC","DARK":"#705746","STEEL":"#B7B7CE","FAIRY":"#D685AD"}
+TYPE_ORDER = ["NORMAL","FIRE","WATER","ELECTRIC","GRASS","ICE","FIGHTING","POISON","GROUND","FLYING",
+  "PSYCHIC","BUG","ROCK","GHOST","DRAGON","DARK","STEEL","FAIRY"]
+STATS = [("hp","HP","#FF5959"),("atk","공격","#F5AC78"),("def","방어","#FAE078"),
+  ("spa","특공","#9DB7F5"),("spd","특방","#A7DB8D"),("spe","스피드","#FA92B2")]
+STAT_KO = {"hp":"HP","atk":"공격","def":"방어","spa":"특공","spd":"특방","spe":"스피드"}
+
+# ── 타입 상성표 (공격 → 방어 배율. 1배는 생략) ─────────────────────────
+CHART = {
+  "NORMAL":  {"ROCK":.5,"STEEL":.5,"GHOST":0},
+  "FIRE":    {"GRASS":2,"ICE":2,"BUG":2,"STEEL":2,"FIRE":.5,"WATER":.5,"ROCK":.5,"DRAGON":.5},
+  "WATER":   {"FIRE":2,"GROUND":2,"ROCK":2,"WATER":.5,"GRASS":.5,"DRAGON":.5},
+  "ELECTRIC":{"WATER":2,"FLYING":2,"ELECTRIC":.5,"GRASS":.5,"DRAGON":.5,"GROUND":0},
+  "GRASS":   {"WATER":2,"GROUND":2,"ROCK":2,"FIRE":.5,"GRASS":.5,"POISON":.5,"FLYING":.5,"BUG":.5,"DRAGON":.5,"STEEL":.5},
+  "ICE":     {"GRASS":2,"GROUND":2,"FLYING":2,"DRAGON":2,"FIRE":.5,"WATER":.5,"ICE":.5,"STEEL":.5},
+  "FIGHTING":{"NORMAL":2,"ICE":2,"ROCK":2,"DARK":2,"STEEL":2,"POISON":.5,"FLYING":.5,"PSYCHIC":.5,"BUG":.5,"FAIRY":.5,"GHOST":0},
+  "POISON":  {"GRASS":2,"FAIRY":2,"POISON":.5,"GROUND":.5,"ROCK":.5,"GHOST":.5,"STEEL":0},
+  "GROUND":  {"FIRE":2,"ELECTRIC":2,"POISON":2,"ROCK":2,"STEEL":2,"GRASS":.5,"BUG":.5,"FLYING":0},
+  "FLYING":  {"GRASS":2,"FIGHTING":2,"BUG":2,"ELECTRIC":.5,"ROCK":.5,"STEEL":.5},
+  "PSYCHIC": {"FIGHTING":2,"POISON":2,"PSYCHIC":.5,"STEEL":.5,"DARK":0},
+  "BUG":     {"GRASS":2,"PSYCHIC":2,"DARK":2,"FIRE":.5,"FIGHTING":.5,"POISON":.5,"FLYING":.5,"GHOST":.5,"STEEL":.5,"FAIRY":.5},
+  "ROCK":    {"FIRE":2,"ICE":2,"FLYING":2,"BUG":2,"FIGHTING":.5,"GROUND":.5,"STEEL":.5},
+  "GHOST":   {"PSYCHIC":2,"GHOST":2,"DARK":.5,"NORMAL":0},
+  "DRAGON":  {"DRAGON":2,"STEEL":.5,"FAIRY":0},
+  "DARK":    {"PSYCHIC":2,"GHOST":2,"FIGHTING":.5,"DARK":.5,"FAIRY":.5},
+  "STEEL":   {"ICE":2,"ROCK":2,"FAIRY":2,"FIRE":.5,"WATER":.5,"ELECTRIC":.5,"STEEL":.5},
+  "FAIRY":   {"FIGHTING":2,"DRAGON":2,"DARK":2,"FIRE":.5,"POISON":.5,"STEEL":.5},
+}
+
+def defense_profile(types):
+    """방어 타입 조합 → {공격타입: 최종배율}."""
+    out = {}
+    for atk in TYPE_ORDER:
+        m = 1.0
+        for d in types:
+            m *= CHART[atk].get(d, 1)
+        out[atk] = m
+    return out
+
+def esc(s):
+    return html.escape(str(s), quote=True)
+
+def slug(en):
+    return re.sub(r"[^a-z0-9-]", "-", en.lower()).strip("-")
+
+# ── HTML 조각 ─────────────────────────────────────────────────────────
+def tp_chip(t):
+    return f'<span class="tp" style="background:{TYPE_COLOR[t]}">{TYPE_KO.get(t,t)}</span>'
+
+def stat_bars(stats):
+    rows = []
+    for k, lab, c in STATS:
+        v = stats[k]
+        w = min(100, v / 255 * 100)
+        rows.append(f'<div class="stat-row"><span class="lab">{lab}</span>'
+                    f'<span class="val">{v}</span>'
+                    f'<div class="bar"><i style="width:{w:.1f}%;background:{c}"></i></div></div>')
+    total = sum(stats[k] for k, _, _ in STATS)
+    rows.append(f'<div class="stat-total"><span>종족값 합계</span><b>{total}</b></div>')
+    return "".join(rows)
+
+def mchip(t, mult):
+    label = {4:"×4", 2:"×2", 0.5:"×½", 0.25:"×¼", 0:"×0"}.get(mult, f"×{mult:g}")
+    return (f'<span class="mchip" style="background:{TYPE_COLOR[t]}">'
+            f'{TYPE_KO[t]}<span class="x">{label}</span></span>')
+
+def matchup_block(types):
+    prof = defense_profile(types)
+    weak   = sorted([(t, m) for t, m in prof.items() if m > 1], key=lambda x: (-x[1], TYPE_ORDER.index(x[0])))
+    resist = sorted([(t, m) for t, m in prof.items() if 0 < m < 1], key=lambda x: (x[1], TYPE_ORDER.index(x[0])))
+    immune = [t for t in TYPE_ORDER if prof[t] == 0]
+    parts = []
+    if weak:
+        parts.append('<div class="matchup-grp weak"><div class="h">약점 (받는 데미지 증가)</div>'
+                     '<div class="mrow">' + "".join(mchip(t, m) for t, m in weak) + '</div></div>')
+    if resist:
+        parts.append('<div class="matchup-grp resist"><div class="h">반감 (받는 데미지 감소)</div>'
+                     '<div class="mrow">' + "".join(mchip(t, m) for t, m in resist) + '</div></div>')
+    if immune:
+        parts.append('<div class="matchup-grp immune"><div class="h">무효 (데미지 없음)</div>'
+                     '<div class="mrow">' + "".join(mchip(t, 0) for t in immune) + '</div></div>')
+    if not weak and not resist and not immune:
+        parts.append('<p class="matchup-note">모든 타입에 등배(×1)로 데미지를 받습니다.</p>')
+    tnames = "·".join(TYPE_KO[t] for t in types)
+    parts.append(f'<p class="matchup-note">{tnames} 타입 기준으로, 상대 기술 타입에 따라 최종 데미지가 위 배율만큼 곱해집니다. '
+                 f'같은 타입 기술을 방어할 땐 자속 보정(×1.5)까지 함께 고려하세요.</p>')
+    return "".join(parts)
+
+def usage_for(en):
+    return USAGE.get(_norm(en))
+
+def usage_section(en):
+    u = usage_for(en)
+    if not u or not u.get("moves"):
+        return ""
+    rows = []
+    for m in u["moves"][:10]:
+        pct = m.get("pct")
+        w = min(100, pct) if isinstance(pct, (int, float)) else 0
+        ptxt = f"{pct:g}%" if isinstance(pct, (int, float)) else "-"
+        rows.append(f'<div class="use-row"><span class="use-nm">{esc(m["ko"])}</span>'
+                    f'<div class="bar"><i style="width:{w:.0f}%;background:#5b8de0"></i></div>'
+                    f'<span class="use-pct">{ptxt}</span></div>')
+    season = f' · 시즌 {esc(USAGE_SEASON)} 싱글 배틀' if USAGE_SEASON else ''
+    _dr = DENSE_RANK.get(_norm(en))
+    sub = f'싱글 사용 순위 {_dr}위' if _dr else '랭크 배틀 채용률'
+    return (f'<section class="card"><h2>실전 사용 기술 <span class="sub">{sub}</span></h2>'
+            '<p class="matchup-note" style="margin:0 0 12px">실제 랭크 배틀에서 이 포켓몬이 자주 채용하는 기술과 채용률입니다. '
+            '상대로 만났을 때 어떤 기술을 조심해야 하는지 예측하는 데 참고하세요.</p>'
+            '<div class="use-list">' + "".join(rows) + '</div>'
+            f'<p class="attrib">{ATTRIB}{season}</p></section>')
+
+def abil_cards(abils):
+    return "".join(
+        f'<div class="abil"><div class="an">{esc(a["ko"])}</div>'
+        + (f'<div class="ad">{esc(a["desc"])}</div>' if a.get("desc") else "")
+        + '</div>'
+        for a in abils)
+
+def mega_card(m):
+    types_html = "".join(tp_chip(t) for t in m["types"])
+    return (f'<div class="mega-card"><div class="mega-head">'
+            f'<img src="/sprites/{esc(m["sprite"])}" alt="{esc(m["ko"])}" width="72" height="72" loading="lazy">'
+            f'<div><div class="mega-nm">{esc(m["ko"])}</div><div class="tps">{types_html}</div></div></div>'
+            f'{stat_bars(m["stats"])}'
+            f'<div class="mega-abil">{abil_cards(m["abil"])}</div>'
+            f'<div style="margin-top:12px">{matchup_block(m["types"])}</div></div>')
+
+# ── 운용 코멘트 (데이터 기반, 자동 서술) ───────────────────────────────
+def commentary(e):
+    s = e["stats"]
+    total = sum(s.values())
+    tnames = "·".join(TYPE_KO[t] for t in e["types"])
+    # 최고 능력치 2개
+    ranked = sorted(STATS, key=lambda x: -s[x[0]])
+    top = ranked[0]
+    top_ko, top_v = STAT_KO[top[0]], s[top[0]]
+    # 물리/특수 성향
+    if s["atk"] - s["spa"] >= 15:
+        atk_kind = "물리 공격 위주"
+    elif s["spa"] - s["atk"] >= 15:
+        atk_kind = "특수 공격 위주"
+    else:
+        atk_kind = "물리·특수 균형형"
+    # 스피드
+    spe = s["spe"]
+    if spe >= 110: spd_txt = "매우 빠른 스피드"
+    elif spe >= 90: spd_txt = "준수한 스피드"
+    elif spe >= 60: spd_txt = "평범한 스피드"
+    else: spd_txt = "느린 스피드"
+    # 내구
+    bulk = s["hp"] + s["def"] + s["spd"]
+    if bulk >= 300: bulk_txt = "높은 내구"
+    elif bulk >= 230: bulk_txt = "무난한 내구"
+    else: bulk_txt = "낮은 내구"
+    # 약점 요약
+    prof = defense_profile(e["types"])
+    weaks = [TYPE_KO[t] for t in TYPE_ORDER if prof[t] > 1]
+    resists = [TYPE_KO[t] for t in TYPE_ORDER if 0 < prof[t] < 1]
+    immunes = [TYPE_KO[t] for t in TYPE_ORDER if prof[t] == 0]
+
+    p1 = (f'<strong>{esc(e["ko"])}</strong>은(는) {tnames} 타입 포켓몬으로, 종족값 합계는 <strong>{total}</strong>입니다. '
+          f'가장 높은 능력치는 {top_ko}({top_v})이며 {atk_kind}에 {spd_txt}, {bulk_txt}를 지닌 배분입니다.')
+
+    seg = []
+    if weaks:
+        seg.append(f'받는 약점은 {", ".join(weaks)} 타입 기술이므로, 이런 상대 앞에서는 교체나 방어를 고려하는 편이 좋습니다.')
+    if resists:
+        seg.append(f'반대로 {", ".join(resists)} 타입 공격은 반감으로 버텨냅니다.')
+    if immunes:
+        seg.append(f'{", ".join(immunes)} 타입 공격은 완전히 무효화합니다.')
+    p2 = " ".join(seg)
+
+    p3 = ""
+    if e.get("mega"):
+        mt = sum(e["mega"][0]["stats"].values())
+        names = ", ".join(m["ko"] for m in e["mega"])
+        p3 = (f'{esc(e["ko"])}은(는) 전투 중 <strong>{names}</strong>(으)로 메가진화할 수 있으며, '
+              f'메가진화 시 종족값 합계가 <strong>{mt}</strong>까지 상승합니다. '
+              f'메가 이후의 타입·특성 변화는 위 메가진화 항목에서 확인하세요.')
+    elif e.get("forms"):
+        title = e.get("formTitle") or "폼체인지"
+        p3 = f'{esc(e["ko"])}은(는) {esc(title)}에 따라 능력치와 특성이 달라집니다. 자세한 변화는 위 항목을 참고하세요.'
+
+    p4 = ('실제 대전에서 이 포켓몬이 상대를 한 번에 쓰러뜨릴 수 있는지, 혹은 상대의 공격을 버틸 수 있는지는 '
+          '<a href="/calc/">데미지 계산기</a>에서 노력치·성격·지닌 도구·랭크·날씨까지 넣어 정확히 확인할 수 있습니다.')
+
+    return "".join(f"<p>{x}</p>" for x in (p1, p2, p3, p4) if x)
+
+# ── 페이지 템플릿 ─────────────────────────────────────────────────────
+PAGE = """<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>{title}</title>
+<meta name="description" content="{desc}" />
+<link rel="canonical" href="{canon}" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="{canon}" />
+<meta property="og:title" content="{ogtitle}" />
+<meta property="og:description" content="{desc}" />
+<meta property="og:image" content="{ogimg}" />
+<meta name="twitter:card" content="summary" />
+<link rel="stylesheet" href="/pokedex/mon.css" />
+<script type="application/ld+json">
+{jsonld}
+</script>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/" class="active">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/">배틀데이터</a>
+      <a href="/guide/">가이드</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="crumb"><a href="/">홈</a> › <a href="/pokedex/">도감</a> › {ko}</div>
+
+  <div class="mon-head">
+    <img src="/sprites/{sprite}" alt="{ko}" width="108" height="108" />
+    <div>
+      <div class="num">{num}</div>
+      <h1>{ko}</h1>
+      <div class="en">{en}</div>
+      <div class="tps">{types}</div>
+    </div>
+  </div>
+
+  <section class="card">
+    <h2>종족값 <span class="sub">Base Stats</span></h2>
+    {stats}
+  </section>
+
+  <section class="card">
+    <h2>타입 상성 <span class="sub">받는 데미지 배율</span></h2>
+    {matchup}
+  </section>
+
+  <section class="card">
+    <h2>특성 <span class="sub">Abilities</span></h2>
+    {abils}
+  </section>
+  {usage}
+  {mega}
+  <section class="card">
+    <h2>{ko} 운용 포인트</h2>
+    <div class="prose">{prose}</div>
+  </section>
+
+  <section class="card">
+    <h2>관련 페이지</h2>
+    <div class="related">
+      <a href="/calc/">데미지 계산기로 계산</a>
+      <a href="/pokedex/">전체 도감</a>
+      <a href="/battle-data/">실전 사용률 통계</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/guide/type-chart/">타입 상성표 가이드</a>
+    </div>
+  </section>
+
+  <div class="pager">
+    <span>{prev}</span>
+    <span>{next}</span>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a> · <a href="/pokedex/">도감</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      &ldquo;Pok&eacute;mon&rdquo;(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pok&eacute;mon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>&copy; 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+</body>
+</html>
+"""
+
+def mega_section(e):
+    if e.get("mega"):
+        return ('<section class="card"><h2>메가진화 <span class="sub">Mega Evolution</span></h2>'
+                + "".join(mega_card(m) for m in e["mega"]) + '</section>')
+    if e.get("forms"):
+        title = esc(e.get("formTitle") or "폼체인지")
+        return (f'<section class="card"><h2>{title}</h2>'
+                + "".join(mega_card(m) for m in e["forms"]) + '</section>')
+    return ""
+
+def pager_link(e, arrow):
+    if not e:
+        return ""
+    if arrow == "prev":
+        return f'<a href="/pokedex/{slug(e["en"])}/">← {esc(e["ko"])}</a>'
+    return f'<a href="/pokedex/{slug(e["en"])}/">{esc(e["ko"])} →</a>'
+
+def build_pages():
+    DEX.sort(key=lambda e: e["id"])
+    n = 0
+    seen = set()
+    for i, e in enumerate(DEX):
+        sg = slug(e["en"])
+        if sg in seen:
+            print(f"  !! slug 중복 skip: {sg} ({e['ko']})")
+            continue
+        seen.add(sg)
+        canon = f"{BASE}/pokedex/{sg}/"
+        num = "#" + str(e["id"]).zfill(4)
+        tnames = "·".join(TYPE_KO[t] for t in e["types"])
+        total = sum(e["stats"].values())
+        desc = (f'{e["ko"]}({e["en"]})의 종족값(합계 {total})·타입 상성(약점/반감)·한글 특성'
+                + ('·메가진화' if e.get("mega") else '')
+                + ' 정보. 포켓몬 챔피언스 도감.')
+        jsonld = json.dumps({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": f'{e["ko"]} — 포켓몬 챔피언스 도감',
+            "inLanguage": "ko",
+            "url": canon,
+            "image": f"{BASE}/sprites/{e['sprite']}",
+            "description": desc,
+            "isPartOf": {"@type": "WebSite", "name": "Champions Helper", "url": BASE + "/"},
+        }, ensure_ascii=False, indent=2)
+        preve = DEX[i-1] if i > 0 else None
+        nexte = DEX[i+1] if i < len(DEX)-1 else None
+
+        page = PAGE.format(
+            title=esc(f'{e["ko"]} 종족값·타입상성·특성 | 포켓몬 챔피언스 도감'),
+            ogtitle=esc(f'{e["ko"]} — 포켓몬 챔피언스 도감'),
+            desc=esc(desc),
+            canon=canon,
+            ogimg=f"{BASE}/sprites/{esc(e['sprite'])}",
+            jsonld=jsonld,
+            ko=esc(e["ko"]),
+            en=esc(e["en"]),
+            num=num,
+            sprite=esc(e["sprite"]),
+            types="".join(tp_chip(t) for t in e["types"]),
+            stats=stat_bars(e["stats"]),
+            matchup=matchup_block(e["types"]),
+            abils=abil_cards(e["abil"]),
+            usage=usage_section(e["en"]),
+            mega=mega_section(e),
+            prose=commentary(e),
+            prev=pager_link(preve, "prev"),
+            next=pager_link(nexte, "next"),
+        )
+        d = os.path.join(SITE, "pokedex", sg)
+        os.makedirs(d, exist_ok=True)
+        with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
+            f.write(page)
+        n += 1
+    return n, seen
+
+# ── 도감 인덱스에 정적 전체목록 주입 ──────────────────────────────────
+def inject_index():
+    path = os.path.join(SITE, "pokedex", "index.html")
+    with open(path, encoding="utf-8") as f:
+        html_src = f.read()
+    items = []
+    for e in sorted(DEX, key=lambda x: x["id"]):
+        sg = slug(e["en"])
+        tag = ""
+        if e.get("mega"): tag = '<span class="ml-mega">메가</span>'
+        elif e.get("forms"): tag = '<span class="ml-form">폼</span>'
+        items.append(f'<li><a href="/pokedex/{sg}/">{esc(e["ko"])}{tag}</a></li>')
+    block = (
+        '<!--ALLLIST-->\n'
+        '<section class="all-list-sec" style="max-width:960px;margin:8px auto 0;padding:22px 0 8px;border-top:1px solid var(--line);">\n'
+        '  <h2 style="font-size:18px;font-weight:800;margin:0 0 6px;">포켓몬 전체 목록</h2>\n'
+        '  <p style="color:var(--muted);font-size:13px;margin:0 0 14px;">각 포켓몬을 누르면 종족값·타입 상성·특성·메가진화 정보를 담은 상세 페이지로 이동합니다.</p>\n'
+        '  <style>.all-list{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 14px}'
+        '.all-list a{display:block;padding:5px 4px;font-size:14px;color:var(--txt);border-bottom:1px solid transparent}'
+        '.all-list a:hover{color:var(--accent2);text-decoration:none}'
+        '.ml-mega,.ml-form{font-size:10px;font-weight:700;margin-left:5px;padding:0 5px;border-radius:7px;vertical-align:middle}'
+        '.ml-mega{color:#ffd479;background:rgba(255,170,40,.16)}.ml-form{color:#9fd0ff;background:rgba(60,130,220,.16)}</style>\n'
+        '  <ul class="all-list">\n    ' + "\n    ".join(items) + '\n  </ul>\n'
+        '</section>\n'
+        '<!--/ALLLIST-->'
+    )
+    if "<!--ALLLIST-->" in html_src:
+        html_src = re.sub(r"<!--ALLLIST-->.*?<!--/ALLLIST-->", lambda _: block, html_src, flags=re.S)
+    else:
+        html_src = html_src.replace("</main>", block + "\n</main>", 1)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(html_src)
+
+# ── sitemap 재생성 ────────────────────────────────────────────────────
+STATIC_ROUTES = [
+    ("/", "weekly", "1.0"),
+    ("/pokedex/", "weekly", "0.9"),
+    ("/calc/", "weekly", "0.9"),
+    ("/battle-data/", "weekly", "0.8"),
+    ("/builder/", "weekly", "0.8"),
+    ("/guide/", "monthly", "0.7"),
+    ("/guide/app-guide/", "monthly", "0.8"),
+    ("/guide/getting-started/", "monthly", "0.7"),
+    ("/guide/damage-formula/", "monthly", "0.7"),
+    ("/guide/type-chart/", "monthly", "0.7"),
+    ("/guide/abilities-items/", "monthly", "0.7"),
+    ("/guide/mega-evolution/", "monthly", "0.7"),
+    ("/privacy/", "yearly", "0.3"),
+    ("/terms/", "yearly", "0.3"),
+]
+
+def build_sitemap():
+    urls = []
+    def u(loc, freq, pri):
+        urls.append(f"  <url>\n    <loc>{BASE}{loc}</loc>\n    <lastmod>{LASTMOD}</lastmod>\n"
+                    f"    <changefreq>{freq}</changefreq>\n    <priority>{pri}</priority>\n  </url>")
+    for loc, freq, pri in STATIC_ROUTES:
+        u(loc, freq, pri)
+    for e in sorted(DEX, key=lambda x: x["id"]):
+        u(f"/pokedex/{slug(e['en'])}/", "monthly", "0.6")
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+           + "\n".join(urls) + "\n</urlset>\n")
+    with open(os.path.join(SITE, "sitemap.xml"), "w", encoding="utf-8") as f:
+        f.write(xml)
+
+BD_PAGE = """<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>포켓몬 챔피언스 실전 사용률 — 배틀 데이터 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스 랭크 배틀({season}) 기준, 포켓몬별 자주 채용하는 기술과 채용률 통계. 상대가 무엇을 들고 오는지 예측하세요." />
+<link rel="canonical" href="https://champions-helper.com/battle-data/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/battle-data/" />
+<meta property="og:title" content="포켓몬 챔피언스 실전 사용률 — 배틀 데이터" />
+<meta property="og:description" content="포켓몬 챔피언스 랭크 배틀 기준, 포켓몬별 기술 채용률 통계." />
+<meta name="twitter:card" content="summary" />
+<link rel="stylesheet" href="/pokedex/mon.css" />
+<style>
+  .bd-list {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }}
+  .bd-row {{ display: flex; align-items: center; gap: 11px; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 10px; padding: 9px 12px; color: var(--txt); }}
+  .bd-row:hover {{ border-color: var(--accent); text-decoration: none; }}
+  .bd-row img {{ width: 42px; height: 42px; object-fit: contain; image-rendering: pixelated; flex: none; }}
+  .bd-rank {{ flex: none; width: 34px; text-align: center; font-weight: 800; font-size: 13px; color: var(--accent2); }}
+  .bd-nm {{ font-weight: 800; font-size: 14px; flex: none; width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+  .bd-mv {{ font-size: 12.5px; color: var(--muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+  .bd-mv b {{ color: var(--accent2); }}
+  .bd-h {{ font-size: 16px; font-weight: 800; margin: 24px 0 10px; }}
+  .bd-h .c {{ color: var(--muted); font-weight: 500; font-size: 13px; margin-left: 6px; }}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/" class="active">배틀데이터</a>
+      <a href="/guide/">가이드</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="crumb"><a href="/">홈</a> › 배틀데이터</div>
+  <div style="padding:16px 0 4px">
+    <h1 style="font-size:28px;margin:0 0 8px;font-weight:800;">실전 사용률 (배틀 데이터)</h1>
+    <p style="color:var(--muted);margin:0;font-size:14.5px;line-height:1.7;">
+      포켓몬 챔피언스 <strong style="color:var(--txt)">랭크 배틀 {season}</strong> 통계를 바탕으로, 포켓몬별로
+      실제 대전에서 자주 채용되는 기술과 채용률을 정리했습니다. 상대가 어떤 기술을 들고 오는지 예측하는 데 활용하세요.
+      각 포켓몬을 누르면 종족값·타입 상성과 함께 <strong style="color:var(--txt)">기술별 채용률 전체</strong>를 볼 수 있습니다.
+    </p>
+  </div>
+
+  <section class="card">
+    <p class="attrib" style="margin:0">{attrib} · 시즌 {season} · 싱글 배틀 · 데이터는 시즌 통계에 따라 주기적으로 갱신됩니다.</p>
+  </section>
+
+  {body}
+
+  <section class="card" style="margin-top:20px">
+    <h2 style="font-size:16px;margin:0 0 10px;font-weight:800;">이 데이터는 어떻게 쓰이나요?</h2>
+    <div class="prose">
+      <p>Champions Helper 데스크탑 프로그램의 <strong>상대 시점 위력 모드</strong>는 이 사용률 데이터를 이용해,
+      상대 포켓몬이 자주 쓰는 상위 기술을 자동으로 위력칩에 띄워 줍니다. 덕분에 상대의 예상 기술 기준으로 내 포켓몬이
+      얼마나 버틸 수 있는지 즉시 확인할 수 있습니다.</p>
+      <p>웹에서도 <a href="/pokedex/">도감</a>의 각 포켓몬 페이지에서 같은 채용률을 확인할 수 있고,
+      <a href="/calc/">데미지 계산기</a>에 기술을 넣어 실제 데미지까지 계산할 수 있습니다.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="https://forms.gle/vzavUFn5xFDtdpu66" target="_blank" rel="noopener">🐞 버그 제보</a> · <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">💬 디스코드</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="attrib" style="margin:0 0 10px">{attrib}</p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      &ldquo;Pok&eacute;mon&rdquo;(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pok&eacute;mon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>&copy; 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+</body>
+</html>
+"""
+
+def _bd_row(e, u, rank):
+    top = u["moves"][:3]
+    mv = ", ".join(
+        f'{esc(m["ko"])} <b>{m["pct"]:g}%</b>' if isinstance(m.get("pct"), (int, float))
+        else esc(m["ko"]) for m in top)
+    rk = f'<span class="bd-rank">{rank}</span>' if rank else '<span class="bd-rank">–</span>'
+    return (f'<a class="bd-row" href="/pokedex/{slug(e["en"])}/">{rk}'
+            f'<img src="/sprites/{esc(e["sprite"])}" alt="{esc(e["ko"])}" width="42" height="42" loading="lazy">'
+            f'<span class="bd-nm">{esc(e["ko"])}</span>'
+            f'<span class="bd-mv">{mv}</span></a>')
+
+def build_battle_data_page():
+    if not USAGE:
+        print("  (move-usage 없음 — /battle-data/ 생략)")
+        return 0
+    ranked, unranked = [], []
+    for e in sorted(DEX, key=lambda x: x["id"]):
+        u = usage_for(e["en"])
+        if not u or not u.get("moves"):
+            continue
+        dr = DENSE_RANK.get(_norm(e["en"]))
+        (ranked if dr else unranked).append((e, u, dr))
+    ranked.sort(key=lambda x: x[2])
+    parts = [f'<h2 class="bd-h">실전 사용 순위 <span class="c">({len(ranked)}종 · 채용률 높은 순)</span></h2>',
+             '<div class="bd-list">' + "".join(_bd_row(e, u, dr) for e, u, dr in ranked) + '</div>']
+    if unranked:
+        parts += [f'<h2 class="bd-h">순위권 밖 등장 포켓몬 <span class="c">({len(unranked)}종 · 도감 순)</span></h2>',
+                  '<div class="bd-list">' + "".join(_bd_row(e, u, None) for e, u, _ in unranked) + '</div>']
+    page = BD_PAGE.format(season=esc(USAGE_SEASON or "현재 시즌"), attrib=ATTRIB, body="\n  ".join(parts))
+    d = os.path.join(SITE, "battle-data")
+    os.makedirs(d, exist_ok=True)
+    with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
+        f.write(page)
+    return len(ranked) + len(unranked)
+
+if __name__ == "__main__":
+    n, seen = build_pages()
+    inject_index()
+    bd = build_battle_data_page()
+    build_sitemap()
+    print(f"OK — 상세페이지 {n}개 생성 (pokedex/<en>/index.html), 사용률 매칭 {sum(1 for e in DEX if usage_for(e['en']))}종")
+    print(f"     배틀데이터 페이지 {bd}종 · 도감 인덱스 정적목록 주입 · sitemap {len(STATIC_ROUTES)}정적 + {len(seen)}상세 재생성")

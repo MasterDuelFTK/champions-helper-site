@@ -42,9 +42,10 @@ def run(name):
 
 out_dex  = run("build-dex.py")
 out_calc = run("build-calc.py")
+out_mon  = run("build-mon-pages.py")   # dex.json → pokedex/<en>/ 상세페이지 + 인덱스 정적목록 + sitemap
 
 print("\n" + "=" * 56)
-print("OK — site/data/{dex,moves}.json + site/sprites 갱신 완료.")
+print("OK — site/data/{dex,moves}.json + site/sprites + pokedex/<en>/ 상세페이지 + sitemap 갱신 완료.")
 print("다음: 검토 후  git push origin dev  &&  git push origin dev:main  로 배포.")
 print("      (메가가이드 /guide/mega-evolution 는 아직 하드코딩 — 수동 반영 필요.)")
 

@@ -41,6 +41,20 @@ def fetch(url, tries=3):
     raise last
 
 
+def fetch_text(url, tries=3):
+    """HTML 페이지 텍스트(종족 사용 순위 파싱용)."""
+    last = None
+    for i in range(tries):
+        try:
+            req = urllib.request.Request(url, headers=UA)
+            with urllib.request.urlopen(req, timeout=40) as r:
+                return r.read().decode("utf-8", "replace")
+        except Exception as e:  # noqa: BLE001
+            last = e
+            time.sleep(1.0 * (i + 1))
+    raise last
+
+
 def norm(s):
     """영어 기술명 정규화(영숫자만 소문자). 'Stealth Rock' ↔ 'stealth-rock' 매칭용."""
     return re.sub(r"[^a-z0-9]", "", s.lower())
@@ -90,12 +104,25 @@ def main():
                 ko = en  # 매핑 실패 시 영어명 노출(드롭다운에서 사용자가 정정 가능)
             moves.append({"en": en, "ko": ko, "pct": r.get("percentage_value")})
         if moves:
-            out[slug] = {
+            # 종족 사용 순위(싱글) — 개별 포켓몬 HTML 페이지의 "Singles rank" 셀에서 추출(전 순위 전수).
+            #   API/JSON 엔 종족 사용 순위가 없음 → HTML 이 유일 소스. 실패해도 기술 사용률은 유지.
+            rank = None
+            try:
+                hp = fetch_text(f"{API}/pokemon/{slug}/")
+                mrk = re.search(r"<td>Singles rank</td><td>(\d+)</td>", hp)
+                if mrk:
+                    rank = int(mrk.group(1))
+            except Exception:  # noqa: BLE001 — 순위 실패는 무시
+                pass
+            entry = {
                 "name": p.get("name", slug),
                 "base": p.get("baseName", ""),
                 "isForm": bool(p.get("isForm", False)),
                 "moves": moves,
             }
+            if rank is not None:
+                entry["rank"] = rank
+            out[slug] = entry
         if n % 25 == 0:
             print(f"[..] {n}/{len(pages)}", file=sys.stderr)
         time.sleep(DELAY)
@@ -112,6 +139,26 @@ def main():
             alias[bk] = data
     out.update(alias)
     print(f"[alias] base 별칭 추가: {len(alias)}", file=sys.stderr)
+
+    # 2.6) 상위 순위 보정 — 요약표(pokemon-champions-singles-usage)로 override.
+    #   개별페이지 "Singles rank" 는 지역폼(예: 칸토/알로라 라이츄)에서 서로 값이 뒤섞이는
+    #   소스 결함이 있음. 요약표는 폼별 slug 로 정확히 구분되므로 top 순위는 표를 신뢰한다.
+    try:
+        tbl = fetch_text(f"{API}/pokemon-champions-singles-usage/")
+        trows = re.findall(r'<tr><td>(\d+)</td><td><a href="/pokemon/([^/]+)/">', tbl)
+        tmap = {norm(s): int(rk) for rk, s in trows}
+        ov = 0
+        for k, v in out.items():
+            rk = tmap.get(norm(k))
+            if rk and v.get("rank") != rk:
+                v["rank"] = rk
+                ov += 1
+        print(f"[rank] 요약표 override: {ov}종 (표 {len(trows)}행)", file=sys.stderr)
+    except Exception as e:  # noqa: BLE001 — 실패해도 개별페이지 순위 유지
+        print(f"[rank] 요약표 override 실패(무시): {e}", file=sys.stderr)
+
+    ranked_n = sum(1 for v in out.values() if v.get("rank"))
+    print(f"[rank] 사용 순위 보유: {ranked_n}종", file=sys.stderr)
 
     # 3) 출력 + 버전(epoch 정수, 단조증가 → 헬퍼가 정수 비교로 갱신 판단).
     version = int(time.time())
