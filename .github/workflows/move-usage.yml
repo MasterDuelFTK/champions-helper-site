@@ -1,0 +1,47 @@
+name: Build move-usage
+
+# 상대 기술 사용률(move-usage.json) 자동 갱신.
+#   championsbattledata.com API → build/build-move-usage.py → helper-data/move-usage.json
+#   master.json/sprites 와 독립(기술 사용률만 12h 주기로 따로 갱신). 개발자 수동 개입 0.
+#   push 대상: dev(작업 브랜치) + dev:main(GitHub Pages 재배포) — 사이트 운영 규칙과 동일.
+
+on:
+  schedule:
+    - cron: "0 0,12 * * *"   # 매일 00:00 / 12:00 UTC (12시간 주기)
+  workflow_dispatch: {}        # 수동 실행도 허용(테스트/즉시 갱신)
+
+permissions:
+  contents: write
+
+concurrency:
+  group: move-usage
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Build move-usage.json
+        run: python build/build-move-usage.py
+
+      - name: Commit & push (dev + Pages)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add helper-data/move-usage.json helper-data/move-usage-version.json
+          if git diff --staged --quiet; then
+            echo "변경 없음 — 커밋 생략"
+            exit 0
+          fi
+          git commit -m "chore: move-usage 자동 갱신 (championsbattledata)"
+          git push origin dev
+          git push origin dev:main   # dev:main = GitHub Pages 소스 → 재배포

@@ -254,15 +254,66 @@
   .ab-desc { font-size: 10px; color: var(--muted); line-height: 1.35; margin-top: 2px; white-space: normal; }
   .ab-fixed { max-width: 200px; padding: 4px 8px; background: #353a44; border: 1px solid var(--line); border-radius: 4px; }
   .ab-cur-desc { max-width: 200px; font-size: 10px; color: var(--muted); line-height: 1.35; margin-top: 3px; white-space: normal; }
+
+  /* 113차 — 상대 시점 모드("상대" 토글, 모든 시뮬 취소 위). on=초록 활성. */
+  .btn.opp-persp {
+    padding: 6px 16px; font-size: 12px; white-space: nowrap; border-radius: 6px; margin-bottom: 6px;
+    background: #2f3742; color: var(--txt); border: 1px solid var(--line);
+  }
+  .btn.opp-persp:hover { background: #3a4450; }
+  .btn.opp-persp.on { background: #2f7d4f; color: #fff; border-color: #41a06a; }
+  /* 113차 — 상대 시점: 6슬롯/매치업 위력칩을 "오른쪽에서부터"(상대 입장 거울). sprite를 오른쪽, 기술블록 왼쪽. */
+  .oppslot.mirror { flex-direction: row-reverse; }
+  .oppslot.mirror .slot-moves { text-align: left; }
+  /* 113차 — 상대 기술 편집: 기술명 클릭 가능 + datalist 입력칸(드롭다운+직접입력). */
+  .mname.editable { cursor: pointer; text-decoration: underline dotted rgba(255,255,255,0.4); text-underline-offset: 2px; }
+  .mname.editable:hover { color: #ffd54f; }
+  .opp-move-input {
+    width: 140px; font-size: 11px; font-weight: 700; color: var(--txt);
+    background: #2a2e36; border: 1px solid var(--accent); border-radius: 3px; padding: 1px 3px;
+  }
+  /* 113차 — 상대 시점 center: 위력칩을 오른쪽(상대 공격자 sprite 쪽)으로. 내 포켓몬(왼쪽)에 안 붙게.
+     col을 full width로 펴고(stretch) 각 행을 justify-end → 위력칩이 오른쪽 끝(상대 쪽)에 정렬. */
+  .mu-center.opp-persp { align-items: stretch; }
+  .mu-center.opp-persp > .col { width: 100%; }
+  /* flex justify-end: [기술명 96 고정][위력칩 wrap] 전체를 오른쪽(상대 쪽)으로. 모든 요소 고정폭 → 밀림 없이 정렬. */
+  .opp-mrow { display: flex; align-items: center; gap: 6px; justify-content: flex-end; width: 100%; }
+  .opp-mrow .mname { flex: 0 0 96px; overflow: hidden; }
+  .opp-mrow .samples { flex: 0 0 196px; flex-wrap: nowrap; overflow: hidden; }  /* 고정폭 — 변화기(칩 없음)여도 폭 유지 → 정렬 */
+  .chips-wrap { display: flex; align-items: center; gap: 6px; }
+  .chips-wrap .pbtn { flex: 0 0 auto; box-sizing: border-box; width: 18px; min-width: 18px; padding: 0; }  /* spacer와 동일 폭 */
+  .chips-wrap .pbtn-spacer { flex: 0 0 auto; width: 18px; }  /* +버튼과 정확히 같은 폭 → 밀림 0 */
+  /* 114차 — 상대 시점 급소 체크박스: mname 왼쪽 flex 아이템(고정폭). chips/mname은 우정렬 고정폭이라 정렬 유지. */
+  .opp-mrow .opp-crit-box { flex: 0 0 auto; width: 13px; height: 13px; margin: 0; cursor: pointer; accent-color: #E05656; }
+  .edit-wrap { display: flex; align-items: center; gap: 4px; }
+  .edit-clear { cursor: pointer; color: var(--muted); font-size: 12px; font-weight: 700; padding: 0 5px; user-select: none; }
+  .edit-clear:hover { color: #E05656; }
+  /* 113차 — 메가 두 줄: 내 원래|내 메가 구분선 + "상대 메가 시" 헤더. */
+  .mega-sep { width: 1px; align-self: stretch; background: rgba(255,255,255,0.3); margin: 0 4px; }
+  .slot-mega-hdr { font-size: 9px; font-weight: 700; color: #b0b0b0; margin: 4px 0 1px; }
+  /* 113차 — 상대 시점 center 컬럼 헤더([내 원래]|[메가OO]). col-lbl 폭=위력칩 3개(64×3+gap≈196)와 정렬. */
+  .opp-mega-block { margin-bottom: 5px; }
+  .opp-col-hdr .col-lbl { width: 196px; text-align: center; font-size: 9px; font-weight: 700; color: #9aa0a8; }
+  .opp-col-hdr .mname { visibility: hidden; }
+  /* 줄 헤더("상대 원래"/"메가OO 시")도 위력칩(우정렬)에 맞춰 오른쪽 정렬 — 왼쪽 sprite에 안 붙게. */
+  .mu-center.opp-persp .slot-mega-hdr { text-align: right; }
+  /* 113차 — "실제 수치" 토글: 광고 영역 바로 위 고정 바(flex item — 광고와 안 겹침). on=초록(실 데미지). */
+  #real-toggle-bar { flex: 0 0 auto; display: flex; justify-content: center; padding: 4px 0; background: var(--panel2); border-top: 1px solid var(--line); }
+  .real-toggle {
+    font-size: 11px; font-weight: 700; padding: 4px 16px; border-radius: 14px; cursor: pointer;
+    background: #2f3742; color: var(--txt); border: 1px solid var(--line);
+  }
+  .real-toggle:hover { background: #3a4450; }
+  .real-toggle.on { background: #2f7d4f; color: #fff; border-color: #41a06a; }
 </style>
 </head>
 <body>
   <div id="bar">
     <span id="status">로컬 헬퍼 연결 대기…</span>
-    <span id="version">v0.110</span>
+    <span id="version">v0.114</span>
   </div>
   <section id="top">
-    <div class="section-title">상대 파티 (내 현재 포켓몬 기준 위력)</div>
+    <div class="section-title" id="top-title">상대 파티 (내 현재 포켓몬 기준 위력)</div>
     <div id="opps" class="opps"></div>
   </section>
   <section id="mid">
@@ -283,6 +334,7 @@
       <div id="parties" class="parties"></div>
     </div>
   </section>
+  <div id="real-toggle-bar"><button id="real-toggle" class="real-toggle" title="위력칩을 % ↔ 실제 데미지 수치로 전환 (내/상대 공통)">실제 수치</button></div>
   <footer id="ads">
     <!-- 87차 — Google AdSense 자리. 승인 후 head 로더 주석 해제 + 아래 ins 활성화(ca-pub/슬롯 발급값 기입):
     <ins class="adsbygoogle" style="display:block;width:100%" data-ad-client="ca-pub-XXXXXXXX" data-ad-slot="XXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
@@ -290,6 +342,7 @@
     -->
     광고 영역 (애드센스 승인 후 표시 — 공개 도메인 champions-helper.com/live에서만)
   </footer>
+  <datalist id="oppMoveList"></datalist>   <!-- 113차 — 상대 기술 편집 드롭다운 후보(사용률 내림차순) -->
 
 <script>
 "use strict";
@@ -298,9 +351,13 @@ let lastModel = null;      // 74차 — 드롭다운 펼침 토글 시 재렌더
 let oppItemOpen = false;   // 74차 — 상대 도구 드롭다운 펼침 상태(WS 갱신에도 유지)
 let myItemOpen = false;    // 107차 — 내 도구 드롭다운 펼침 상태
 let oppAbilityOpen = false; // 82차 — 상대 특성 드롭다운 펼침 상태
+let oppEditSlot = null;     // 113차 — 상대 시점 기술 편집 중인 슬롯(0~3, null=없음)
+let showRealDamage = false; // 113차 — "실제 수치" 토글(% ↔ 실 데미지). 내/상대 위력 위력칩 공통. 하단 중앙 고정 버튼.
 
 // ── 색 규칙 (PowerRowRenderer 포팅) ──────────────────────────
-const LABEL_BG = { White: "#FFFFFF", LightGreen: "#C8F0C0", Orange: "#FFC880", LightPink: "#FFC8DC" };
+const LABEL_BG = { White: "#FFFFFF", LightGreen: "#C8F0C0", Orange: "#FFC880", LightPink: "#FFC8DC",
+  // 113차 — 상대 시점: 물리기=붉은(공격 랭크색 #F09B9B), 특수기=보라(특공 랭크색 #C8A2E0). 흰→약간→진.
+  PhysMid: "#F6C1C1", PhysFull: "#F09B9B", SpecMid: "#DBC4EE", SpecFull: "#C8A2E0" };
 const FORM = { base: "#C8C8C8", megaX: "#FF9F9F", megaY: "#FFC890", myMega: "#9FD0FF" };
 const STAT_KO = ["공", "방", "특공", "특방", "스피드"];   // 랭크·성격 인덱스(0~4)
 const EV_KO = ["HP", "공", "방", "특공", "특방", "스피드"]; // 노력치 인덱스(0~5)
@@ -393,15 +450,17 @@ function renderRow(row, withControls) {
   return g;
 }
 function renderSample(s) {
-  // s.text / s.canKo / s.guaranteedKo 는 C# 계산 프로퍼티 → JSON에 포함됨.
-  const b = el("span", "sample", s.text);
+  // s.text(%) / s.damageText(실 데미지) / s.canKo / s.guaranteedKo 는 C# 계산 프로퍼티 → JSON에 포함됨.
+  // "실제 수치" 토글 시 s.damageText(HP 절대값), 아니면 % 표기.
+  const txt = showRealDamage ? (s.damageText || s.text) : s.text;
+  const b = el("span", "sample", txt);
   b.style.background = LABEL_BG[s.color] || "#fff";
   if (s.guaranteedKo) b.style.fontWeight = "bold";
   if (s.simulated) b.style.border = "2px solid #FFEE00";          // 시뮬 노력치/성격 반영 (KO보다 우선)
   else if (s.guaranteedKo) b.style.border = "2px solid #D22020";  // 확정 1타
   else if (s.canKo) b.style.border = "1.5px solid #E08000";       // 난수 1타
   else b.style.border = "1px solid rgba(0,0,0,0.375)";
-  b.title = (s.simulated ? s.bulkName + " (시뮬)" : s.bulkName) + " · " + s.text;
+  b.title = (s.simulated ? s.bulkName + " (시뮬)" : s.bulkName) + " · " + txt;
   return b;
 }
 
@@ -471,6 +530,144 @@ function renderCenter(m) {
   return host;
 }
 
+// ── 113차: 상대 시점 center(상대=공격자) + 기술 편집 ──────────
+// 상대 usage 4기술 위력칩(무보정/풀/풀+성격) + 기술명 클릭 → datalist(드롭다운+직접입력) 편집.
+function renderOppCenter(m) {
+  const host = el("div", "col");
+  const base = m.centerColumn;
+  if (!base || !base.rows || !base.rows.length) {
+    host.appendChild(el("div", "muted", "상대 기술 정보 없음 (사용률 데이터 미수신 / 미등록 종족)"));
+    return host;
+  }
+  // 가로(컬럼) = 상대 공격 폼: 원래 / 메가X / 메가Y (상대는 X/Y 미상이라 둘 다 나란히).
+  //   oppMegaFormX/Y = "X"/"Y"(듀얼=리자몽), 단일 메가면 formX 없음 → "상대 메가".
+  const xLbl = m.oppMegaFormX ? "상대 메가" + m.oppMegaFormX : "상대 메가";
+  const yLbl = m.oppMegaFormY ? "상대 메가" + m.oppMegaFormY : null;
+  // 세로(섹션) = 내 방어 폼: 내 원래(편집 O) / 내 메가(편집 X). 내가 X/Y 아는 단일이라 아래 줄 하나.
+  host.appendChild(oppAtkSection(m, "내 원래",
+    [{ lbl: "상대 원래", col: m.centerColumn }, { lbl: xLbl, col: m.centerMegaColumn }, { lbl: yLbl, col: m.centerMegaColumnY }], true));
+  if (m.centerMyMegaColumn)
+    host.appendChild(oppAtkSection(m, m.myMegaName || "메가",
+      [{ lbl: "상대 원래", col: m.centerMyMegaColumn }, { lbl: xLbl, col: m.centerMyMegaVsOppMegaColumn }, { lbl: yLbl, col: m.centerMyMegaVsOppMegaColumnY }], false));
+  return host;
+}
+function oppAtkSection(m, sectionLabel, cols, editable) {
+  const active = cols.filter((c) => c.col && c.col.rows && c.col.rows.length);
+  const sec = el("div", "opp-mega-block");
+  if (sectionLabel) sec.appendChild(el("div", "slot-mega-hdr", sectionLabel));
+  if (!active.length) return sec;
+  // 컬럼 헤더(컬럼 2개 이상일 때): [빈] [상대 원래] | [상대 메가X] | [상대 메가Y]
+  if (active.length > 1) {
+    const h = el("div", "opp-mrow opp-col-hdr");
+    h.appendChild(el("div", "mname", ""));   // col0
+    const hw = el("div", "chips-wrap");      // col1 — 데이터 행과 동일 구조(첫 컬럼 앞뒤 -/+ 자리)로 정렬
+    active.forEach((c, ci) => {
+      if (ci > 0) hw.appendChild(el("div", "mega-sep"));
+      hw.appendChild(el("div", "col-lbl", c.lbl));
+      if (ci === 0) hw.appendChild(el("span", "pbtn-spacer"));   // 첫 위력칩 뒤 +자리(데이터 행과 정렬)
+    });
+    h.appendChild(hw);
+    sec.appendChild(h);
+  }
+  active[0].col.rows.forEach((r, i) => sec.appendChild(oppRow(m, active, i, editable)));
+  return sec;
+}
+function fillSamples(sp, row) {
+  if (!row) { sp.appendChild(el("span", "muted", "—")); return; }
+  if (row.unknown) sp.appendChild(el("span", "muted", "미등록"));
+  else if (row.isStatus || !row.samples || !row.samples.length) sp.appendChild(el("span", "muted", "변화기"));
+  else row.samples.forEach((s) => sp.appendChild(renderSample(s)));
+}
+function oppRow(m, active, slot, editable) {
+  const g = el("div", "opp-mrow");
+  const first = active[0].col.rows[slot];
+  if (editable && oppEditSlot === slot) {
+    // 편집: datalist 입력칸 + 비우기(✕) 버튼(입력칸 오른쪽 끝). grid 전체 폭.
+    const ew = el("div", "edit-wrap");
+    ew.style.gridColumn = "1 / -1";
+    const inp = el("input", "opp-move-input");
+    inp.setAttribute("list", "oppMoveList");
+    inp.value = (first && first.moveNameKo) || "";
+    inp.placeholder = "기술명 입력/선택";
+    inp.onkeydown = (e) => {
+      if (e.key === "Enter") { e.preventDefault(); commitOppMove(slot, inp.value); }
+      else if (e.key === "Escape") { oppEditSlot = null; if (lastModel) render(lastModel); }
+    };
+    inp.onblur = () => commitOppMove(slot, inp.value);
+    ew.appendChild(inp);
+    const clr = el("span", "edit-clear", "✕");
+    clr.title = "입력 비우기";
+    clr.onmousedown = (e) => { e.preventDefault(); inp.value = ""; inp.focus(); };  // blur 전 처리(mousedown)
+    ew.appendChild(clr);
+    g.appendChild(ew);
+    setTimeout(() => { inp.focus(); inp.select(); }, 0);
+    return g;
+  }
+  // 114차 — 급소 체크박스(모든 상대 기술). mname 왼쪽 flex 아이템 → chips/mname은 우측 기준 고정이라 정렬 유지(내 시점 crit-box의 상대 버전).
+  if (first && first.moveNameEn) {
+    const cb = el("input", "opp-crit-box");
+    cb.type = "checkbox";
+    cb.checked = !!first.critActive;
+    cb.title = "급소 (체크 시 위력 ×1.5)";
+    cb.onchange = () => sim("/api/sim/opp/crit", { moveNameEn: first.moveNameEn });
+    g.appendChild(cb);
+  }
+  // 내 시점 renderRow와 100% 동일: col0=기술명(+has-ctl이면 −버튼), col1=chips-wrap(왼쪽 정렬, 기술명 바로 옆).
+  //   +버튼은 첫 위력칩(상대 원래) 뒤. -/+ 는 편집 섹션(내 원래)만. samples 고정폭 → 변화기/컬럼 모두 정렬.
+  const hasCtl = editable && !!(first && first.moveKey);
+  const nameTxt = (first && first.moveNameKo) || "(빈 슬롯)";
+  const n = el("div", "mname" + (hasCtl ? " has-ctl" : "") + (editable && !hasCtl ? " editable" : ""));
+  if (hasCtl) {
+    const mtext = el("span", "mtext", nameTxt);
+    mtext.classList.add("editable"); mtext.title = "클릭: 기술 편집";
+    mtext.onclick = () => { oppEditSlot = slot; if (lastModel) render(lastModel); };
+    n.appendChild(mtext);
+    const delta = (first.currentPower || 0) - (first.basePower || 0);
+    if (delta !== 0) n.appendChild(el("span", "pdelta", (delta > 0 ? "+" : "") + delta));
+    const minus = el("span", "pbtn", "−");
+    minus.title = "위력 단계 내리기";
+    minus.onclick = () => sim("/api/sim/move-power", { moveKey: first.moveKey, delta: -1 });
+    n.appendChild(minus);
+  } else {
+    n.textContent = nameTxt;
+    if (editable) {
+      n.title = "클릭: 기술 편집 (사용률순 드롭다운 + 직접입력)";
+      n.onclick = () => { oppEditSlot = slot; if (lastModel) render(lastModel); };
+    }
+  }
+  g.appendChild(n);
+  const wrap = el("div", "chips-wrap");
+  active.forEach((c, ci) => {
+    if (ci > 0) wrap.appendChild(el("div", "mega-sep"));
+    const sp = el("div", "samples");
+    fillSamples(sp, c.col.rows[slot]);
+    wrap.appendChild(sp);
+    if (ci === 0) {   // 첫 위력칩(상대 원래) 뒤 +버튼 / 자리
+      if (hasCtl) {
+        const plus = el("span", "pbtn", "+");
+        plus.title = "위력 단계 올리기";
+        plus.onclick = () => sim("/api/sim/move-power", { moveKey: first.moveKey, delta: 1 });
+        wrap.appendChild(plus);
+      } else { wrap.appendChild(el("span", "pbtn-spacer")); }
+    }
+  });
+  g.appendChild(wrap);
+  return g;
+}
+function commitOppMove(slot, val) {
+  oppEditSlot = null;
+  const v = (val || "").trim();
+  if (v) sim("/api/sim/opp/move", { slot: slot, moveKo: v });
+  else if (lastModel) render(lastModel);   // 빈 입력 = 편집 취소(재렌더로 원복)
+}
+// 상대 usage 후보로 datalist 채움(사용률 내림차순). 직전과 같으면 skip.
+function fillOppMoveList(cands) {
+  const dl = $("#oppMoveList");
+  if (!dl) return;
+  const html = (cands || []).map((c) => `<option value="${c.ko}">${Math.round(c.pct)}%</option>`).join("");
+  if (dl.innerHTML !== html) dl.innerHTML = html;
+}
+
 // ── 스피드 ──────────────────────────────────────────────────
 function spChip(v, bg, tip) { const c = el("span", "spchip", v); c.style.background = bg; c.title = tip + " · " + v; return c; }
 function speedLine(s) {
@@ -480,6 +677,8 @@ function speedLine(s) {
   l.appendChild(spChip(s.min, "#C8F0C0", "무보정·무노력"));
   return l;
 }
+// 113차 — 상대 시점 6슬롯(내 파티): 내 실제 스피드 1개 칩(추정 3단계 대신).
+function mySpeedChip(v) { const c = el("span", "myspchip", v); c.title = "내 스피드(실수치)"; return c; }
 function renderMySpeed(rows) {
   if (!rows || !rows.length) return null;
   const d = el("div");
@@ -526,16 +725,18 @@ function typeIcons(types) {
 }
 
 // ── 상대 6슬롯 ───────────────────────────────────────────────
-function renderOpponents(list) {
+function renderOpponents(list, mirror) {
   const wrap = el("div", "opps");
   (list || []).forEach((o) => {
-    const c = el("div", "oppslot");
+    const c = el("div", "oppslot" + (mirror ? " mirror" : ""));
     // 왼쪽 = sprite / 이름 / 스피드 (세로)
     const left = el("div", "slot-left");
     if (o.spritePath) { const img = el("img", "spr"); img.src = PCH_ASSET + o.spritePath; img.alt = o.name; left.appendChild(img); }
     if (o.types && o.types.length) left.appendChild(typeIcons(o.types));
     left.appendChild(el("div", "slot-name", o.name));
-    if (o.speed) left.appendChild(speedLine(o.speed));
+    // 스피드: 상대 시점(mirror)=내 실제 스피드 1개(빌드 앎), 일반=상대 3단계 추정.
+    if (mirror && o.mySpeed != null) { const l = el("div", "spline"); l.appendChild(mySpeedChip(o.mySpeed)); left.appendChild(l); }
+    else if (o.speed) left.appendChild(speedLine(o.speed));
     c.appendChild(left);
     // 오른쪽 = 기술 4개
     const moves = el("div", "slot-moves");
@@ -578,8 +779,8 @@ function renderMatchup(m) {
   const host = el("div", "matchup-row");
   host.appendChild(muSide(m.myName, m.mySpritePath, m.myStages, m.myBurned, m.myParalyzed, renderMySpeed(m.mySpeeds), false, m.myTypes, m.myAegisToggle, m.myAegisBlade, "my"));
   // 중앙: 기술 리스트(위 정렬)
-  const center = el("div", "mu-center");
-  center.appendChild(renderCenter(m));
+  const center = el("div", "mu-center" + (m.oppPerspective ? " opp-persp" : ""));
+  center.appendChild(m.oppPerspective ? renderOppCenter(m) : renderCenter(m));
   host.appendChild(center);
   host.appendChild(muSide(m.oppName, m.oppSpritePath, m.oppStages, m.oppBurned, m.oppParalyzed, renderOppSpeed(m.oppSpeeds), true, m.oppTypes, m.oppAegisToggle, m.oppAegisBlade, "opp"));
   return host;
@@ -619,7 +820,7 @@ function adjRow(label, valueText, onMinus, onPlus, minusLabel, plusLabel, valueC
   return r;
 }
 // 74차 — 상대 시뮬 지닌도구 드롭다운(헤더 클릭 펼침/접힘). 항목 클릭 → POST + 접힘.
-function oppItemDropdown(m) {
+function oppItemDropdown(m, persp) {
   const wrap = el("div", "dropdown");
   const sel = m.oppSimItemKo || "없음";
   const header = el("button", "dd-header");
@@ -629,12 +830,22 @@ function oppItemDropdown(m) {
   wrap.appendChild(header);
   if (oppItemOpen) {
     const list = el("div", "dd-list");
-    OPP_ITEMS.forEach((it) => {
+    const addOpt = (it) => {
       const cur = it === "없음" ? !m.oppSimItemKo : m.oppSimItemKo === it;
       const opt = el("div", "dd-opt" + (cur ? " sel" : ""), it + (cur ? "  ✓" : ""));
       opt.onclick = () => { oppItemOpen = false; sim("/api/sim/opp/item", { itemKo: it === "없음" ? "" : it }); };
       list.appendChild(opt);
-    });
+    };
+    // 114차 — 상대 시점(persp)=상대가 공격자 → 공격도구(위력/타입강화) 그룹. 내 시점=상대가 방어자 → 방어 가정도구(OPP_ITEMS).
+    if (persp) {
+      addOpt("없음");
+      MY_ITEM_GROUPS.forEach((g) => {
+        list.appendChild(el("div", "dd-grp", g.label));
+        g.items.forEach((it) => addOpt(it));
+      });
+    } else {
+      OPP_ITEMS.forEach(addOpt);
+    }
     wrap.appendChild(list);
   }
   return wrap;
@@ -746,12 +957,14 @@ function mySimPanel(m) {
 }
 function oppSimPanel(m) {
   const p = el("div", "sim-panel");
+  // 114차 — 상대 시점(persp)=상대가 공격자 → 지닌도구를 공격도구로. 랭크/노력치/성격은 시점 무관 전체 유지.
+  const persp = !!m.oppPerspective;
   p.appendChild(oppSimHead("상대 시뮬: " + (m.oppName || ""), m.oppSimMegaForms, m.oppSimMegaIndex));
   // 83차 — 지닌도구 + 특성을 수평 2칸으로(세로 스크롤 제거). 각 드롭다운 펼침은 absolute라 옆칸 안 밀림.
   const cols = el("div", "sim-cols");
   const itemCol = el("div", "sim-col");
   itemCol.appendChild(el("div", "sim-sub", "지닌도구"));
-  itemCol.appendChild(oppItemDropdown(m));
+  itemCol.appendChild(oppItemDropdown(m, persp));
   cols.appendChild(itemCol);
   // 82차 — 특성 (메가=자동 고정 / 비메가=후보 드롭다운, 효과설명 표시). 후보 있을 때만 둘째 칸.
   if ((m.oppSimAbilityChoices && m.oppSimAbilityChoices.length) || m.oppSimAbilityLocked) {
@@ -785,7 +998,7 @@ function oppSimPanel(m) {
       () => sim("/api/sim/opp/nature", { stat: i, dir: -1 }),
       () => sim("/api/sim/opp/nature", { stat: i, dir: 1 }), "▼", "▲", color));
   });
-  // 랭크
+  // 랭크 — 전체 스탯(공/방/특공/특방/스피드) 업/다운.
   p.appendChild(el("div", "sim-sub", "랭크"));
   STAT_KO.forEach((name, i) => {
     const v = (m.oppStages && m.oppStages[i]) || 0;
@@ -810,15 +1023,21 @@ function renderPartiesBlock(m) {
   const anySim = m.simActive || m.oppSimActive || m.simWeatherActive
     || m.simOppScreenActive || !!m.simMyType || !!m.simOppType || m.movePowerActive || m.critOverrideActive
     || m.simMyTailwindActive || m.simOppTailwindActive || !!m.simMyStatusKey || !!m.simOppStatusKey;
+  // 113차 — 중앙 열: "상대 시점" 토글(항상) + 그 아래 "모든 시뮬 취소"(시뮬 활성 시).
+  const mid = el("div", "pcol center");
+  mid.appendChild(el("div", "section-title", " "));
+  const persp = el("button", "btn opp-persp" + (m.oppPerspective ? " on" : ""), m.oppPerspective ? "상대 시점 ✓" : "상대");
+  persp.title = "상대 시점 위력 — 상대가 공격자, 내 6마리가 방어자. 위력칩이 상대 기술 기준으로 반전.";
+  persp.onclick = () => sim("/api/sim/opp-perspective");
+  mid.appendChild(persp);
   if (anySim) {
-    const mid = el("div", "pcol center");
     mid.appendChild(el("div", "section-title", " "));   // 좌우 "내/상대 파티" 제목 높이 맞춤 → 버튼을 sprite 라인에 정렬
     const btn = el("button", "btn sim-reset", "모든 시뮬 취소");
     btn.title = "내/상대 포켓몬·날씨·벽·타입 시뮬을 전부 해제하고 현재 실제 필드 상황으로 복귀";
     btn.onclick = () => sim("/api/sim/reset-all");
     mid.appendChild(btn);
-    host.appendChild(mid);
   }
+  host.appendChild(mid);
 
   const opp = el("div", "pcol right");
   const oh = el("div", "section-title", "상대 파티");
@@ -942,10 +1161,16 @@ function applyRegion(sel, nodes) {
 function render(m) {
   lastModel = m;
   setStatus("데이터 수신 중", "ok");
+  // 113차 — 상대 시점 모드: 상단 타이틀 + 기술 편집 datalist + 6슬롯 거울.
+  const tt = $("#top-title");
+  if (tt) tt.textContent = m.oppPerspective
+    ? "내 파티 (상대 기준 위력 — 상대가 공격)"
+    : "상대 파티 (내 현재 포켓몬 기준 위력)";
+  if (m.oppPerspective) fillOppMoveList(m.oppUsageCandidates);
   applyRegion("#mu-my-field", [fieldChips(m, "my")]);
   applyRegion("#mu-opp-field", [fieldChips(m, "opp")]);
   applyRegion("#mu-weather", [weatherControl(m)]);
-  applyRegion("#opps", [...renderOpponents(m.opponents).childNodes]);
+  applyRegion("#opps", [...renderOpponents(m.opponents, m.oppPerspective).childNodes]);
   applyRegion("#matchup", [renderMatchup(m)]);
   applyRegion("#parties", [...renderPartiesBlock(m).childNodes]);
 }
@@ -982,6 +1207,12 @@ function handleShutdown() {
     + '<div style="font-size:16px;color:#e8eaed;">헬퍼(오버레이)가 종료되었습니다.</div>'
     + '<div style="font-size:13px;">이 탭은 닫아도 됩니다. 헬퍼를 다시 시작하면 새 위력창이 열립니다.</div></div>';
 }
+// 113차 — "실제 수치" 토글(% ↔ 실 데미지). 로컬 상태라 서버 왕복 없이 재렌더만. 내/상대 위력칩 공통 적용.
+$("#real-toggle").onclick = () => {
+  showRealDamage = !showRealDamage;
+  $("#real-toggle").classList.toggle("on", showRealDamage);
+  if (lastModel) render(lastModel);
+};
 connect();
 </script>
 </body>
