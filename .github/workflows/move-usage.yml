@@ -43,5 +43,10 @@ jobs:
             exit 0
           fi
           git commit -m "chore: move-usage 자동 갱신 (championsbattledata)"
-          git push origin dev
+          # 실행 중 다른 push가 끼면(희귀) 여기서 거부됨 — 이번 결과는 옛 체크아웃 기준 생성물이라
+          # 덮어쓰지 않고 조용히 종료(다음 주기가 최신 코드로 재생성). 강제 병합 금지.
+          if ! git push origin dev; then
+            echo "push 경합 감지 — 이번 생성물 폐기, 다음 주기에 최신 코드로 재생성"
+            exit 0
+          fi
           git push origin dev:main   # dev:main = GitHub Pages 소스 → 재배포
