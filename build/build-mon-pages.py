@@ -9,7 +9,7 @@
 import json, os, re, html
 
 SITE = r"C:\개인\Claude\champions-helper-site"
-LASTMOD = "2026-07-01"
+LASTMOD = "2026-07-02"
 BASE = "https://champions-helper.com"
 
 with open(os.path.join(SITE, "data", "dex.json"), encoding="utf-8") as f:
@@ -32,11 +32,8 @@ except FileNotFoundError:
 ATTRIB = ('Battle data provided by <a href="https://championsbattledata.com/" '
           'target="_blank" rel="noopener">Pok&eacute;mon Champions Battle Data</a>')
 
-# dense 순위: 소스의 전역 순위(폼·비도감종 포함 → 구멍 발생)를 그대로 쓰지 않고,
-#   우리 도감에 실재하는 종만 사용률 높은 순으로 1..N 연속 재부여(빈 순위 제거).
-_ranked_dex = sorted((e for e in DEX if USAGE.get(_norm(e["en"]), {}).get("rank")),
-                     key=lambda e: (USAGE[_norm(e["en"])]["rank"], e["id"]))
-DENSE_RANK = {_norm(e["en"]): i + 1 for i, e in enumerate(_ranked_dex)}
+# 순위 = move-usage.json 의 rank(소스 column_position, 1~235 완전) 그대로 사용.
+#   (구 DENSE 재부여는 폼 미수록으로 구멍이 있던 시절의 임시조치 — 폼 도감 수록으로 폐기.)
 
 # ── 한글/색상 ──────────────────────────────────────────────────────────
 TYPE_KO = {"NORMAL":"노말","FIRE":"불꽃","WATER":"물","ELECTRIC":"전기","GRASS":"풀","ICE":"얼음",
@@ -148,8 +145,8 @@ def usage_section(en):
                     f'<div class="bar"><i style="width:{w:.0f}%;background:#5b8de0"></i></div>'
                     f'<span class="use-pct">{ptxt}</span></div>')
     season = f' · 시즌 {esc(USAGE_SEASON)} 싱글 배틀' if USAGE_SEASON else ''
-    _dr = DENSE_RANK.get(_norm(en))
-    sub = f'싱글 사용 순위 {_dr}위' if _dr else '랭크 배틀 채용률'
+    _rk = u.get("rank")
+    sub = f'싱글 사용 순위 {_rk}위' if _rk else '랭크 배틀 채용률'
     return (f'<section class="card"><h2>실전 사용 기술 <span class="sub">{sub}</span></h2>'
             '<p class="matchup-note" style="margin:0 0 12px">실제 랭크 배틀에서 이 포켓몬이 자주 채용하는 기술과 채용률입니다. '
             '상대로 만났을 때 어떤 기술을 조심해야 하는지 예측하는 데 참고하세요.</p>'
@@ -360,7 +357,7 @@ def pager_link(e, arrow):
     return f'<a href="/pokedex/{slug(e["en"])}/">{esc(e["ko"])} →</a>'
 
 def build_pages():
-    DEX.sort(key=lambda e: e["id"])
+    # 순서 = dex.json 그대로(도감번호 순, 독립폼은 base 바로 뒤) — prev/next 페이저도 이 순서.
     n = 0
     seen = set()
     for i, e in enumerate(DEX):
@@ -370,7 +367,7 @@ def build_pages():
             continue
         seen.add(sg)
         canon = f"{BASE}/pokedex/{sg}/"
-        num = "#" + str(e["id"]).zfill(4)
+        num = "#" + str(e.get("baseId") or e["id"]).zfill(4)
         tnames = "·".join(TYPE_KO[t] for t in e["types"])
         total = sum(e["stats"].values())
         desc = (f'{e["ko"]}({e["en"]})의 종족값(합계 {total})·타입 상성(약점/반감)·한글 특성'
@@ -423,7 +420,7 @@ def inject_index():
     with open(path, encoding="utf-8") as f:
         html_src = f.read()
     items = []
-    for e in sorted(DEX, key=lambda x: x["id"]):
+    for e in DEX:  # dex.json 순서(도감번호 순, 독립폼은 base 바로 뒤)
         sg = slug(e["en"])
         tag = ""
         if e.get("mega"): tag = '<span class="ml-mega">메가</span>'
@@ -475,7 +472,7 @@ def build_sitemap():
                     f"    <changefreq>{freq}</changefreq>\n    <priority>{pri}</priority>\n  </url>")
     for loc, freq, pri in STATIC_ROUTES:
         u(loc, freq, pri)
-    for e in sorted(DEX, key=lambda x: x["id"]):
+    for e in DEX:
         u(f"/pokedex/{slug(e['en'])}/", "monthly", "0.6")
     xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
@@ -583,7 +580,7 @@ def _bd_row(e, u, rank):
     top = u["moves"][:3]
     mv = ", ".join(
         f'{esc(m["ko"])} <b>{m["pct"]:g}%</b>' if isinstance(m.get("pct"), (int, float))
-        else esc(m["ko"]) for m in top)
+        else esc(m["ko"]) for m in top) or "기술 통계 없음"
     rk = f'<span class="bd-rank">{rank}</span>' if rank else '<span class="bd-rank">–</span>'
     return (f'<a class="bd-row" href="/pokedex/{slug(e["en"])}/">{rk}'
             f'<img src="/sprites/{esc(e["sprite"])}" alt="{esc(e["ko"])}" width="42" height="42" loading="lazy">'
@@ -595,13 +592,26 @@ def build_battle_data_page():
         print("  (move-usage 없음 — /battle-data/ 생략)")
         return 0
     ranked, unranked = [], []
-    for e in sorted(DEX, key=lambda x: x["id"]):
+    for e in DEX:
         u = usage_for(e["en"])
-        if not u or not u.get("moves"):
+        if not u:
             continue
-        dr = DENSE_RANK.get(_norm(e["en"]))
-        (ranked if dr else unranked).append((e, u, dr))
-    ranked.sort(key=lambda x: x[2])
+        rk = u.get("rank")
+        if rk:
+            ranked.append((e, u, rk))
+        elif u.get("moves"):
+            unranked.append((e, u, None))
+    ranked.sort(key=lambda x: (x[2], x[0]["id"]))
+    # 검증: 순위 완전성(구멍/중복) — 소스 1..N 그대로 나와야 정상.
+    rks = [r for _, _, r in ranked]
+    dup = sorted({r for r in rks if rks.count(r) > 1})
+    holes = sorted(set(range(1, (max(rks) if rks else 0) + 1)) - set(rks))
+    if dup:
+        print(f"  !! 배틀데이터 중복 순위: {dup}")
+        for r in dup:
+            print(f"     {r}: {[e['ko'] for e, _, rr in ranked if rr == r]}")
+    if holes:
+        print(f"  !! 배틀데이터 빈 순위: {holes}")
     parts = [f'<h2 class="bd-h">실전 사용 순위 <span class="c">({len(ranked)}종 · 채용률 높은 순)</span></h2>',
              '<div class="bd-list">' + "".join(_bd_row(e, u, dr) for e, u, dr in ranked) + '</div>']
     if unranked:
