@@ -272,6 +272,13 @@
     width: 140px; font-size: 11px; font-weight: 700; color: var(--txt);
     background: #2a2e36; border: 1px solid var(--accent); border-radius: 3px; padding: 1px 3px;
   }
+  /* 122차 — 상단 6슬롯 이름 클릭 → 종족 교체(오인식 수동 정정). 내 시점(상대 파티)만. */
+  .slot-name.editable { cursor: pointer; text-decoration: underline dotted rgba(255,255,255,0.4); text-underline-offset: 2px; }
+  .slot-name.editable:hover { color: #ffd54f; }
+  .opp-name-input {
+    width: 92px; font-size: 11px; font-weight: 700; color: var(--txt);
+    background: #2a2e36; border: 1px solid var(--accent); border-radius: 3px; padding: 1px 3px;
+  }
   /* 113차 — 상대 시점 center: 위력칩을 오른쪽(상대 공격자 sprite 쪽)으로. 내 포켓몬(왼쪽)에 안 붙게.
      col을 full width로 펴고(stretch) 각 행을 justify-end → 위력칩이 오른쪽 끝(상대 쪽)에 정렬. */
   .mu-center.opp-persp { align-items: stretch; }
@@ -363,7 +370,7 @@
 <body>
   <div id="bar">
     <span id="status">로컬 헬퍼 연결 대기…</span>
-    <span id="version">v0.121</span>
+    <span id="version">v0.122</span>
   </div>
   <section id="top">
     <div class="section-title" id="top-title">상대 파티 (내 현재 포켓몬 기준 위력)</div>
@@ -409,6 +416,7 @@
     광고 영역 (애드센스 승인 후 표시 — 공개 도메인 champions-helper.com/live에서만)
   </footer>
   <datalist id="oppMoveList"></datalist>   <!-- 113차 — 상대 기술 편집 드롭다운 후보(사용률 내림차순) -->
+  <datalist id="oppSpeciesList"></datalist>   <!-- 122차 — 상단 6슬롯 종족 교체 자동완성 후보(/api/master/species, 메가폼 제외) -->
 
 <script>
 "use strict";
@@ -418,6 +426,7 @@ let oppItemOpen = false;   // 74차 — 상대 도구 드롭다운 펼침 상태
 let myItemOpen = false;    // 107차 — 내 도구 드롭다운 펼침 상태
 let oppAbilityOpen = false; // 82차 — 상대 특성 드롭다운 펼침 상태
 let oppEditSlot = null;     // 113차 — 상대 시점 기술 편집 중인 슬롯(0~3, null=없음)
+let oppNameEditIdx = null;  // 122차 — 상단 6슬롯 종족 교체 편집 중인 슬롯(0~5, null=없음). 내 시점만.
 let showRealDamage = false; // 113차 — "실제 수치" 토글(% ↔ 실 데미지). 내/상대 위력 위력칩 공통. 하단 중앙 고정 버튼.
 
 // ── 색 규칙 (PowerRowRenderer 포팅) ──────────────────────────
@@ -791,15 +800,66 @@ function typeIcons(types) {
 }
 
 // ── 상대 6슬롯 ───────────────────────────────────────────────
+// 122차 — 내 시점(상대 파티)에서 슬롯 이름 클릭 → 종족 교체 편집(오인식 수동 정정, 기술 편집과 동일 UX).
+//   상대 시점(mirror=내 파티)은 편집 없음(사용자 정책 — 내 포켓몬 수정 불필요).
+function commitOppSlotName(slot, val) {
+  oppNameEditIdx = null;
+  const v = (val || "").trim();
+  if (v) sim("/api/sim/opp/party-slot", { slot: slot, nameKo: v });
+  if (lastModel) render(lastModel);   // 즉시 편집칸 제거(같은 이름 커밋 = WS push 없음 대비). 새 종족은 push가 반영.
+}
+let speciesFetchTimer = null;
+function fetchSpeciesList(q) {
+  clearTimeout(speciesFetchTimer);
+  speciesFetchTimer = setTimeout(() => {
+    fetch(PCH_HTTP + "/api/master/species?q=" + encodeURIComponent(q || ""))
+      .then((r) => r.json())
+      .then((list) => {
+        const dl = $("#oppSpeciesList");
+        if (!dl) return;
+        // 메가폼 제외 — 엔트리 화면(상대 6슬롯)엔 기본폼만 나온다.
+        const html = (list || []).filter((s) => !s.isMega).map((s) => `<option value="${s.nameKo}"></option>`).join("");
+        if (dl.innerHTML !== html) dl.innerHTML = html;
+      })
+      .catch(() => {});
+  }, 120);
+}
 function renderOpponents(list, mirror) {
   const wrap = el("div", "opps");
-  (list || []).forEach((o) => {
+  (list || []).forEach((o, i) => {
     const c = el("div", "oppslot" + (mirror ? " mirror" : ""));
     // 왼쪽 = sprite / 이름 / 스피드 (세로)
     const left = el("div", "slot-left");
     if (o.spritePath) { const img = el("img", "spr"); img.src = PCH_ASSET + o.spritePath; img.alt = o.name; left.appendChild(img); }
     if (o.types && o.types.length) left.appendChild(typeIcons(o.types));
-    left.appendChild(el("div", "slot-name", o.name));
+    if (!mirror && oppNameEditIdx === i) {
+      // 편집: datalist 입력칸 + 비우기(✕) — 상대 기술 편집(oppRow)과 동일 패턴.
+      const ew = el("div", "edit-wrap");
+      const inp = el("input", "opp-name-input");
+      inp.setAttribute("list", "oppSpeciesList");
+      inp.value = o.name || "";
+      inp.placeholder = "포켓몬 이름";
+      inp.oninput = () => fetchSpeciesList(inp.value);
+      inp.onkeydown = (e) => {
+        if (e.key === "Enter") { e.preventDefault(); commitOppSlotName(i, inp.value); }
+        else if (e.key === "Escape") { oppNameEditIdx = null; if (lastModel) render(lastModel); }
+      };
+      inp.onblur = () => commitOppSlotName(i, inp.value);
+      ew.appendChild(inp);
+      const clr = el("span", "edit-clear", "✕");
+      clr.title = "입력 비우기";
+      clr.onmousedown = (e) => { e.preventDefault(); inp.value = ""; inp.focus(); };  // blur 전 처리(mousedown)
+      ew.appendChild(clr);
+      left.appendChild(ew);
+      setTimeout(() => { inp.focus(); inp.select(); fetchSpeciesList(inp.value); }, 0);
+    } else {
+      const nm = el("div", "slot-name" + (mirror ? "" : " editable"), o.name);
+      if (!mirror) {
+        nm.title = "클릭: 포켓몬 교체 (오인식 정정 — 이름 입력/선택)";
+        nm.onclick = () => { oppNameEditIdx = i; if (lastModel) render(lastModel); };
+      }
+      left.appendChild(nm);
+    }
     // 스피드: 상대 시점(mirror)=내 실제 스피드 1개(빌드 앎), 일반=상대 3단계 추정.
     if (mirror && o.mySpeed != null) { const l = el("div", "spline"); l.appendChild(mySpeedChip(o.mySpeed)); left.appendChild(l); }
     else if (o.speed) left.appendChild(speedLine(o.speed));
