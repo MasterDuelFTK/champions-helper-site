@@ -8,7 +8,7 @@
 # dex.json 갱신(build-all.py) 후 이 스크립트를 돌리면 상세페이지가 자동 재생성된다.
 import datetime, json, os, re, html
 
-SITE = r"C:\개인\Claude\champions-helper-site"
+SITE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # build/ 의 상위 = repo 루트(CI 우분투 호환, 123차)
 LASTMOD = datetime.date.today().isoformat()  # cron 자동 재생성(123차)에 맞춰 실행일 스탬프
 BASE = "https://champions-helper.com"
 
