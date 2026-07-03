@@ -297,20 +297,73 @@
   .opp-col-hdr .mname { visibility: hidden; }
   /* 줄 헤더("상대 원래"/"메가OO 시")도 위력칩(우정렬)에 맞춰 오른쪽 정렬 — 왼쪽 sprite에 안 붙게. */
   .mu-center.opp-persp .slot-mega-hdr { text-align: right; }
-  /* 113차 — "실제 수치" 토글: 광고 영역 바로 위 고정 바(flex item — 광고와 안 겹침). on=초록(실 데미지). */
-  #real-toggle-bar { flex: 0 0 auto; display: flex; justify-content: center; padding: 4px 0; background: var(--panel2); border-top: 1px solid var(--line); }
+  /* 113차 — "실제 수치" 토글: 광고 영역 바로 위 고정 바(flex item — 광고와 안 겹침). on=초록(실 데미지).
+     120차 — "선출 정보" 버튼 동승: 두 버튼이 함께 중앙 정렬(gap). 클릭=선출 정보 모달 열기(아래 #pick-modal). */
+  #real-toggle-bar { flex: 0 0 auto; display: flex; justify-content: center; gap: 10px; padding: 4px 0; background: var(--panel2); border-top: 1px solid var(--line); }
   .real-toggle {
     font-size: 11px; font-weight: 700; padding: 4px 16px; border-radius: 14px; cursor: pointer;
     background: #2f3742; color: var(--txt); border: 1px solid var(--line);
   }
   .real-toggle:hover { background: #3a4450; }
   .real-toggle.on { background: #2f7d4f; color: #fff; border-color: #41a06a; }
+  /* 120차 — 선출 정보 모달(계산 = 열기·다시계산·상대파티 변경 시 1회씩).
+     121차 — UI 재설계: 추천 트리오 카드 + 팀 경고 배지 + 6×6 히트맵 그리드(줄글 나열 폐기). */
+  #pick-modal { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 900; display: none; align-items: center; justify-content: center; }
+  #pick-modal .pick-box { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; width: min(1080px, 96vw); max-height: 90vh; display: flex; flex-direction: column; }
+  .pick-hdr { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .pick-title { font-size: 15px; font-weight: 800; }
+  .pick-status { font-size: 11px; color: #9aa0a8; }
+  .pick-close { margin-left: 4px; background: transparent; border: none; color: #9aa0a8; font-size: 16px; cursor: pointer; }
+  .pick-close:hover { color: #fff; }
+  .pick-body { overflow-y: auto; padding: 8px 14px 12px; }
+  /* 세그먼트 채색(120차 사용자 지시 유지): 내게 유리한 사실=빨강 / 불리한 사실=파랑. 중립=기본 회색. */
+  .pick-good { color: #ff7a7a; font-weight: 700; }
+  .pick-bad { color: #6fa8ff; font-weight: 700; }
+  .pick-caveat { font-size: 10.5px; color: #6e7683; padding: 8px 2px 2px; }
+  .pick-wait { padding: 40px 10px; text-align: center; color: #9aa0a8; font-size: 13px; line-height: 1.7; }
+  /* 121차 — 추천 트리오 카드(상단). 1순위=주황 테두리 강조, ★선봉 배지. */
+  .pick-sec-title { font-size: 12px; font-weight: 800; margin: 6px 0 3px; color: #e8eaed; }
+  .pick-reco-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 2px 0 6px; }
+  .pick-reco { flex: 1 1 250px; min-width: 220px; background: #232a33; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  .pick-reco.best { border-color: #c96a4a; box-shadow: 0 0 0 1px rgba(201,106,74,.35); }
+  .pick-reco-rank { font-size: 11px; font-weight: 800; color: #9aa0a8; margin-bottom: 4px; }
+  .pick-reco.best .pick-reco-rank { color: #ff9a7a; }
+  .pick-reco-mons { display: flex; gap: 10px; }
+  .pick-reco-mon { display: flex; flex-direction: column; align-items: center; width: 58px; }
+  .pick-reco-mon img { width: 36px; height: 36px; image-rendering: pixelated; }
+  .pick-reco-mon .nm { font-size: 9.5px; color: #c7ccd4; max-width: 58px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pick-lead-badge { font-size: 8.5px; font-weight: 800; color: #ffd479; }
+  .pick-reco-reasons { margin-top: 5px; font-size: 10.5px; color: #9aa0a8; line-height: 1.55; }
+  /* 121차 — 팀 경고 배지(순풍/트릭룸/장판/벽). */
+  .pick-warn-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 2px 0 6px; }
+  .pick-warn { font-size: 10.5px; font-weight: 700; color: #ffb86b; background: #3a2f22; border: 1px solid #6b5230; border-radius: 10px; padding: 2px 8px; }
+  /* 121차 — 6×6 히트맵 그리드. 셀 배경 = 듀얼 판정(유리 빨강/불리 파랑/반반 회색), 클릭 = 하단 상세. */
+  .pick-legend { font-size: 10px; color: #6e7683; margin: 6px 0 2px; }
+  .pick-grid-wrap { overflow-x: auto; }
+  table.pick-grid { border-collapse: collapse; width: 100%; }
+  .pick-grid th, .pick-grid td { border: 1px solid var(--line); padding: 3px 4px; text-align: center; }
+  .pick-grid th { background: #20262e; font-weight: 700; font-size: 10px; color: #c7ccd4; }
+  .pick-grid th img { width: 30px; height: 30px; image-rendering: pixelated; display: block; margin: 0 auto; }
+  .pick-grid td.me { text-align: left; background: #20262e; min-width: 108px; font-size: 11px; }
+  .pick-grid td.me img { width: 28px; height: 28px; image-rendering: pixelated; vertical-align: middle; margin-right: 4px; }
+  .pick-me-sub { font-size: 9px; color: #9aa0a8; margin-top: 1px; }
+  .pick-cell { cursor: pointer; min-width: 72px; font-size: 10.5px; line-height: 1.45; position: relative; padding-right: 15px !important; }
+  .pick-cell:hover { outline: 1px solid rgba(255,255,255,.3); }
+  .pick-cell.sel { outline: 2px solid #ffd479; }
+  .pick-cell .spd { position: absolute; top: 2px; right: 3px; font-size: 9px; color: #9aa0a8; }
+  .pick-c-good { background: rgba(255,90,90,.16); }
+  .pick-c-bad { background: rgba(90,140,255,.15); }
+  .pick-c-mid { background: rgba(255,255,255,.03); }
+  .pick-badges { font-size: 10px; letter-spacing: 1px; margin-top: 1px; cursor: default; }
+  /* 121차 — 셀 클릭 상세 패널(그리드 아래). */
+  .pick-detail { margin-top: 8px; background: #20262e; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 11.5px; color: #c7ccd4; line-height: 1.65; display: none; }
+  .pick-reason { font-size: 10.5px; color: #9aa0a8; }
 </style>
 </head>
 <body>
   <div id="bar">
     <span id="status">로컬 헬퍼 연결 대기…</span>
-    <span id="version">v0.114</span>
+    <span id="version">v0.121</span>
   </div>
   <section id="top">
     <div class="section-title" id="top-title">상대 파티 (내 현재 포켓몬 기준 위력)</div>
@@ -334,7 +387,20 @@
       <div id="parties" class="parties"></div>
     </div>
   </section>
-  <div id="real-toggle-bar"><button id="real-toggle" class="real-toggle" title="위력칩을 % ↔ 실제 데미지 수치로 전환 (내/상대 공통)">실제 수치</button></div>
+  <div id="real-toggle-bar"><button id="real-toggle" class="real-toggle" title="위력칩을 % ↔ 실제 데미지 수치로 전환 (내/상대 공통)">실제 수치</button><button id="pick-toggle" class="real-toggle" title="내 파티 각 멤버 vs 상대 6마리 — 몇 타/스피드 우위 정보 (매치 진입 시 자동 갱신)">선출 정보</button></div>
+  <!-- 120차 — 선출 정보 모달. 배경/✕ 클릭으로 닫기. 내용은 renderPickInfo가 채움. -->
+  <div id="pick-modal">
+    <div class="pick-box">
+      <div class="pick-hdr">
+        <span class="pick-title">선출 정보</span>
+        <span id="pick-status" class="pick-status"></span>
+        <span style="flex:1"></span>
+        <button id="pick-refresh" class="real-toggle" title="지금 상태로 다시 계산">다시 계산</button>
+        <button id="pick-close" class="pick-close" title="닫기">✕</button>
+      </div>
+      <div id="pick-body" class="pick-body"></div>
+    </div>
+  </div>
   <footer id="ads">
     <!-- 87차 — Google AdSense 자리. 승인 후 head 로더 주석 해제 + 아래 ins 활성화(ca-pub/슬롯 발급값 기입):
     <ins class="adsbygoogle" style="display:block;width:100%" data-ad-client="ca-pub-XXXXXXXX" data-ad-slot="XXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
@@ -1161,6 +1227,8 @@ function applyRegion(sel, nodes) {
 function render(m) {
   lastModel = m;
   setStatus("데이터 수신 중", "ok");
+  // 120차 — 선출 정보 모달 열림 중 상대 파티가 바뀌면(새 매치 인식/클리어) 1회 재요청. 닫혀 있으면 비교만(계산 0).
+  if (pickOpen) { const s = pickSig(m); if (s !== pickOppSig) { pickOppSig = s; fetchPickInfo(); } }
   // 113차 — 상대 시점 모드: 상단 타이틀 + 기술 편집 datalist + 6슬롯 거울.
   const tt = $("#top-title");
   if (tt) tt.textContent = m.oppPerspective
@@ -1213,6 +1281,177 @@ $("#real-toggle").onclick = () => {
   $("#real-toggle").classList.toggle("on", showRealDamage);
   if (lastModel) render(lastModel);
 };
+// 120차 — "선출 정보" 모달. 계산 요청은 ①열기 ②"다시 계산" ③모달 열림 중 상대 파티 변경(render의 sig 감지) —
+//   각 1회 POST(폴링 없음). 헬퍼가 요청당 1회 계산해 JSON 반환.
+let pickOpen = false;
+let pickOppSig = null; // 모달 열림 중 상대 파티 변경 감지용(WS push마다 문자열 비교만)
+function pickSig(m) { return ((m && m.oppParty) || []).map((p) => p.name).join(","); }
+function togglePickModal() {
+  pickOpen = !pickOpen;
+  $("#pick-modal").style.display = pickOpen ? "flex" : "none";
+  $("#pick-toggle").classList.toggle("on", pickOpen);
+  if (pickOpen) { pickOppSig = pickSig(lastModel); fetchPickInfo(); }
+}
+async function fetchPickInfo() {
+  $("#pick-status").textContent = "계산 중…";
+  try {
+    const r = await fetch(PCH_HTTP + "/api/sim/pick-info",
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    const j = await r.json();
+    renderPickInfo(j.ok ? j.info : null, false);
+  } catch { renderPickInfo(null, true); }
+}
+// 121차 — UI 재설계: ①추천 트리오 카드 ②팀 경고 배지 ③6×6 히트맵 그리드(셀=듀얼 판정 채색, 클릭=상세).
+//   채색 규칙(120차 사용자 지시 유지): 유리=빨강 / 불리=파랑 / 반반=회색.
+let lastPickInfo = null;
+let pickSel = null; // 선택 셀 {mi, oj}
+const PICK_BADGE_GLYPH = { recovery: "♻", offsetup: "⬆", defsetup: "🛡", burn: "🔥", paralysis: "⚡", sleep: "💤", toxic: "☠", priority: "▶" };
+const PICK_SPD_GLYPH = ["▼", "▽", "△", "▲"]; // speedTier 0(열세)~3(최속에도 우위)
+const pickTurnsTxt = (t) => (t >= 6 ? "6타+" : t + "타");
+function pickSegCls(e) {
+  // 세그먼트 채색: 내 타수 1~2=good·4+/유효타없음=bad·3=중립 / 상대는 반대 / 스피드 우위=good.
+  const myCls = e.myBestPct > 0 && e.myTurns <= 2 ? "pick-good"
+    : (e.myBestPct <= 0 || e.myTurns >= 4) ? "pick-bad" : null;
+  const oppCls = e.oppMovesUnknown ? null
+    : (e.oppBestPct <= 0 || e.oppTurns >= 4) ? "pick-good"
+    : e.oppTurns <= 2 ? "pick-bad" : null;
+  const spdCls = (e.speedText || "").startsWith("스피드 우위") ? "pick-good" : "pick-bad";
+  return { myCls, oppCls, spdCls };
+}
+function renderPickInfo(info, offline) {
+  const body = $("#pick-body");
+  body.innerHTML = "";
+  lastPickInfo = info;
+  pickSel = null;
+  $("#pick-status").textContent = info ? "계산 시각 " + new Date().toLocaleTimeString() : "";
+  if (!info) {
+    body.appendChild(el("div", "pick-wait", offline
+      ? "헬퍼에 연결할 수 없습니다. 헬퍼가 실행 중인지(또는 최신 버전인지) 확인하세요."
+      : "상대 파티 인식 대기 중 — 매치 시작(엔트리 선택 화면)에서 상대 6마리가 인식되면 자동으로 표시됩니다."));
+    return;
+  }
+  const members = info.members || [];
+  const reco = info.recommendation;
+
+  // ① 추천 트리오 카드(내 파티 3마리 이상일 때만 서버가 채움).
+  if (reco && reco.trios && reco.trios.length) {
+    body.appendChild(el("div", "pick-sec-title", "추천 선출 (참고용)"));
+    const row = el("div", "pick-reco-row");
+    reco.trios.forEach((t, ti) => {
+      const card = el("div", "pick-reco" + (ti === 0 ? " best" : ""));
+      card.appendChild(el("div", "pick-reco-rank", (ti + 1) + "순위"));
+      const mons = el("div", "pick-reco-mons");
+      (t.memberIdx || []).forEach((mi) => {
+        const m = members[mi];
+        if (!m) return;
+        const box = el("div", "pick-reco-mon");
+        if (m.spritePath) { const i = el("img"); i.src = PCH_ASSET + m.spritePath; i.alt = m.nameKo; box.appendChild(i); }
+        box.appendChild(el("div", "nm", m.nameKo));
+        if (mi === t.leadIdx) box.appendChild(el("div", "pick-lead-badge", "★ 선봉"));
+        mons.appendChild(box);
+      });
+      card.appendChild(mons);
+      const rs = el("div", "pick-reco-reasons");
+      (t.reasons || []).forEach((r) => rs.appendChild(el("div", null, "· " + r)));
+      card.appendChild(rs);
+      row.appendChild(card);
+    });
+    body.appendChild(row);
+  }
+
+  // ② 팀 경고 배지(순풍/트릭룸/장판/벽 요원).
+  if (reco && reco.teamWarnings && reco.teamWarnings.length) {
+    const wr = el("div", "pick-warn-row");
+    reco.teamWarnings.forEach((w) => wr.appendChild(el("span", "pick-warn", "⚠ " + w)));
+    body.appendChild(wr);
+  }
+
+  // ③ 6×6 히트맵 그리드.
+  if (!members.length) return;
+  body.appendChild(el("div", "pick-legend",
+    "행=내 파티 · 열=상대 — 셀 배경: 빨강=유리 / 파랑=불리 / 회색=반반 · 셀 클릭=상세 · 우상단 화살표=스피드(▲최속에도 우위 △풀보정까지 ▽무보정만 ▼열세)"));
+  const wrap = el("div", "pick-grid-wrap");
+  const table = document.createElement("table");
+  table.className = "pick-grid";
+  const trh = document.createElement("tr");
+  trh.appendChild(el("th", null, "내 ↓ 상대 →"));
+  (members[0].entries || []).forEach((e, oj) => {
+    const th = document.createElement("th");
+    if (e.oppSpritePath) { const i = el("img"); i.src = PCH_ASSET + e.oppSpritePath; i.alt = e.oppNameKo; th.appendChild(i); }
+    th.appendChild(el("div", null, e.oppNameKo));
+    const tags = info.oppTags && info.oppTags[oj];
+    if (tags && tags.badges && tags.badges.length) {
+      const b = el("div", "pick-badges", tags.badges.map((x) => PICK_BADGE_GLYPH[x.kind] || "•").join(""));
+      b.title = tags.badges.map((x) => x.text).join("\n");
+      th.appendChild(b);
+    }
+    trh.appendChild(th);
+  });
+  table.appendChild(trh);
+  members.forEach((m, mi) => {
+    const tr = document.createElement("tr");
+    const me = document.createElement("td");
+    me.className = "me";
+    if (m.spritePath) { const i = el("img"); i.src = PCH_ASSET + m.spritePath; i.alt = m.nameKo; me.appendChild(i); }
+    me.appendChild(el("span", null, m.nameKo));
+    me.appendChild(el("div", "pick-me-sub", "스피드 " + m.mySpeed + (m.megaAssumed ? " · 메가 기준" : "")));
+    tr.appendChild(me);
+    (m.entries || []).forEach((e, oj) => {
+      const td = document.createElement("td");
+      const v = e.duel ? e.duel.verdict : "반반";
+      td.className = "pick-cell " + (v === "유리" ? "pick-c-good" : v === "불리" ? "pick-c-bad" : "pick-c-mid");
+      const c = pickSegCls(e);
+      td.appendChild(el("div", c.myCls, e.myBestPct > 0 ? "내 " + pickTurnsTxt(e.myTurns) : "유효타 ✕"));
+      td.appendChild(el("div", c.oppCls, e.oppMovesUnknown ? "상대 ?" : e.oppBestPct > 0 ? "상대 " + pickTurnsTxt(e.oppTurns) : "상대 ✕"));
+      const spd = el("span", "spd", PICK_SPD_GLYPH[e.speedTier || 0]);
+      td.appendChild(spd);
+      td.title = m.nameKo + " vs " + e.oppNameKo + "\n" + e.myText + "\n" + e.oppText + "\n" + e.speedText
+        + (e.duel && e.duel.reasons && e.duel.reasons.length ? "\n" + e.duel.reasons.map((r) => "· " + r).join("\n") : "");
+      td.onclick = () => selectPickCell(mi, oj, td);
+      tr.appendChild(td);
+    });
+    table.appendChild(tr);
+  });
+  wrap.appendChild(table);
+  body.appendChild(wrap);
+
+  const det = el("div", "pick-detail");
+  det.id = "pick-detail";
+  body.appendChild(det);
+  body.appendChild(el("div", "pick-caveat",
+    (info.caveatText || "") + (reco && reco.caveatText ? " " + reco.caveatText : "")));
+}
+// 121차 — 셀 클릭 → 그리드 아래 상세(기술명·%·스피드 문장·듀얼 근거). 같은 셀 재클릭=닫기.
+function selectPickCell(mi, oj, td) {
+  document.querySelectorAll(".pick-cell.sel").forEach((x) => x.classList.remove("sel"));
+  const det = $("#pick-detail");
+  if (!det || !lastPickInfo) return;
+  if (pickSel && pickSel.mi === mi && pickSel.oj === oj) { pickSel = null; det.style.display = "none"; return; }
+  pickSel = { mi: mi, oj: oj };
+  td.classList.add("sel");
+  const m = lastPickInfo.members[mi], e = m.entries[oj];
+  det.innerHTML = "";
+  const hd = el("div", null);
+  hd.style.fontWeight = "700";
+  hd.appendChild(el("span", null, m.nameKo + " vs " + e.oppNameKo + " — "));
+  const v = e.duel ? e.duel.verdict : "반반";
+  hd.appendChild(el("span", v === "유리" ? "pick-good" : v === "불리" ? "pick-bad" : null, v));
+  det.appendChild(hd);
+  const c = pickSegCls(e);
+  const ln = el("div", null);
+  ln.appendChild(el("span", c.myCls, e.myText));
+  ln.appendChild(el("span", null, " · "));
+  ln.appendChild(el("span", c.oppCls, e.oppText));
+  ln.appendChild(el("span", null, " · "));
+  ln.appendChild(el("span", c.spdCls, e.speedText));
+  det.appendChild(ln);
+  ((e.duel && e.duel.reasons) || []).forEach((r) => det.appendChild(el("div", "pick-reason", "· " + r)));
+  det.style.display = "block";
+}
+$("#pick-toggle").onclick = togglePickModal;
+$("#pick-close").onclick = togglePickModal;
+$("#pick-refresh").onclick = fetchPickInfo;
+$("#pick-modal").onclick = (e) => { if (e.target === $("#pick-modal")) togglePickModal(); };
 connect();
 </script>
 </body>
