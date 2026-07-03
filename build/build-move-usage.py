@@ -40,13 +40,18 @@ SITE   = "https://champs.pokedb.tokyo"
 RULE   = 0                  # 0 = 싱글 배틀 (포켓몬 챔피언스 헬퍼 대상)
 FORMAT = "Singles"          # 스키마 호환 라벨(구버전과 동일)
 TOP_N  = 12                 # 위력칩 4개 + 편집 드롭다운(5위~) 여유분 (pokedb 페이지는 상위 10 노출)
-# GitHub Actions 러너(데이터센터 IP)에서 커스텀 UA 꼬리표가 403 → 표준 브라우저 헤더 세트로 요청.
 UA     = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "ja,en-US;q=0.8,en;q=0.6",
     "Referer": "https://champs.pokedb.tokyo/",
 }
+
+# pokedb 는 클라우드 DC IP 대역을 전면 403(GitHub Actions 러너 실측 — robots.txt 포함 전부).
+#   → CI 에선 Cloudflare Worker 릴레이(pch-relay, upstream 고정 + 비밀 헤더) 경유로 fetch.
+#   로컬(거주지 IP)은 env 미설정 = 직접 접속. workflow 가 secrets 로 env 2개를 주입한다.
+RELAY     = os.environ.get("PCH_FETCH_RELAY", "").rstrip("/")
+RELAY_KEY = os.environ.get("PCH_RELAY_KEY", "")
 DELAY  = 0.35               # 정중한 호출 간격(초)
 
 # 무인 cron 안전핀 — 사이트 개편 등으로 파싱이 무너지면 옛(정상) json 을 덮지 않고 실패 종료.
@@ -55,10 +60,14 @@ MAX_EMPTY_RATIO = 0.5       # 기술 0개 페이지가 절반 넘으면 파싱 �
 
 
 def fetch_text(url, tries=3):
+    headers = dict(UA)
+    if RELAY and url.startswith(SITE):
+        url = RELAY + url[len(SITE):]
+        headers["X-Relay-Key"] = RELAY_KEY
     last = None
     for i in range(tries):
         try:
-            req = urllib.request.Request(url, headers=UA)
+            req = urllib.request.Request(url, headers=headers)
             with urllib.request.urlopen(req, timeout=40) as r:
                 return r.read().decode("utf-8", "replace")
         except Exception as e:  # noqa: BLE001 — best-effort 재시도

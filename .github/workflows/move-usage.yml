@@ -32,6 +32,10 @@ jobs:
 
       - name: Build move-usage.json
         run: python build/build-move-usage.py
+        env:
+          # pokedb 가 클라우드 IP 전면 403 → Cloudflare Worker 릴레이 경유(123차). 로컬 실행은 env 없이 직접.
+          PCH_FETCH_RELAY: ${{ secrets.PCH_FETCH_RELAY }}
+          PCH_RELAY_KEY: ${{ secrets.PCH_RELAY_KEY }}
 
       - name: Commit & push (dev + Pages)
         run: |
