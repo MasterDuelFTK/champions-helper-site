@@ -1,2 +1,3 @@
 # 빌드/진단 임시 출력 (재생성 가능)
 build/*_out.txt
+__pycache__/
