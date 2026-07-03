@@ -40,7 +40,13 @@ SITE   = "https://champs.pokedb.tokyo"
 RULE   = 0                  # 0 = 싱글 배틀 (포켓몬 챔피언스 헬퍼 대상)
 FORMAT = "Singles"          # 스키마 호환 라벨(구버전과 동일)
 TOP_N  = 12                 # 위력칩 4개 + 편집 드롭다운(5위~) 여유분 (pokedb 페이지는 상위 10 노출)
-UA     = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) PCH-move-usage/2.0"}
+# GitHub Actions 러너(데이터센터 IP)에서 커스텀 UA 꼬리표가 403 → 표준 브라우저 헤더 세트로 요청.
+UA     = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "ja,en-US;q=0.8,en;q=0.6",
+    "Referer": "https://champs.pokedb.tokyo/",
+}
 DELAY  = 0.35               # 정중한 호출 간격(초)
 
 # 무인 cron 안전핀 — 사이트 개편 등으로 파싱이 무너지면 옛(정상) json 을 덮지 않고 실패 종료.
