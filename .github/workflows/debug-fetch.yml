@@ -1,0 +1,19 @@
+name: Debug fetch (임시 — 진단 후 삭제)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe pokedb from runner
+        run: |
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+          for u in "https://champs.pokedb.tokyo/robots.txt" "https://champs.pokedb.tokyo/" "https://champs.pokedb.tokyo/pokemon/list?rule=0" "https://champs.pokedb.tokyo/opendata/s2_single_ranked_teams.csv"; do
+            code=$(curl -s -o /tmp/body -w "%{http_code}" -A "$UA" -H "Accept-Language: ja" "$u")
+            echo "== $u -> $code"
+            head -c 300 /tmp/body; echo
+          done
+          echo "== runner egress IP:"
+          curl -s https://api.ipify.org; echo
