@@ -1,7 +1,7 @@
 name: Build move-usage
 
 # 상대 기술 사용률(move-usage.json) 자동 갱신.
-#   championsbattledata.com API → build/build-move-usage.py → helper-data/move-usage.json
+#   champs.pokedb.tokyo (싱글, 123차 소스 교체) → build/build-move-usage.py → helper-data/move-usage.json
 #   master.json/sprites 와 독립(기술 사용률만 12h 주기로 따로 갱신). 개발자 수동 개입 0.
 #   push 대상: dev(작업 브랜치) + dev:main(GitHub Pages 재배포) — 사이트 운영 규칙과 동일.
 
@@ -42,7 +42,7 @@ jobs:
             echo "변경 없음 — 커밋 생략"
             exit 0
           fi
-          git commit -m "chore: move-usage 자동 갱신 (championsbattledata)"
+          git commit -m "chore: move-usage 자동 갱신 (champs.pokedb.tokyo)"
           # 실행 중 다른 push가 끼면(희귀) 여기서 거부됨 — 이번 결과는 옛 체크아웃 기준 생성물이라
           # 덮어쓰지 않고 조용히 종료(다음 주기가 최신 코드로 재생성). 강제 병합 금지.
           if ! git push origin dev; then
