@@ -37,11 +37,16 @@ jobs:
           PCH_FETCH_RELAY: ${{ secrets.PCH_FETCH_RELAY }}
           PCH_RELAY_KEY: ${{ secrets.PCH_RELAY_KEY }}
 
+      # 사이트 정적 페이지(도감 상세 사용기술/순위·배틀데이터·sitemap)도 새 데이터로 재생성(123차) —
+      #   json 만 갱신하면 헬퍼는 최신인데 사이트 표시가 뒤처지는 갭 제거.
+      - name: Rebuild pokedex/battle-data pages
+        run: python build/build-mon-pages.py
+
       - name: Commit & push (dev + Pages)
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add helper-data/move-usage.json helper-data/move-usage-version.json
+          git add helper-data/move-usage.json helper-data/move-usage-version.json pokedex battle-data sitemap.xml
           if git diff --staged --quiet; then
             echo "변경 없음 — 커밋 생략"
             exit 0

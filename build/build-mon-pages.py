@@ -6,10 +6,10 @@
 #
 # 실행:  python build/build-mon-pages.py
 # dex.json 갱신(build-all.py) 후 이 스크립트를 돌리면 상세페이지가 자동 재생성된다.
-import json, os, re, html
+import datetime, json, os, re, html
 
 SITE = r"C:\개인\Claude\champions-helper-site"
-LASTMOD = "2026-07-02"
+LASTMOD = datetime.date.today().isoformat()  # cron 자동 재생성(123차)에 맞춰 실행일 스탬프
 BASE = "https://champions-helper.com"
 
 with open(os.path.join(SITE, "data", "dex.json"), encoding="utf-8") as f:
