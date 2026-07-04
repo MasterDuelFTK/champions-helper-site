@@ -149,6 +149,34 @@
   .hint { font-size: 11px; color: var(--muted); }
   .hint.bad { color: var(--bad); }
 
+  /* 파티 추천 (recommend.js가 #recoBody 렌더) */
+  #recoCard { margin: 6px 0 14px; }
+  .reco-diag { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+  .reco-drow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .reco-glabel { font-size: 11px; font-weight: 700; color: var(--muted); min-width: 56px; cursor: help; }
+  .reco-type { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 10px; color: #fff; }
+  .reco-tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 10px;
+              background: var(--panel2); border: 1px solid var(--line); color: var(--muted); }
+  .reco-tag.warn { color: var(--warn); border-color: #5a4d1f; }
+  .reco-tag.ok { color: var(--ok); border-color: #2f5a3c; }
+  .reco-head-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0 8px; }
+  .reco-row { display: flex; align-items: center; gap: 10px; background: var(--panel2); border: 1px solid var(--line);
+              border-radius: 8px; padding: 6px 10px; margin-bottom: 6px; cursor: pointer; }
+  .reco-row:hover { border-color: var(--accent); }
+  .reco-spr { width: 40px; height: 40px; image-rendering: pixelated; flex: none; }
+  .reco-main { flex: 1 1 auto; min-width: 0; }
+  .reco-rank { font-size: 11px; color: var(--muted); margin-left: 6px; }
+  .reco-whys { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+  .reco-why { font-size: 11px; color: var(--ok); background: #24322a; border-radius: 8px; padding: 0 7px; }
+  .reco-why.bad { color: var(--bad); background: #362527; }
+  /* 태그 설명 범례 */
+  .reco-help { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+  .reco-help summary { font-size: 12px; color: var(--accent2); cursor: pointer; font-weight: 700; }
+  .reco-help dl { margin: 8px 0 0; font-size: 12px; line-height: 1.65; }
+  .reco-help dt { font-weight: 700; color: var(--txt); margin-top: 8px; }
+  .reco-help dt:first-child { margin-top: 0; }
+  .reco-help dd { margin: 1px 0 0; color: var(--muted); }
+
   /* 광고 자리 + 푸터 (랜딩/도감과 동일) */
   .ad-slot { margin: 18px auto 26px; min-height: 90px; max-width: 728px;
     display: flex; align-items: center; justify-content: center;
@@ -267,6 +295,34 @@
     </div>
   </div>
 
+  <!-- 파티 추천 — 조합 분석 (recommend.js) -->
+  <div class="card" id="recoCard">
+    <h2>파티 추천 — 슬롯에 넣은 포켓몬 기준 남은 자리 조합 분석 <span class="hint">(타입 시너지 · 공격 커버리지 · 밸런스 · 사용률 기반, 참고용)</span></h2>
+    <div id="recoBody" class="hint">포켓몬을 1마리 이상 슬롯에 넣으면 남은 자리 추천이 표시됩니다.</div>
+
+    <details class="reco-help">
+      <summary>태그 설명 — 각 태그가 뜻하는 것</summary>
+      <dl>
+        <dt>겹약점 — <span class="reco-type" style="background:#96D9D6">얼음 ×2</span> 같은 색 타입칩</dt>
+        <dd>그 타입 공격에 약점(2배 이상)인 멤버가 <b>몇 마리</b>인지. 2마리 이상이면 상대는 그 타입 기술 하나로 파티 여럿을 동시에 압박할 수 있습니다 → 그 타입을 반감·면역으로 받는 포켓몬으로 보완하세요.</dd>
+        <dt>내성 없음</dt>
+        <dd>그 타입에 약점인 멤버는 있는데, 반감·면역으로 받아줄 멤버가 한 마리도 없다는 뜻. 불리한 대면에서 교체로 받아낼 곳이 없습니다.</dd>
+        <dt>물리 어태커 없음 / 특수 어태커 없음</dt>
+        <dd>종족값 기준(공격과 특공 차이)으로 분류했을 때 한쪽 화력이 아예 없는 상태. 화력이 한쪽뿐이면 상대는 방어(또는 특방) 특화 내구형 <b>1마리</b>로 파티 전체를 막을 수 있습니다.</dd>
+        <dt>스피드 100+ 없음</dt>
+        <dd>스피드 종족값 100 이상인 멤버가 없음. 메타 상위권 다수가 스피드 100 이상이라, 항상 선공을 내주고 시작하게 됩니다.</dd>
+        <dt>내구형 없음</dt>
+        <dd>HP×(방어+특방)이 높은 "쿠션" 멤버가 없음. 상대의 강한 한 방을 받아내고 반격을 시작할 포켓몬이 없다는 뜻입니다.</dd>
+        <dt>메타 상위30 중 n마리 효과굉장 가능 (커버리지)</dt>
+        <dd>지금 파티의 공격 타입으로 <b>사용률 상위 30마리</b> 중 효과굉장(2배 이상)을 때릴 수 있는 수. 공격 타입은 슬롯에 입력한 기술이 있으면 그 기술 + 자속, 없으면 그 종의 실전 채용률 15% 이상 공격기 + 자속으로 계산합니다. 30에 가까울수록 "때릴 수단이 없어 막히는" 상대가 적습니다.</dd>
+        <dt>추천 행의 <span class="reco-why">초록 태그</span> / <span class="reco-why bad">빨간 태그</span></dt>
+        <dd>초록 = 그 후보를 넣었을 때 좋아지는 점(약점 보완 · 커버리지 증가 · 밸런스 보강 · 사용률 순위). 빨강 = 주의점(그 후보도 같은 타입이 약점이라 겹약점이 더 쏠림). <b>#n위</b>는 실전 사용률 순위(champs.pokedb.tokyo, 12시간마다 갱신)입니다.</dd>
+        <dt>분석 제외</dt>
+        <dd>도감 목록 밖 폼(메가진화 등)이 슬롯에 있으면 그 멤버는 계산에서 빠집니다.</dd>
+      </dl>
+    </details>
+  </div>
+
   <!-- AdSense: 승인 후 이 자리에 반응형 광고 슬롯 삽입 -->
   <div class="ad-slot">광고 자리 (AdSense 승인 후 게재)</div>
 
@@ -301,6 +357,8 @@
   </div>
 </footer>
 
+<script src="/calc/engine.js"></script>
+<script src="recommend.js"></script>
 <script>
 "use strict";
 // === 헬퍼(데스크탑 프로그램) API 주소 ===
@@ -534,6 +592,7 @@ function commitSlot() {
   };
   hint.textContent = "슬롯 " + (state.editing + 1) + " 적용됨."; hint.className = "hint";
   renderSlots();
+  PCHReco.onPartyChanged();
   const next = state.slots.findIndex((m) => m === null);
   if (next >= 0) { state.editing = next; resetForm(); renderSlots(); }
 }
@@ -556,6 +615,7 @@ function loadSlot(i) {
 }
 function clearSlot() {
   state.slots[state.editing] = null; renderSlots(); resetForm();
+  PCHReco.onPartyChanged();
   $("#commitHint").textContent = "슬롯 비움."; $("#commitHint").className = "hint";
 }
 function resetForm() {
@@ -599,6 +659,7 @@ async function loadParty(id) {
   });
   await hydrateSlots();
   state.editing = 0; renderSlots(); loadSlot(0);
+  PCHReco.onPartyChanged();
   setStatus(`'${p.name}' 불러옴`, "ok");
 }
 async function hydrateSlots() {
@@ -640,6 +701,7 @@ function newParty() {
   state.partyId = null; state.slots = new Array(6).fill(null); state.editing = 0;
   $("#partyName").value = "새 파티"; $("#saveHint").textContent = "";
   renderSlots(); resetForm();
+  PCHReco.onPartyChanged();
 }
 
 // 헬퍼 미연결이어도 슬롯 6칸은 즉시 그려둠(연결되면 init이 데이터 채움).
