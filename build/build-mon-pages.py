@@ -253,13 +253,14 @@ PAGE = """<!DOCTYPE html>
 <meta property="og:image" content="{ogimg}" />
 <meta name="twitter:card" content="summary" />
 <link rel="stylesheet" href="/pokedex/mon.css" />
+<link rel="stylesheet" href="/site-header.css" />
 <script type="application/ld+json">
 {jsonld}
 </script>
 </head>
 <body>
 <header>
-  <div class="wrap nav">
+  <div class="nav">
     <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
     <nav class="nav-links">
       <a href="/#features">기능</a>
@@ -501,6 +502,7 @@ BD_PAGE = """<!DOCTYPE html>
 <meta property="og:description" content="포켓몬 챔피언스 랭크 배틀 기준, 포켓몬별 기술 채용률 통계." />
 <meta name="twitter:card" content="summary" />
 <link rel="stylesheet" href="/pokedex/mon.css" />
+<link rel="stylesheet" href="/site-header.css" />
 <style>
   .bd-list {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }}
   .bd-row {{ display: flex; align-items: center; gap: 11px; background: var(--panel); border: 1px solid var(--line);
@@ -517,7 +519,7 @@ BD_PAGE = """<!DOCTYPE html>
 </head>
 <body>
 <header>
-  <div class="wrap nav">
+  <div class="nav">
     <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
     <nav class="nav-links">
       <a href="/#features">기능</a>

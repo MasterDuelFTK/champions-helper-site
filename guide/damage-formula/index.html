@@ -46,17 +46,7 @@
   a { color: var(--accent2); text-decoration: none; }
   a:hover { text-decoration: underline; }
   .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
-  header { position: sticky; top: 0; z-index: 20;
-    background: rgba(27,29,34,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
-  .nav { display: flex; align-items: center; justify-content: space-between; height: 56px; }
-  .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 17px; color: var(--txt); }
-  .brand .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-  .nav-links { display: flex; gap: 20px; font-size: 14px; }
-  .nav-links a { color: var(--muted); }
-  .nav-links a:hover { color: var(--txt); text-decoration: none; }
-  .nav-links a.active { color: var(--txt); }
-  @media (max-width: 640px) { .nav-links { gap: 13px; font-size: 13px; } }
-
+              
   .article { max-width: 760px; margin: 0 auto; padding: 36px 0 24px; }
   .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
   .article h1 { font-size: 30px; font-weight: 800; margin: 0 0 10px; letter-spacing: -0.4px; }
@@ -86,11 +76,12 @@
   footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
   .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 760px; margin: 0 auto; }
 </style>
+  <link rel="stylesheet" href="/site-header.css" />
 </head>
 <body>
 
 <header>
-  <div class="wrap nav">
+  <div class="nav">
     <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
     <nav class="nav-links">
       <a href="/#features">기능</a>
@@ -101,7 +92,7 @@
       <a href="/battle-data/">배틀데이터</a>
       <a href="/guide/" class="active">가이드</a>
       <a href="/#download">다운로드</a>
-          <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
     </nav>
   </div>
 </header>

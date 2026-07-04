@@ -11,16 +11,7 @@ a { color: var(--accent2); text-decoration: none; }
 a:hover { text-decoration: underline; }
 .wrap { max-width: 900px; margin: 0 auto; padding: 0 16px; }
 
-header { position: sticky; top: 0; z-index: 20;
-  background: rgba(27,29,34,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
-.nav { display: flex; align-items: center; justify-content: space-between; height: 56px; }
-.brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 17px; color: var(--txt); }
-.brand .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-.nav-links { display: flex; gap: 20px; font-size: 14px; }
-.nav-links a { color: var(--muted); }
-.nav-links a:hover { color: var(--txt); text-decoration: none; }
-.nav-links a.active { color: var(--txt); }
-@media (max-width: 640px) { .nav-links { gap: 13px; font-size: 13px; } }
+/* 헤더 스타일은 /site-header.css 단일 소스 (124차 — 전 페이지 nav 통일) */
 
 .crumb { font-size: 13px; color: var(--muted); padding: 18px 0 0; }
 .crumb a { color: var(--muted); }
