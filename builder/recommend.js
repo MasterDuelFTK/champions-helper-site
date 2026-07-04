@@ -14,6 +14,39 @@ const RECO_SHOW_N = 8;            // 추천 표시 개수
 const FAST_SPE = 100;             // "빠르다" 기준 종족값
 const BULKY_INDEX = 20000;        // 내구형 기준: hp*(def+spd)
 
+/* ── 특성 반영(126차) — 최다 채용 특성(move-usage abils 1위, 없으면 dex 단일특성) 가정 ── */
+// -ate 스킨: 노말 공격기 → 지정 타입(+위력 1.2, 헬퍼 DamageCalculator와 동일 세트)
+const ABILITY_ATE = {
+  "페어리스킨": "FAIRY", "스카이스킨": "FLYING", "프리즈스킨": "ICE",
+  "일렉트릭스킨": "ELECTRIC", "드래곤스킨": "DRAGON",
+};
+// 방어 특성 → { 공격타입: 배수 } (0=면역 / 0.5=반감 / 2=약점화). 헬퍼 AbilityRegistry와 동일 세트.
+const ABILITY_DEF = {
+  "부유": { GROUND: 0 }, "천정부지": { GROUND: 0 }, "흙먹기": { GROUND: 0 },
+  "저수": { WATER: 0 }, "마중물": { WATER: 0 },
+  "건조피부": { WATER: 0, FIRE: 1.25 },
+  "초식": { GRASS: 0 },
+  "타오르는불꽃": { FIRE: 0 },
+  "축전": { ELECTRIC: 0 }, "피뢰침": { ELECTRIC: 0 }, "전기엔진": { ELECTRIC: 0 },
+  "두꺼운지방": { FIRE: 0.5, ICE: 0.5 }, "내열": { FIRE: 0.5 }, "수포": { FIRE: 0.5 },
+};
+
+// 종의 가정 특성: 채용률 1위(usageAbils) > dex 단일특성 > null(불명 — 보정 없음).
+function assumedAbility(entry) {
+  if (entry.usageAbils && entry.usageAbils.length) return entry.usageAbils[0].ko;
+  const ab = entry.abil || [];
+  return ab.length === 1 ? ab[0].ko : null;
+}
+
+// 타입 t 공격이 entry에게 주는 실효 상성(타입상성 × 방어특성 보정). abilityKo 명시 시 그 특성(빌더 슬롯 선택).
+function effWithAbility(t, entry, abilityKo) {
+  let e = effTypes(t, entry.types);
+  const ab = abilityKo || assumedAbility(entry);
+  const mod = ab && ABILITY_DEF[ab];
+  if (mod && mod[t] !== undefined) e *= mod[t];
+  return e;
+}
+
 /* ── 데이터 준비(순수) ─────────────────────────────────── */
 // moves.json → en/ko 양쪽 인덱스 (ko는 공백 제거 정규화)
 function buildMoveIndex(movesJson) {
@@ -32,7 +65,7 @@ function buildPool(dexJson, usageJson) {
   for (const e of dexJson.dex) {
     const u = usage[e.en];
     if (!u || !u.rank) continue;
-    pool.push({ ...e, rank: u.rank, usageMoves: u.moves || [] });
+    pool.push({ ...e, rank: u.rank, usageMoves: u.moves || [], usageAbils: u.abils || [] });
   }
   pool.sort((a, b) => a.rank - b.rank);
   return pool;
@@ -40,19 +73,21 @@ function buildPool(dexJson, usageJson) {
 
 // 종의 공격 타입 집합: STAB + 실전 채용 공격기(채용률≥RECO_ATTACK_PCT_MIN) 타입.
 // ownMovesKo(빌더에 입력된 실제 기술)가 있으면 그걸 우선 사용(+STAB 유지).
-function offenseTypes(entry, moveIdx, ownMovesKo) {
+// 126차 — -ate 스킨 특성이면 노말 공격기는 변환 타입으로 집계(노말 추가 안 함 — 페어리스킨 하이퍼보이스=페어리).
+function offenseTypes(entry, moveIdx, ownMovesKo, abilityKo) {
   const set = new Set(entry.types);
+  const ate = ABILITY_ATE[abilityKo || assumedAbility(entry)] || null;
+  const addMove = (m) => {
+    if (!m || m.cat === "STATUS" || !(m.pow > 0)) return;
+    set.add(ate && m.type === "NORMAL" ? ate : m.type);
+  };
   const picked = (ownMovesKo || []).map((k) => (k || "").replace(/\s+/g, "")).filter(Boolean);
   if (picked.length) {
-    for (const k of picked) {
-      const m = moveIdx.byKo[k];
-      if (m && m.cat !== "STATUS" && m.pow > 0) set.add(m.type);
-    }
+    for (const k of picked) addMove(moveIdx.byKo[k]);
   } else {
     for (const um of entry.usageMoves || []) {
       if (um.pct < RECO_ATTACK_PCT_MIN) continue;
-      const m = moveIdx.byEn[um.en];
-      if (m && m.cat !== "STATUS" && m.pow > 0) set.add(m.type);
+      addMove(moveIdx.byEn[um.en]);
     }
   }
   return set;
@@ -66,7 +101,8 @@ function classOf(stats) {
 }
 function isBulky(stats) { return stats.hp * (stats.def + stats.spd) >= BULKY_INDEX; }
 
-// members: [{entry, movesKo?}] (dex에 못 찾은 슬롯은 호출측에서 제외)
+// members: [{entry, movesKo?, abilityKo?}] (dex에 못 찾은 슬롯은 호출측에서 제외)
+// 126차 — 약점/내성·커버리지 전부 특성 보정(effWithAbility) 기준. 멤버는 슬롯 선택 특성(abilityKo) 우선.
 function buildProfile(members, pool, moveIdx) {
   const types = Object.keys(TYPE_KO);
   const weakCount = {}, weakW = {}, resistCount = {};
@@ -74,19 +110,19 @@ function buildProfile(members, pool, moveIdx) {
 
   for (const m of members) {
     for (const t of types) {
-      const e = effTypes(t, m.entry.types);
+      const e = effWithAbility(t, m.entry, m.abilityKo);
       if (e >= 2) { weakCount[t] += 1; weakW[t] += (e >= 4 ? 1.5 : 1); }
-      else if (e < 1) resistCount[t] += 1;   // 반감·면역
+      else if (e < 1) resistCount[t] += 1;   // 반감·면역(특성 포함)
     }
   }
 
   const offense = new Set();
-  for (const m of members) offenseTypes(m.entry, moveIdx, m.movesKo).forEach((t) => offense.add(t));
+  for (const m of members) offenseTypes(m.entry, moveIdx, m.movesKo, m.abilityKo).forEach((t) => offense.add(t));
 
   const meta = pool.slice(0, RECO_META_TOP);
   const coveredSet = new Set();
   for (const mon of meta) {
-    for (const t of offense) if (effTypes(t, mon.types) >= 2) { coveredSet.add(mon.en); break; }
+    for (const t of offense) if (effWithAbility(t, mon) >= 2) { coveredSet.add(mon.en); break; }
   }
 
   let phys = 0, spec = 0, fast = 0, bulky = 0;
@@ -105,12 +141,17 @@ function scoreCandidate(cand, prof, moveIdx) {
   const reasons = [], warns = [];
   let score = 0;
 
-  // ① 방어 시너지: 기존 약점을 받아주면 +, 겹약점 −
+  // ① 방어 시너지: 기존 약점을 받아주면 +, 겹약점 − (특성 보정 포함 — 면역이 특성 덕이면 근거에 표기)
+  const candAbility = assumedAbility(cand);
   for (const t of Object.keys(TYPE_KO)) {
     const wc = prof.weakCount[t];
-    const e = effTypes(t, cand.types);
+    const eBase = effTypes(t, cand.types);
+    const e = effWithAbility(t, cand);
     if (wc > 0) {
-      if (e === 0) { score += 1.6 * prof.weakW[t]; reasons.push({ txt: `${TYPE_KO[t]} 약점 보완(면역)`, val: 1.6 * prof.weakW[t] }); }
+      if (e === 0) {
+        const byAbility = eBase > 0 && candAbility ? ` — 특성 ${candAbility}` : "";
+        score += 1.6 * prof.weakW[t]; reasons.push({ txt: `${TYPE_KO[t]} 약점 보완(면역${byAbility})`, val: 1.6 * prof.weakW[t] });
+      }
       else if (e < 1) { score += 1.2 * prof.weakW[t]; reasons.push({ txt: `${TYPE_KO[t]} 약점 보완${wc >= 2 ? ` (${wc}마리)` : ""}`, val: 1.2 * prof.weakW[t] }); }
       else if (e >= 2) { const p = 1.1 * prof.weakW[t] * (e >= 4 ? 1.5 : 1); score -= p; warns.push({ txt: `${TYPE_KO[t]} 겹약점 (${wc + 1}마리째)`, val: p }); }
     } else if (e >= 2) {
@@ -118,12 +159,12 @@ function scoreCandidate(cand, prof, moveIdx) {
     }
   }
 
-  // ② 공격 커버리지: 메타 상위 N 중 새로 효과굉장 커버되는 수
+  // ② 공격 커버리지: 메타 상위 N 중 새로 효과굉장 커버되는 수(상대 특성 보정 — 부유 로토무에 땅 무효 등)
   const candOff = offenseTypes(cand, moveIdx);
   let gain = 0;
   for (const mon of prof.meta) {
     if (prof.coveredSet.has(mon.en) || mon.en === cand.en) continue;
-    for (const t of candOff) if (effTypes(t, mon.types) >= 2) { gain++; break; }
+    for (const t of candOff) if (effWithAbility(t, mon) >= 2) { gain++; break; }
   }
   if (gain > 0) { score += gain * 0.45; reasons.push({ txt: `공격 커버리지 +${gain} (메타 상위${RECO_META_TOP})`, val: gain * 0.45 }); }
 
@@ -222,7 +263,8 @@ if (typeof document !== "undefined") {
     for (const s of (typeof state !== "undefined" ? state.slots : [])) {
       if (!s) { empty++; continue; }
       const e = dexById.get(s.speciesId);
-      if (e) members.push({ entry: e, movesKo: s.movesKo });
+      // 126차 — 슬롯에서 고른 특성(abilityKo)을 방어보정·-ate 판정에 사용(미선택이면 최다 채용 가정).
+      if (e) members.push({ entry: e, movesKo: s.movesKo, abilityKo: s.abilityKo });
       else unknown++;   // 메가폼 등 도감 톱레벨 밖 → 분석 제외
     }
     return { members, empty, unknown };
@@ -317,7 +359,7 @@ if (typeof document !== "undefined") {
       d.noAnswer.map((t) => typeChip(t, "", `${TYPE_KO[t]} 공격: 약점 멤버 있음 + 반감·면역 멤버 없음`)).join(""));
     if (d.lacks.length) html += drow("부족", "파티 구성 밸런스에서 빠져 있는 요소",
       d.lacks.map((l) => `<span class="reco-tag" title="${LACK_TIPS[l] || ""}">${l}</span>`).join(""));
-    html += drow("커버리지", "파티의 공격 타입 = 슬롯에 입력한 기술(있으면) + 자속, 없으면 그 종의 실전 채용(15%+) 공격기",
+    html += drow("커버리지", "파티의 공격 타입 = 슬롯에 입력한 기술(있으면) + 자속, 없으면 그 종의 실전 채용(15%+) 공격기 · 특성 반영(페어리스킨 노말기=페어리, 상대 부유=땅 무효 등, 최다 채용 특성 가정)",
       `<span class="reco-tag ok" title="사용률 상위 ${d.metaN}마리 중 효과굉장(2배 이상)으로 때릴 수 있는 수 — 높을수록 안 막히는 파티">메타 상위${d.metaN} 중 ${d.covered}마리 효과굉장 가능</span>`
       + (unknown ? `<span class="reco-tag" title="도감 목록 밖 폼(메가 등)은 계산에서 제외">분석 제외 ${unknown}마리(도감 외 폼)</span>` : ""));
     html += `</div>`;
@@ -367,5 +409,6 @@ if (typeof document !== "undefined") {
 if (typeof module !== "undefined" && module.exports) {
   module.exports = { buildMoveIndex, buildPool, offenseTypes, buildProfile,
     scoreCandidate, recommend, autofill, diagnose,
+    assumedAbility, effWithAbility, ABILITY_ATE, ABILITY_DEF,
     RECO_POOL_MAX_RANK, RECO_META_TOP };
 }

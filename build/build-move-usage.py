@@ -15,10 +15,12 @@ Champions Helper — 상대 기술 사용률(move-usage) 빌드.
 종족 사용 순위(rank): /pokemon/list?rule=0 (한 페이지 235종, 사용률 내림차순)의
   <div class="pokemon-rank"> 숫자 그대로. 1~235 완전(중복·구멍 검증 후 출력).
 
-출력 스키마(구버전과 동일 — 헬퍼 exe·사이트 빌드 무변경):
+출력 스키마(구버전 + abils 추가 — additive 라 헬퍼 exe·사이트 구버전 무영향):
   { version, format, season, count, pokemon: { <master nameEn>: {
-      name, base, isForm, moves:[{en,ko,pct}], rank } } }
+      name, base, isForm, moves:[{en,ko,pct}], abils:[{en,ko,pct}], rank } } }
   키 = master.json species nameEn (헬퍼 UsageKeyCandidates·사이트 usage_for 가 이 키로 조회).
+  abils(126차) = 특성 채용률(내림차순) — 선출 정보/파티 추천이 "최다 채용 특성" 가정에 사용.
+    ability_key = 전국 특성 ID = master abilities.id 완전 일치(move_key 와 동일한 ID 직결 매칭).
 
 자동화(master.json/sprites 와 독립 — 기술 사용률만 따로 갱신):
   .github/workflows/move-usage.yml 가 cron(12h)으로 이 스크립트를 실행 → helper-data/move-usage.json +
@@ -144,6 +146,29 @@ def parse_moves(src):
     return [(k, r) for _, k, r in out]
 
 
+def parse_abilities(src):
+    """126차 — 상세 페이지 특성 채용률 → [(ability_key, rate)] (rank 순).
+    특성 파이차트 = pokemon-trend__column-abilities div 의 x-data="window.usagePieChart([...])"
+    (HTML-escape 된 JSON, ability_key = 전국 특성 ID). 섹션/blob 없으면 빈 리스트(안전)."""
+    i = src.find("pokemon-trend__column-abilities")
+    if i < 0:
+        return []
+    m = re.search(r'window\.usagePieChart\(\[(.*?)\]\)', src[i:i + 30000], re.S)
+    if not m:
+        return []
+    try:
+        entries = json.loads("[" + _html.unescape(m.group(1)) + "]")
+    except Exception:  # noqa: BLE001 — blob 손상은 특성 없이 진행(기술만이라도 유지)
+        return []
+    out = []
+    for d in entries:
+        key, rate = d.get("ability_key"), d.get("rate")
+        if isinstance(key, int) and isinstance(rate, (int, float)):
+            out.append((d.get("rank", 9999), key, rate))
+    out.sort()
+    return [(k, r) for _, k, r in out]
+
+
 def main():
     limit = int(sys.argv[1]) if len(sys.argv) > 1 else None
 
@@ -151,11 +176,12 @@ def main():
     with open(os.path.join(HELPER, "master.json"), encoding="utf-8") as f:
         master = json.load(f)
     move_by_id = {mv["id"]: mv for mv in master.get("moves", []) if isinstance(mv.get("id"), int)}
+    abil_by_id = {ab["id"]: ab for ab in master.get("abilities", []) if isinstance(ab.get("id"), int)}
     sp_by_id = {}
     for sp in master.get("species", []):
         if isinstance(sp.get("id"), int) and not sp.get("isMegaForm"):
             sp_by_id.setdefault(sp["id"], sp)
-    print(f"[map] master moves: {len(move_by_id)}  species: {len(sp_by_id)}", file=sys.stderr)
+    print(f"[map] master moves: {len(move_by_id)}  abilities: {len(abil_by_id)}  species: {len(sp_by_id)}", file=sys.stderr)
 
     # 2) 사용률 랭킹 리스트(235종, 순위 명시) + 시즌 라벨.
     list_src = fetch_text(f"{SITE}/pokemon/list?rule={RULE}")
@@ -167,7 +193,7 @@ def main():
     if not limit and len(entries) < MIN_POKEMON:
         raise SystemExit(f"[abort] 리스트 파싱 {len(entries)}종 < {MIN_POKEMON} — 사이트 개편 의심, 기존 json 유지")
 
-    out, miss, empty = {}, {}, 0
+    out, miss, miss_ab, empty = {}, {}, {}, 0
     for n, (rank, dex, form) in enumerate(entries, 1):
         # 종족 해석: 폼번호 00 = master id==도감번호 원종 / 그 외 = FORM2MASTER 테이블.
         if form == "00":
@@ -196,13 +222,23 @@ def main():
         if not moves:
             empty += 1  # 기술 통계 없는 종(저사용·시즌 초)도 순위는 유지 — 구버전과 동일 정책.
 
+        # 126차 — 특성 채용률(내림차순). master 에 없는 ability_key 는 miss_ab 로 경고만(항목은 건너뜀).
+        abils = []
+        for key, rate in parse_abilities(page):
+            ab = abil_by_id.get(key)
+            if ab is None:
+                miss_ab[key] = miss_ab.get(key, 0) + 1
+                continue
+            abils.append({"en": ab.get("nameEn", ""), "ko": ab.get("nameKo") or ab.get("nameEn", ""),
+                          "pct": rate})
+
         base_sp = sp_by_id.get(int(dex))
         base_en = (base_sp or {}).get("nameEn") or name_en
         if name_en in out:  # cosmetic 폼이 base 로 흡수될 때 등 — 먼저 잡힌(상위 순위) 항목 유지.
             print(f"[dup][WARN] {dex}-{form} → {name_en} 키 중복(rank {out[name_en]['rank']} 유지, {rank} 버림)", file=sys.stderr)
             continue
         out[name_en] = {"name": name_en, "base": base_en,
-                        "isForm": form != "00", "moves": moves, "rank": rank}
+                        "isForm": form != "00", "moves": moves, "abils": abils, "rank": rank}
         if n % 25 == 0:
             print(f"[..] {n}/{len(entries)}", file=sys.stderr)
         time.sleep(DELAY)
@@ -228,9 +264,12 @@ def main():
     with open(os.path.join(HELPER, "move-usage-version.json"), "w", encoding="utf-8") as f:
         json.dump({"version": version}, f)
 
-    print(f"[done] pokemon: {len(out)}  version: {version}  season: {season!r}  기술없음: {empty}종", file=sys.stderr)
+    abil_n = sum(1 for v in out.values() if v.get("abils"))
+    print(f"[done] pokemon: {len(out)}  version: {version}  season: {season!r}  기술없음: {empty}종  특성보유: {abil_n}종", file=sys.stderr)
     if miss:
         print(f"[miss][WARN] master 에 없는 move_key: {sorted(miss)} — master.json moves 보강 필요", file=sys.stderr)
+    if miss_ab:
+        print(f"[miss][WARN] master 에 없는 ability_key: {sorted(miss_ab)} — master.json abilities 보강 필요", file=sys.stderr)
 
 
 if __name__ == "__main__":
