@@ -63,6 +63,12 @@
   /* 83차 — 필드 시뮬 드롭다운(날씨=중앙, 벽=상대측). 타이틀바 한 줄 유지(작게). 펼침은 네이티브라 세로 안 밀림. */
   .field-sel { font-size: 10px; font-weight: 700; color: var(--txt); background: #2a2e36; border: 1px solid var(--line); border-radius: 4px; padding: 1px 2px; cursor: pointer; max-width: 94px; vertical-align: middle; }
   .field-sel.sim-on { border-color: #FFEE00; border-width: 1.5px; color: #FFEE00; }
+  /* 127차 — 기타 배수(상태이상 옆). [−][직접 입력][＋] — 버튼은 기술 위력 -/+와 동일(.pbtn), 0.1 단위.
+     네이티브 스피너는 숨김(누르기 어렵다는 피드백으로 pbtn 교체). ≠1이면 입력창 노란테. */
+  .mult-wrap { display: flex; align-items: center; gap: 3px; }
+  .mult-input { font-size: 11px; font-weight: 700; color: var(--txt); background: #2a2e36; border: 1px solid var(--line); border-radius: 4px; padding: 1px 4px; width: 40px; text-align: center; vertical-align: middle; appearance: textfield; -moz-appearance: textfield; }
+  .mult-input::-webkit-outer-spin-button, .mult-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .mult-input.sim-on { border-color: #FFEE00; border-width: 1.5px; color: #FFEE00; }
   .chip {
     font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 10px;
     line-height: 1.5; white-space: nowrap;
@@ -370,7 +376,7 @@
 <body>
   <div id="bar">
     <span id="status">로컬 헬퍼 연결 대기…</span>
-    <span id="version">v0.122</span>
+    <span id="version">v0.127</span>
   </div>
   <section id="top">
     <div class="section-title" id="top-title">상대 파티 (내 현재 포켓몬 기준 위력)</div>
@@ -1070,8 +1076,8 @@ function mySimPanel(m) {
   p.appendChild(simHead("내 시뮬: " + (m.myName || ""), m.simCanMega, m.simMega, "/api/sim/my/mega"));
   p.appendChild(el("div", "sim-sub", "지닌도구"));
   p.appendChild(myItemDropdown(m));
-  p.appendChild(el("div", "sim-sub", "상태이상"));
-  p.appendChild(statusControl(m, "my"));
+  // 127차 — 상태이상 옆 빈 공간에 "기타 배수"(총대장 등 수동 보정) 수평 배치.
+  p.appendChild(statusMultRow(m, "my"));
   p.appendChild(el("div", "sim-sub", "랭크"));
   STAT_KO.forEach((name, i) => {
     const v = (m.myStages && m.myStages[i]) || 0;
@@ -1101,8 +1107,8 @@ function oppSimPanel(m) {
   }
   p.appendChild(cols);
   // 98차(feedback#3) — 상태이상 시뮬(hex/베노쇼크/가시천벌 등 자동 위력 + 마비 스피드½).
-  p.appendChild(el("div", "sim-sub", "상태이상"));
-  p.appendChild(statusControl(m, "opp"));
+  // 127차 — 상태이상 옆 빈 공간에 "기타 배수"(상대 총대장 등 수동 보정) 수평 배치.
+  p.appendChild(statusMultRow(m, "opp"));
   // 노력치 — feedback#3: 내 위력 계산엔 상대 HP/방어/특방만 영향(공/특공/스피드는 내→상대 데미지 무관) → 그 3개만 표시.
   p.appendChild(el("div", "sim-sub", "노력치 (±4 · 스탯≤32 · 합≤66)"));
   [0, 2, 4].forEach((i) => {   // EV_KO 인덱스: 0=HP, 2=방어, 4=특방
@@ -1188,6 +1194,43 @@ const STATUS_OPTS = [["", "상태이상"], ["none", "정상"], ["burn", "화상"
 function statusControl(m, side) {
   const key = side === "my" ? m.simMyStatusKey : m.simOppStatusKey;
   return fieldSelect(STATUS_OPTS, key || "", !!key, "/api/sim/" + side + "/status"); // !!key = 미시뮬 아니면 노란테
+}
+// 127차 — 상태이상 드롭다운 + 기타 배수 입력을 수평 2칸으로(공통 빈 공간 활용, 사용자 지정 위치).
+//   기타 배수 = 총대장(기절 아군 1마리당 ×0.1↑) 등 미지원 보정을 그 측 공격 데미지에 곱하는 수동 값.
+//   직접 입력 + 네이티브 스피너 0.1 단위(계산기 #atkMult와 동일). 시뮬 종료/전환/모든취소 시 서버가 1로 리셋.
+function statusMultRow(m, side) {
+  const cols = el("div", "sim-cols");
+  const stCol = el("div", "sim-col");
+  stCol.appendChild(el("div", "sim-sub", "상태이상"));
+  stCol.appendChild(statusControl(m, side));
+  cols.appendChild(stCol);
+  const mCol = el("div", "sim-col");
+  mCol.appendChild(el("div", "sim-sub", "기타 배수"));
+  mCol.appendChild(miscMultControl(m, side));
+  cols.appendChild(mCol);
+  return cols;
+}
+function miscMultControl(m, side) {
+  const cur = side === "my" ? (m.mySimMiscMult ?? 1) : (m.oppSimMiscMult ?? 1);
+  const active = Math.abs(cur - 1) > 0.001;
+  const post = (v) => sim("/api/sim/" + side + "/misc", { value: Number.isFinite(v) ? v : 1 });
+  const wrap = el("div", "mult-wrap");
+  // −/＋ = 기술 위력 조절과 동일한 pbtn(누르기 쉬움, 사용자 피드백으로 네이티브 스피너 교체). 0.1 단위, 0 하한.
+  const minus = el("span", "pbtn", "−");
+  minus.title = "기타 배수 −0.1";
+  minus.onclick = () => post(Math.max(0, Math.round((cur - 0.1) * 10) / 10));
+  wrap.appendChild(minus);
+  const inp = el("input", "mult-input" + (active ? " sim-on" : ""));
+  inp.type = "number"; inp.step = "0.1"; inp.min = "0";
+  inp.setAttribute("value", String(cur)); // attribute로 설정 — applyRegion innerHTML 비교 감지(property는 미감지)
+  inp.title = "기타 배수 — 총대장(기절한 아군 1마리당 +0.1) 등 미지원 보정을 데미지에 곱해 반영. 1 = 보정 없음. 직접 입력 가능";
+  inp.onchange = () => post(parseFloat(inp.value));
+  wrap.appendChild(inp);
+  const plus = el("span", "pbtn", "+");
+  plus.title = "기타 배수 +0.1";
+  plus.onclick = () => post(Math.round((cur + 0.1) * 10) / 10);
+  wrap.appendChild(plus);
+  return wrap;
 }
 // 84차 — 타입 시뮬(테라스탈/타입변경 수동 단일화). 첫 옵션 "타입"(빈)=기본 해제 / 타입 선택=단일타입 강제.
 //   key는 백엔드 PokemonType.ToString().ToLowerInvariant()와 일치(/type-icons/{key}.png 동일).
