@@ -270,6 +270,7 @@ PAGE = """<!DOCTYPE html>
       <a href="/calc/">계산기</a>
       <a href="/battle-data/">배틀데이터</a>
       <a href="/guide/">가이드</a>
+      <a href="/board/">게시판</a>
       <a href="/#download">다운로드</a>
       <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
     </nav>
@@ -456,6 +457,7 @@ STATIC_ROUTES = [
     ("/calc/", "weekly", "0.9"),
     ("/battle-data/", "weekly", "0.8"),
     ("/builder/", "weekly", "0.8"),
+    ("/board/", "daily", "0.7"),
     ("/guide/", "monthly", "0.7"),
     ("/guide/app-guide/", "monthly", "0.8"),
     ("/guide/getting-started/", "monthly", "0.7"),
@@ -529,6 +531,7 @@ BD_PAGE = """<!DOCTYPE html>
       <a href="/calc/">계산기</a>
       <a href="/battle-data/" class="active">배틀데이터</a>
       <a href="/guide/">가이드</a>
+      <a href="/board/">게시판</a>
       <a href="/#download">다운로드</a>
       <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
     </nav>

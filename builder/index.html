@@ -202,6 +202,7 @@
       <a href="/calc/">계산기</a>
       <a href="/battle-data/">배틀데이터</a>
       <a href="/guide/">가이드</a>
+      <a href="/board/">게시판</a>
       <a href="/#download">다운로드</a>
       <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
     </nav>
@@ -346,6 +347,7 @@
         <a href="/builder/">파티 빌더</a>
         <a href="/calc/">계산기</a>
         <a href="/guide/">가이드</a>
+        <a href="/board/">게시판</a>
         <a href="/#download">다운로드</a>
       </nav>
     </div>
@@ -454,6 +456,30 @@ async function init(attempt) {
   itemAc = makeAutocomplete($("#itemAc"), { items: () => state.meta.items });
   renderSlots();
   await loadParties();
+  await importFromBoard();
+}
+
+// ── 게시판 "빌더로 복사" 가져오기(/board 상세 → localStorage 경유) ──
+async function importFromBoard() {
+  let raw = null;
+  try { raw = localStorage.getItem("pch-board-import"); if (raw !== null) localStorage.removeItem("pch-board-import"); } catch {}
+  if (!raw) return;
+  let p; try { p = JSON.parse(raw); } catch { return; }
+  if (!p || !Array.isArray(p.members) || !p.members.length) return;
+  state.partyId = null;
+  $("#partyName").value = (p.name || "게시판 파티").slice(0, 40);
+  state.slots = new Array(6).fill(null);
+  p.members.slice(0, 6).forEach((m, i) => {
+    state.slots[i] = {
+      speciesId: m.speciesId, nameKo: m.nameKo, type1: "", type2: null, baseStats: null, abilities: null,
+      abilityKo: m.abilityKo || null, natureKo: m.natureKo || null, evs: m.evs || {},
+      movesKo: m.movesKo || [], itemKo: m.itemKo || null,
+    };
+  });
+  await hydrateSlots();
+  state.editing = 0; renderSlots(); loadSlot(0);
+  PCHReco.onPartyChanged();
+  setStatus("게시판 파티 불러옴 — '저장'을 눌러야 내 파티로 저장됩니다", "ok");
 }
 
 function buildStatRows() {

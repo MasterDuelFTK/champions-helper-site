@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>파티 공유 게시판 — 포켓몬 챔피언스 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스 파티 공유 게시판. 유저들이 직접 만든 랭크배틀 파티(포켓몬 6마리·기술·도구·노력치)를 구경하고 내 파티도 공유해 보세요." />
+<link rel="canonical" href="https://champions-helper.com/board/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/board/" />
+<meta property="og:title" content="포켓몬 챔피언스 파티 공유 게시판" />
+<meta property="og:description" content="유저들이 직접 만든 포켓몬 챔피언스 파티를 구경하고 내 파티도 공유해 보세요." />
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+    --ok: #6fd08a; --warn: #e0b000; --bad: #e0605a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.5; font-size: 14px; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+
+  .page-head { padding: 24px 0 10px; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .page-head h1 { font-size: 26px; margin: 0 0 4px; font-weight: 800; }
+  .page-head p { color: var(--muted); margin: 0; font-size: 14px; }
+
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+  .btn { font-size: 13px; font-weight: 700; color: var(--txt); background: #353a44;
+         border: 1px solid var(--line); border-radius: 5px; padding: 6px 12px; cursor: pointer; display: inline-block; }
+  .btn:hover { background: #424955; } .btn:active { background: #2a2e36; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: #4a80d8; text-decoration: none; }
+  .btn.danger { background: #6a2f2f; border-color: #843a3a; }
+  .btn.small { padding: 3px 8px; font-size: 11px; }
+  .btn[disabled] { opacity: .5; cursor: default; }
+  .row { display: flex; align-items: center; gap: 8px; }
+  .hint { font-size: 12px; color: var(--muted); }
+  .hint.bad { color: var(--bad); }
+  .hint.ok { color: var(--ok); }
+
+  input[type=text], input[type=password], input[type=number], select, textarea {
+    background: #1f2229; color: var(--txt); border: 1px solid var(--line); border-radius: 5px;
+    padding: 6px 8px; font-size: 13px; font-family: inherit; width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { outline: 1px solid var(--accent); }
+  input::placeholder, textarea::placeholder { color: #5a606b; }
+  textarea { resize: vertical; min-height: 120px; }
+  label { font-size: 12px; color: var(--muted); }
+  .field { display: flex; flex-direction: column; gap: 3px; }
+
+  /* ── 목록 ── */
+  .board-toolbar { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 12px; gap: 8px; flex-wrap: wrap; }
+  .sort-tabs { display: flex; gap: 4px; }
+  .sort-tabs .btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .post-card { display: block; background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+               padding: 12px 14px; margin-bottom: 10px; cursor: pointer; }
+  .post-card:hover { border-color: var(--accent); }
+  .post-title { font-size: 15px; font-weight: 800; margin: 0 0 4px; }
+  .post-meta { font-size: 12px; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .post-sprites { display: flex; gap: 4px; margin-top: 8px; }
+  .post-sprites img { width: 40px; height: 40px; image-rendering: pixelated; background: var(--panel2); border-radius: 6px; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 10px;
+           background: var(--panel2); border: 1px solid var(--line); color: var(--muted); }
+  .badge.win { color: var(--ok); border-color: #2f5a3c; }
+  .likes-chip { color: #e0708a; font-weight: 700; }
+
+  /* ── 상세 ── */
+  .detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .party-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+  @media (max-width: 780px) { .party-grid { grid-template-columns: repeat(2, 1fr); } }
+  .member { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+  .member .m-top { display: flex; align-items: center; gap: 8px; }
+  .member img { width: 56px; height: 56px; image-rendering: pixelated; }
+  .member .m-name { font-weight: 800; font-size: 14px; }
+  .type-chip { display: inline-block; font-size: 11px; font-weight: 700; padding: 0 8px; border-radius: 10px; color: #181818; margin-right: 3px; }
+  .member .m-line { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .member .m-line b { color: var(--txt); font-weight: 700; }
+  .move-chip { display: inline-block; font-size: 11px; background: #1f2229; border: 1px solid var(--line);
+               border-radius: 8px; padding: 1px 7px; margin: 2px 3px 0 0; }
+  .post-content { white-space: pre-wrap; word-break: break-word; background: var(--panel2); border: 1px solid var(--line);
+                  border-radius: 8px; padding: 12px; margin-top: 6px; font-size: 14px; line-height: 1.7; }
+  .like-btn { font-size: 14px; padding: 8px 18px; }
+  .like-btn.liked { background: #4a2530; border-color: #6a3545; color: #e0708a; }
+
+  /* ── 글쓰기 ── */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+  .w-slots { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 8px 0; }
+  @media (max-width: 640px) { .w-slots { grid-template-columns: repeat(3, 1fr); } }
+  .w-slot { background: var(--panel2); border: 2px solid var(--line); border-radius: 8px; padding: 6px 4px;
+            text-align: center; min-height: 72px; }
+  .w-slot img { width: 40px; height: 40px; image-rendering: pixelated; }
+  .w-slot .s-name { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .w-slot .s-empty { color: var(--muted); font-size: 11px; padding-top: 20px; }
+  .spr-ph { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px;
+            background: #1f2229; border-radius: 6px; color: var(--muted); font-weight: 800; }
+  .plist { display: flex; flex-direction: column; gap: 5px; margin: 8px 0; }
+  .pitem { display: flex; align-items: center; gap: 8px; background: var(--panel2); border: 2px solid var(--line);
+           border-radius: 6px; padding: 7px 10px; cursor: pointer; }
+  .pitem:hover { border-color: var(--accent); }
+  .pitem.on { border-color: #ffee00; }
+  .pitem .pname { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+  .pitem .pcount { font-size: 11px; color: var(--muted); }
+  #wOffline { display: none; background: var(--panel2); border: 1px solid var(--line); border-left: 3px solid var(--warn);
+              border-radius: 8px; padding: 12px 14px; margin: 8px 0; }
+  #wOffline p { margin: 0 0 8px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+  #tsWidget { margin: 10px 0; min-height: 66px; }
+
+  .view { display: none; }
+  .view.on { display: block; }
+
+  /* 광고 자리 + 푸터 (다른 페이지와 동일) */
+  .ad-slot { margin: 18px auto 26px; min-height: 90px; max-width: 728px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--panel); border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); font-size: 12px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 6px; }
+  footer .cols { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  footer .fnav { display: flex; gap: 18px; font-size: 14px; }
+  footer .fnav a { color: var(--muted); }
+  .disclaimer { margin-top: 22px; font-size: 12px; color: var(--muted); line-height: 1.7; }
+</style>
+  <link rel="stylesheet" href="/site-header.css" />
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/">배틀데이터</a>
+      <a href="/guide/">가이드</a>
+      <a href="/board/" class="active">게시판</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="page-head">
+    <div>
+      <h1>파티 공유 게시판</h1>
+      <p>유저들이 직접 만든 파티를 구경하고, 내 파티도 공유해 보세요. 글 상세에서 파티를 빌더로 바로 복사할 수 있습니다.</p>
+    </div>
+  </div>
+
+  <!-- ── 목록 뷰 ── -->
+  <section id="view-list" class="view">
+    <div class="board-toolbar">
+      <div class="sort-tabs">
+        <button class="btn on" id="sortRecent">최신순</button>
+        <button class="btn" id="sortLikes">인기순</button>
+      </div>
+      <button class="btn primary" id="goWrite">✎ 파티 공유하기</button>
+    </div>
+    <div id="postList"></div>
+    <div class="row" style="justify-content:center; margin: 14px 0;">
+      <button class="btn" id="moreBtn" style="display:none;">더 보기</button>
+    </div>
+  </section>
+
+  <!-- ── 상세 뷰 ── -->
+  <section id="view-detail" class="view">
+    <div class="row" style="margin-bottom:10px;">
+      <button class="btn" id="backBtn">← 목록</button>
+    </div>
+    <div class="card" id="detailCard"></div>
+  </section>
+
+  <!-- ── 글쓰기 뷰 ── -->
+  <section id="view-write" class="view">
+    <div class="row" style="margin-bottom:10px;">
+      <button class="btn" id="backBtn2">← 목록</button>
+    </div>
+    <div class="card">
+      <h2 style="font-size:13px; color:var(--muted); margin:0 0 4px;">1. 공유할 파티 선택 — 파티 빌더에 저장된 내 파티</h2>
+
+      <!-- 헬퍼 미연결 안내 -->
+      <div id="wOffline">
+        <p>저장된 파티는 PC에서 실행 중인 <b>Champions Helper 프로그램</b>에서 불러옵니다.
+           프로그램을 실행한 뒤 <b>다시 불러오기</b>를 눌러 주세요. 파티가 없다면 <a href="/builder/">파티 빌더</a>에서 먼저 만들어 저장하세요.</p>
+        <a class="btn primary" href="/#download">⬇ 프로그램 다운로드</a>
+      </div>
+
+      <div id="wPartyList" class="plist"></div>
+      <div class="row">
+        <button class="btn" id="reloadParties">↻ 다시 불러오기</button>
+        <span class="hint" id="partyHint"></span>
+      </div>
+      <div class="w-slots" id="wSlots"></div>
+
+      <!-- 전적 = 헬퍼가 집계한 실제 승/패만. 직접 입력 불가 — 공개/비공개 선택뿐. -->
+      <div class="row" id="recordRow" style="display:none; margin:4px 0 2px;">
+        <label class="row" style="gap:6px; cursor:pointer; font-size:13px; color:var(--txt);">
+          <input type="checkbox" id="wRecordShare" checked style="width:auto;" />
+          <span id="recordText"></span>
+        </label>
+      </div>
+      <div class="hint" id="recordNone" style="display:none;"></div>
+
+      <h2 style="font-size:13px; color:var(--muted); margin:14px 0 4px;">2. 글 정보</h2>
+      <div class="field"><label>제목 *</label><input type="text" id="wTitle" maxlength="100" placeholder="예: 순풍 축 스탠다드 파티" /></div>
+      <div class="grid2" style="margin-top:8px;">
+        <div class="field"><label>닉네임 *</label><input type="text" id="wNick" maxlength="20" /></div>
+        <div class="field"><label>삭제용 비밀번호 * (4자 이상)</label><input type="password" id="wPw" maxlength="50" autocomplete="new-password" /></div>
+      </div>
+
+      <div class="field" style="margin-top:14px;"><label>파티 설명 * (운용법·선출 팁 등)</label>
+        <textarea id="wContent" maxlength="4000" placeholder="파티 컨셉, 운용법, 선출 팁 등을 적어 주세요."></textarea></div>
+
+      <div id="tsWidget"></div>
+
+      <div class="row" style="margin-top:10px;">
+        <button class="btn primary" id="submitBtn">게시하기</button>
+        <span class="hint" id="writeHint"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- AdSense: 승인 후 이 자리에 반응형 광고 슬롯 삽입 -->
+  <div class="ad-slot">광고 자리 (AdSense 승인 후 게재)</div>
+
+  <section style="max-width:860px;margin:12px auto 0;padding:22px 0 4px;border-top:1px solid var(--line);color:var(--muted);font-size:14px;line-height:1.75;">
+    <h2 style="font-size:18px;color:var(--txt);margin:0 0 12px;font-weight:800;">파티 공유 게시판 소개</h2>
+    <p style="margin:0 0 12px;">파티 공유 게시판은 포켓몬 챔피언스 유저들이 <strong style="color:var(--txt)">직접 만든 파티를 서로 공유하는 공간</strong>입니다. 글마다 포켓몬 6마리의 스프라이트와 기술·지닌 도구·특성·노력치 배분까지 함께 표시되어, 파티의 의도를 한눈에 파악할 수 있습니다. 마음에 드는 파티는 "빌더로 복사" 버튼으로 <a href="/builder/">파티 빌더</a>에 그대로 가져와 내 파티로 저장할 수 있습니다.</p>
+    <p style="margin:0;">글 작성에는 계정이 필요 없습니다(닉네임과 삭제용 비밀번호만 입력). 파티는 하나하나 입력할 필요 없이 <strong style="color:var(--txt)">파티 빌더에 저장해 둔 내 파티를 그대로 불러와</strong> 공유합니다. 파티 구성에 참고할 실전 채용률은 <a href="/battle-data/">배틀데이터</a>, 포켓몬별 종족값·특성은 <a href="/pokedex/">도감</a>에서 확인할 수 있습니다.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+      <nav class="fnav">
+        <a href="/#features">기능</a>
+        <a href="/pokedex/">도감</a>
+        <a href="/#how">사용법</a>
+        <a href="/builder/">파티 빌더</a>
+        <a href="/calc/">계산기</a>
+        <a href="/guide/">가이드</a>
+        <a href="/#download">다운로드</a>
+      </nav>
+    </div>
+    <p class="foot-links" style="font-size:13px;margin:0 0 12px;"><a href="/privacy/" style="color:var(--muted)">개인정보처리방침</a> · <a href="/terms/" style="color:var(--muted)">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트·프로그램은 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>
+      © 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+<script src="/calc/engine.js"></script>
+<script src="board.js"></script>
+</body>
+</html>
