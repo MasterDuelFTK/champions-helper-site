@@ -30,10 +30,19 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Build move-usage.json
+      - name: Build move-usage.json (싱글, rule=0)
         run: python build/build-move-usage.py
         env:
           # pokedb 가 클라우드 IP 전면 403 → Cloudflare Worker 릴레이 경유(123차). 로컬 실행은 env 없이 직접.
+          PCH_FETCH_RELAY: ${{ secrets.PCH_FETCH_RELAY }}
+          PCH_RELAY_KEY: ${{ secrets.PCH_RELAY_KEY }}
+
+      - name: Build move-usage-double.json (더블, rule=1)
+        # 131차 — 더블배틀 사용률(pokedb rule=1). 싱글과 완전 별개 메타. build-mon-pages 가 이 json 을 로드해
+        #   도감 상세 더블 섹션 + /battle-data/doubles/ 생성. 릴레이는 rule 을 path 에 포함하므로 그대로 통과.
+        run: python build/build-move-usage.py
+        env:
+          PCH_MOVE_RULE: "1"
           PCH_FETCH_RELAY: ${{ secrets.PCH_FETCH_RELAY }}
           PCH_RELAY_KEY: ${{ secrets.PCH_RELAY_KEY }}
 
@@ -46,12 +55,14 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add helper-data/move-usage.json helper-data/move-usage-version.json pokedex battle-data sitemap.xml
+          git add helper-data/move-usage.json helper-data/move-usage-version.json \
+                  helper-data/move-usage-double.json helper-data/move-usage-double-version.json \
+                  pokedex battle-data sitemap.xml
           if git diff --staged --quiet; then
             echo "변경 없음 — 커밋 생략"
             exit 0
           fi
-          git commit -m "chore: move-usage 자동 갱신 (champs.pokedb.tokyo)"
+          git commit -m "chore: move-usage 싱글+더블 자동 갱신 (champs.pokedb.tokyo)"
           # 실행 중 다른 push가 끼면(희귀) 여기서 거부됨 — 이번 결과는 옛 체크아웃 기준 생성물이라
           # 덮어쓰지 않고 조용히 종료(다음 주기가 최신 코드로 재생성). 강제 병합 금지.
           if ! git push origin dev; then

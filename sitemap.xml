@@ -25,6 +25,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://champions-helper.com/battle-data/doubles/</loc>
+    <lastmod>2026-07-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://champions-helper.com/builder/</loc>
     <lastmod>2026-07-08</lastmod>
     <changefreq>weekly</changefreq>

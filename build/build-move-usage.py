@@ -39,8 +39,14 @@ import json, os, re, sys, time, urllib.request
 REPO   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # build/ 의 상위 = repo 루트
 HELPER = os.path.join(REPO, "helper-data")
 SITE   = "https://champs.pokedb.tokyo"
-RULE   = 0                  # 0 = 싱글 배틀 (포켓몬 챔피언스 헬퍼 대상)
-FORMAT = "Singles"          # 스키마 호환 라벨(구버전과 동일)
+# 131차(더블배틀) — rule 파라미터화. env PCH_MOVE_RULE 로 배틀 형식 전환:
+#   0 = 싱글(기존 동작 무변경, move-usage.json) / 1 = 더블(move-usage-double.json).
+#   ID 직결 매칭(move_key/ability_key/도감번호)은 rule 무관 동일 → 파싱 로직 전부 공용, URL·출력파일만 분기.
+#   더블은 기술/포켓몬 사용률 메타가 싱글과 완전히 다름(예 가브리아스 방어 76.5%) — 별도 수집 필수.
+RULE   = int(os.environ.get("PCH_MOVE_RULE", "0"))
+FORMAT = "Doubles" if RULE == 1 else "Singles"
+OUT_MOVE = "move-usage-double.json" if RULE == 1 else "move-usage.json"
+OUT_VER  = "move-usage-double-version.json" if RULE == 1 else "move-usage-version.json"
 TOP_N  = 12                 # 위력칩 4개 + 편집 드롭다운(5위~) 여유분 (pokedb 페이지는 상위 10 노출)
 UA     = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
@@ -259,9 +265,9 @@ def main():
     result = {"version": version, "format": FORMAT, "season": season,
               "count": len(out), "pokemon": out}
     os.makedirs(HELPER, exist_ok=True)
-    with open(os.path.join(HELPER, "move-usage.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(HELPER, OUT_MOVE), "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, separators=(",", ":"))
-    with open(os.path.join(HELPER, "move-usage-version.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(HELPER, OUT_VER), "w", encoding="utf-8") as f:
         json.dump({"version": version}, f)
 
     abil_n = sum(1 for v in out.values() if v.get("abils"))

@@ -30,6 +30,17 @@ try:
 except FileNotFoundError:
     print("  (move-usage.json 없음 — 사용률 섹션 생략)")
 
+# 131차(더블배틀) — 더블 사용률(move-usage-double.json, pokedb rule=1). 있으면 도감 상세 "더블" 섹션 +
+#   /battle-data/doubles/ 페이지 생성. 싱글과 완전 별개 메타(기술/포켓몬 사용률 다름). 없으면 조용히 생략(싱글만).
+USAGE_D, USAGE_D_SEASON = {}, ""
+try:
+    with open(os.path.join(SITE, "helper-data", "move-usage-double.json"), encoding="utf-8") as f:
+        _ud = json.load(f)
+    USAGE_D_SEASON = _ud.get("season", "")
+    USAGE_D = {_norm(k): v for k, v in _ud.get("pokemon", {}).items()}
+except FileNotFoundError:
+    print("  (move-usage-double.json 없음 — 더블 섹션 생략)")
+
 ATTRIB = ('Battle data provided by <a href="https://champs.pokedb.tokyo/" '
           'target="_blank" rel="noopener">バトルデータベース チャンピオンズ (champs.pokedb.tokyo)</a>')
 
@@ -133,8 +144,9 @@ def matchup_block(types):
 def usage_for(en):
     return USAGE.get(_norm(en))
 
-def usage_section(en):
-    u = usage_for(en)
+def usage_section(en, usage_map=None, season="", fmt="싱글"):
+    # 131차 — 싱글/더블 공용. usage_map=None → 싱글(USAGE) 기본. 더블은 USAGE_D 전달.
+    u = (USAGE if usage_map is None else usage_map).get(_norm(en))
     if not u or not u.get("moves"):
         return ""
     rows = []
@@ -145,14 +157,14 @@ def usage_section(en):
         rows.append(f'<div class="use-row"><span class="use-nm">{esc(m["ko"])}</span>'
                     f'<div class="bar"><i style="width:{w:.0f}%;background:#5b8de0"></i></div>'
                     f'<span class="use-pct">{ptxt}</span></div>')
-    season = f' · 시즌 {esc(USAGE_SEASON)} 싱글 배틀' if USAGE_SEASON else ''
+    season_txt = f' · 시즌 {esc(season)} {fmt} 배틀' if season else ''
     _rk = u.get("rank")
-    sub = f'싱글 사용 순위 {_rk}위' if _rk else '랭크 배틀 채용률'
+    sub = f'{fmt} 사용 순위 {_rk}위' if _rk else '랭크 배틀 채용률'
     return (f'<section class="card"><h2>실전 사용 기술 <span class="sub">{sub}</span></h2>'
-            '<p class="matchup-note" style="margin:0 0 12px">실제 랭크 배틀에서 이 포켓몬이 자주 채용하는 기술과 채용률입니다. '
+            f'<p class="matchup-note" style="margin:0 0 12px">실제 랭크 배틀({fmt})에서 이 포켓몬이 자주 채용하는 기술과 채용률입니다. '
             '상대로 만났을 때 어떤 기술을 조심해야 하는지 예측하는 데 참고하세요.</p>'
             '<div class="use-list">' + "".join(rows) + '</div>'
-            f'<p class="attrib">{ATTRIB}{season}</p></section>')
+            f'<p class="attrib">{ATTRIB}{season_txt}</p></section>')
 
 def abil_cards(abils):
     return "".join(
@@ -404,7 +416,8 @@ def build_pages():
             stats=stat_bars(e["stats"]),
             matchup=matchup_block(e["types"]),
             abils=abil_cards(e["abil"]),
-            usage=usage_section(e["en"]),
+            usage=usage_section(e["en"], USAGE, USAGE_SEASON, "싱글")
+                  + usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블"),
             mega=mega_section(e),
             prose=commentary(e),
             prev=pager_link(preve, "prev"),
@@ -456,6 +469,7 @@ STATIC_ROUTES = [
     ("/pokedex/", "weekly", "0.9"),
     ("/calc/", "weekly", "0.9"),
     ("/battle-data/", "weekly", "0.8"),
+    ("/battle-data/doubles/", "weekly", "0.7"),
     ("/builder/", "weekly", "0.8"),
     ("/board/", "daily", "0.7"),
     ("/guide/", "monthly", "0.7"),
@@ -493,14 +507,14 @@ BD_PAGE = """<!DOCTYPE html>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-<title>포켓몬 챔피언스 실전 사용률 — 배틀 데이터 | Champions Helper</title>
-<meta name="description" content="포켓몬 챔피언스 랭크 배틀({season}) 기준, 포켓몬별 자주 채용하는 기술과 채용률 통계. 상대가 무엇을 들고 오는지 예측하세요." />
-<link rel="canonical" href="https://champions-helper.com/battle-data/" />
+<title>포켓몬 챔피언스 {fmt_label}배틀 실전 사용률 — 배틀 데이터 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스 {fmt_label}배틀 랭크({season}) 기준, 포켓몬별 자주 채용하는 기술과 채용률 통계. 상대가 무엇을 들고 오는지 예측하세요." />
+<link rel="canonical" href="{canon_url}" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Champions Helper" />
 <meta property="og:locale" content="ko_KR" />
-<meta property="og:url" content="https://champions-helper.com/battle-data/" />
-<meta property="og:title" content="포켓몬 챔피언스 실전 사용률 — 배틀 데이터" />
+<meta property="og:url" content="{canon_url}" />
+<meta property="og:title" content="포켓몬 챔피언스 {fmt_label}배틀 실전 사용률 — 배틀 데이터" />
 <meta property="og:description" content="포켓몬 챔피언스 랭크 배틀 기준, 포켓몬별 기술 채용률 통계." />
 <meta name="twitter:card" content="summary" />
 <link rel="stylesheet" href="/pokedex/mon.css" />
@@ -517,6 +531,11 @@ BD_PAGE = """<!DOCTYPE html>
   .bd-mv b {{ color: var(--accent2); }}
   .bd-h {{ font-size: 16px; font-weight: 800; margin: 24px 0 10px; }}
   .bd-h .c {{ color: var(--muted); font-weight: 500; font-size: 13px; margin-left: 6px; }}
+  .bd-toggle {{ display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin: 8px 0 4px; }}
+  .bd-toggle a {{ padding: 8px 22px; font-weight: 800; font-size: 14px; color: var(--muted); background: var(--panel); }}
+  .bd-toggle a.active {{ background: var(--accent); color: #fff; }}
+  .bd-toggle a:hover {{ text-decoration: none; color: var(--txt); }}
+  .bd-toggle a.active:hover {{ color: #fff; }}
 </style>
 </head>
 <body>
@@ -541,7 +560,7 @@ BD_PAGE = """<!DOCTYPE html>
 <main class="wrap">
   <div class="crumb"><a href="/">홈</a> › 배틀데이터</div>
   <div style="padding:16px 0 4px">
-    <h1 style="font-size:28px;margin:0 0 8px;font-weight:800;">실전 사용률 (배틀 데이터)</h1>
+    <h1 style="font-size:28px;margin:0 0 8px;font-weight:800;">{fmt_label}배틀 실전 사용률</h1>
     <p style="color:var(--muted);margin:0;font-size:14.5px;line-height:1.7;">
       포켓몬 챔피언스 <strong style="color:var(--txt)">랭크 배틀 {season}</strong> 통계를 바탕으로, 포켓몬별로
       실제 대전에서 자주 채용되는 기술과 채용률을 정리했습니다. 상대가 어떤 기술을 들고 오는지 예측하는 데 활용하세요.
@@ -550,7 +569,7 @@ BD_PAGE = """<!DOCTYPE html>
   </div>
 
   <section class="card">
-    <p class="attrib" style="margin:0">{attrib} · 시즌 {season} · 싱글 배틀 · 데이터는 시즌 통계에 따라 주기적으로 갱신됩니다.</p>
+    <p class="attrib" style="margin:0">{attrib} · 시즌 {season} · {fmt_label} 배틀 · 데이터는 시즌 통계에 따라 주기적으로 갱신됩니다.</p>
   </section>
 
   {body}
@@ -593,13 +612,21 @@ def _bd_row(e, u, rank):
             f'<span class="bd-nm">{esc(e["ko"])}</span>'
             f'<span class="bd-mv">{mv}</span></a>')
 
-def build_battle_data_page():
-    if not USAGE:
-        print("  (move-usage 없음 — /battle-data/ 생략)")
+def bd_toggle(active):
+    # 131차 — 싱글/더블 배틀데이터 전환 탭. active = 'single' | 'double'.
+    s = ' active' if active == 'single' else ''
+    d = ' active' if active == 'double' else ''
+    return (f'<div class="bd-toggle"><a href="/battle-data/" class="tab{s}">싱글배틀</a>'
+            f'<a href="/battle-data/doubles/" class="tab{d}">더블배틀</a></div>')
+
+def build_battle_data_page(usage_map, season, fmt_label, subdir, canon_url, active_tab):
+    # 131차 — 싱글/더블 공용. usage_map=USAGE(싱글) or USAGE_D(더블). 없으면 조용히 생략.
+    if not usage_map:
+        print(f"  (move-usage {fmt_label} 없음 — /{subdir}/ 생략)")
         return 0
     ranked, unranked = [], []
     for e in DEX:
-        u = usage_for(e["en"])
+        u = usage_map.get(_norm(e["en"]))
         if not u:
             continue
         rk = u.get("rank")
@@ -613,18 +640,20 @@ def build_battle_data_page():
     dup = sorted({r for r in rks if rks.count(r) > 1})
     holes = sorted(set(range(1, (max(rks) if rks else 0) + 1)) - set(rks))
     if dup:
-        print(f"  !! 배틀데이터 중복 순위: {dup}")
+        print(f"  !! {fmt_label} 배틀데이터 중복 순위: {dup}")
         for r in dup:
             print(f"     {r}: {[e['ko'] for e, _, rr in ranked if rr == r]}")
     if holes:
-        print(f"  !! 배틀데이터 빈 순위: {holes}")
-    parts = [f'<h2 class="bd-h">실전 사용 순위 <span class="c">({len(ranked)}종 · 채용률 높은 순)</span></h2>',
+        print(f"  !! {fmt_label} 배틀데이터 빈 순위: {holes}")
+    parts = [bd_toggle(active_tab),
+             f'<h2 class="bd-h">실전 사용 순위 <span class="c">({len(ranked)}종 · 채용률 높은 순)</span></h2>',
              '<div class="bd-list">' + "".join(_bd_row(e, u, dr) for e, u, dr in ranked) + '</div>']
     if unranked:
         parts += [f'<h2 class="bd-h">순위권 밖 등장 포켓몬 <span class="c">({len(unranked)}종 · 도감 순)</span></h2>',
                   '<div class="bd-list">' + "".join(_bd_row(e, u, None) for e, u, _ in unranked) + '</div>']
-    page = BD_PAGE.format(season=esc(USAGE_SEASON or "현재 시즌"), attrib=ATTRIB, body="\n  ".join(parts))
-    d = os.path.join(SITE, "battle-data")
+    page = BD_PAGE.format(season=esc(season or "현재 시즌"), attrib=ATTRIB,
+                          body="\n  ".join(parts), fmt_label=fmt_label, canon_url=canon_url)
+    d = os.path.join(SITE, subdir)
     os.makedirs(d, exist_ok=True)
     with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
         f.write(page)
@@ -633,7 +662,10 @@ def build_battle_data_page():
 if __name__ == "__main__":
     n, seen = build_pages()
     inject_index()
-    bd = build_battle_data_page()
+    bd = build_battle_data_page(USAGE, USAGE_SEASON, "싱글", "battle-data",
+                                "https://champions-helper.com/battle-data/", "single")
+    bd_d = build_battle_data_page(USAGE_D, USAGE_D_SEASON, "더블", os.path.join("battle-data", "doubles"),
+                                  "https://champions-helper.com/battle-data/doubles/", "double")
     build_sitemap()
     print(f"OK — 상세페이지 {n}개 생성 (pokedex/<en>/index.html), 사용률 매칭 {sum(1 for e in DEX if usage_for(e['en']))}종")
-    print(f"     배틀데이터 페이지 {bd}종 · 도감 인덱스 정적목록 주입 · sitemap {len(STATIC_ROUTES)}정적 + {len(seen)}상세 재생성")
+    print(f"     배틀데이터 싱글 {bd}종 · 더블 {bd_d}종 · 도감 인덱스 정적목록 주입 · sitemap {len(STATIC_ROUTES)}정적 + {len(seen)}상세 재생성")
