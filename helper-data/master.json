@@ -16434,12 +16434,12 @@
         "FAIRY"
       ],
       "baseStats": {
-        "hp": 54,
-        "atk": 45,
-        "def": 47,
-        "spa": 75,
-        "spd": 98,
-        "spe": 52
+        "hp": 74,
+        "atk": 65,
+        "def": 67,
+        "spa": 125,
+        "spd": 128,
+        "spe": 92
       },
       "weightHg": 9,
       "abilities": [
