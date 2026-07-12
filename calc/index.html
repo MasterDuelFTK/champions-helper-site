@@ -368,7 +368,18 @@
   <section style="max-width:860px;margin:24px auto 0;padding:22px 0 4px;border-top:1px solid var(--line);color:var(--muted);font-size:14px;line-height:1.75;">
     <h2 style="font-size:18px;color:var(--txt);margin:0 0 12px;font-weight:800;">데미지 계산기 소개</h2>
     <p style="margin:0 0 12px;">이 계산기는 포켓몬 챔피언스의 데미지 공식을 그대로 구현했습니다. 공격자와 수비자의 <strong style="color:var(--txt)">종족·노력치·성격·랭크·지닌 도구·특성</strong>, 그리고 <strong style="color:var(--txt)">날씨·필드·벽</strong> 같은 환경을 입력하면 데미지 범위(%)와 확정 1타 여부, 16난수 분포를 즉시 계산합니다. 모든 계산은 브라우저에서 바로 처리되어 프로그램 설치 없이 사용할 수 있습니다.</p>
-    <p style="margin:0;">데미지가 어떤 순서로 계산되는지 궁금하다면 <a href="/guide/damage-formula/">데미지 계산 공식 가이드</a>를, 포켓몬별 종족값·타입·특성을 찾아보려면 <a href="/pokedex/">도감</a>을 참고하세요.</p>
+    <p style="margin:0 0 18px;">데미지가 어떤 순서로 계산되는지 궁금하다면 <a href="/guide/damage-formula/">데미지 계산 공식 가이드</a>를, 포켓몬별 종족값·타입·특성을 찾아보려면 <a href="/pokedex/">도감</a>을 참고하세요.</p>
+
+    <h2 style="font-size:18px;color:var(--txt);margin:0 0 12px;font-weight:800;">사용법 — 3단계</h2>
+    <p style="margin:0 0 8px;"><strong style="color:var(--txt)">① 공격자 설정</strong> — 포켓몬 이름을 입력하면 종족값이 자동으로 채워집니다. 노력치(능력치당 최대 32)·성격 보정·랭크·지닌 도구·특성을 실제 대전 상황에 맞게 지정하세요.</p>
+    <p style="margin:0 0 8px;"><strong style="color:var(--txt)">② 수비자·환경 설정</strong> — 상대 포켓몬과 내구 배분(정확히 모른다면 HP·방어 풀투자 같은 최악 가정을 권장), 날씨·필드·벽 여부를 지정합니다.</p>
+    <p style="margin:0 0 18px;"><strong style="color:var(--txt)">③ 기술 선택 후 결과 읽기</strong> — 데미지 범위(%)와 <strong style="color:var(--txt)">확정 1타 / 난수 1타(확률) / 확정 2타</strong> 판정, 16가지 난수 분포가 표시됩니다. "난수 1타 75%"라면 16가지 난수 중 12가지에서 쓰러진다는 뜻입니다.</p>
+
+    <h2 style="font-size:18px;color:var(--txt);margin:0 0 12px;font-weight:800;">자주 묻는 질문</h2>
+    <p style="margin:0 0 8px;"><strong style="color:var(--txt)">Q. 게임 안의 실제 데미지와 같은가요?</strong><br>같습니다. 챔피언스의 공식(레벨 50·개체값 31·노력치 실수치 직접 가산·16난수)을 그대로 구현했고, 실제 게임 수치와 대조해 검증했습니다. 다른 결과가 나오는 사례를 발견하면 <a href="https://forms.gle/vzavUFn5xFDtdpu66" target="_blank" rel="noopener">제보</a>해 주세요 — 버그로 취급해 수정합니다.</p>
+    <p style="margin:0 0 8px;"><strong style="color:var(--txt)">Q. 본가(스칼렛·바이올렛) 계산기와 무엇이 다른가요?</strong><br>챔피언스는 노력치 체계가 다릅니다(1 포인트 = 실수치 1, 능력치당 32·합계 66). 본가 계산기에 챔피언스 배분을 넣으면 실수치부터 어긋납니다. 자세한 차이는 <a href="/guide/ev-nature/">노력치·성격 배분 가이드</a>를 참고하세요.</p>
+    <p style="margin:0 0 8px;"><strong style="color:var(--txt)">Q. 상대의 노력치를 모르는데 어떻게 넣나요?</strong><br>"내 공격이 통하는지"를 볼 때는 상대 내구를 풀투자(최악)로, "상대 공격을 버티는지"를 볼 때는 상대 화력을 풀투자+성격 보정(최악)으로 가정하는 것이 안전한 판단 기준입니다. 실전 채용 경향은 <a href="/battle-data/">배틀데이터</a>에서 확인할 수 있습니다.</p>
+    <p style="margin:0;"><strong style="color:var(--txt)">Q. 배틀 중에 매번 입력하기 번거롭습니다.</strong><br>그 문제를 해결하는 것이 <a href="/#download">Champions Helper 데스크탑 앱</a>입니다. 배틀 화면을 자동 인식해 상대 파티 전원에 대한 데미지를 실시간으로 계산·표시합니다.</p>
   </section>
 </main>
 
@@ -387,7 +398,7 @@
         <a href="/#download">다운로드</a>
       </nav>
     </div>
-    <p class="foot-links" style="font-size:13px;margin:0 0 12px;"><a href="/privacy/" style="color:var(--muted)">개인정보처리방침</a> · <a href="/terms/" style="color:var(--muted)">이용약관</a></p>
+    <p class="foot-links" style="font-size:13px;margin:0 0 12px;"><a href="/about/" style="color:var(--muted)">사이트 소개</a> · <a href="/privacy/" style="color:var(--muted)">개인정보처리방침</a> · <a href="/terms/" style="color:var(--muted)">이용약관</a></p>
     <p class="disclaimer">
       Champions Helper는 팬이 만든 비공식 보조 도구입니다.
       “Pokémon”(포켓몬) 및 관련 명칭·이미지는 Nintendo, Game Freak, The Pokémon Company의

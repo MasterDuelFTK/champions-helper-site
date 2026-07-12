@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>포켓몬 챔피언스 스피드 실전 가이드 — 스피드 라인·실수치 표 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스에서 선공을 판단하는 법. 레벨 50 기준 주요 포켓몬의 무보정·풀노력·최속 스피드 실수치 표와 스카프·순풍·마비 배율, 동속 처리까지 정리한 실전 가이드." />
+<link rel="canonical" href="https://champions-helper.com/guide/speed-guide/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/speed-guide/" />
+<meta property="og:title" content="포켓몬 챔피언스 스피드 실전 가이드 — 스피드 라인·실수치 표" />
+<meta property="og:description" content="주요 포켓몬의 무보정·풀노력·최속 실수치 표와 스피드 배율 총정리." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="포켓몬 챔피언스 스피드 실전 가이드" />
+<meta name="twitter:description" content="스피드 라인·실수치 표·배율 총정리." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "포켓몬 챔피언스 스피드 실전 가이드 — 스피드 라인·실수치 표",
+  "description": "레벨 50 기준 스피드 실수치 표와 선공 판단법.",
+  "inLanguage": "ko",
+  "datePublished": "2026-07-12",
+  "url": "https://champions-helper.com/guide/speed-guide/",
+  "author": { "@type": "Organization", "name": "Champions Helper" },
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .article { max-width: 920px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 28px; font-weight: 800; margin: 0 0 10px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 20px; font-weight: 800; margin: 34px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 800; margin: 22px 0 8px; }
+  .article p { margin: 0 0 14px; }
+  .article strong { color: #fff; }
+  .article ul { margin: 0 0 14px; padding-left: 22px; }
+  .article li { margin-bottom: 6px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+  th { background: var(--panel2); }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: center; }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+  .formula { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 16px; margin: 8px 0 16px; font-family: Consolas, monospace; font-size: 13.5px; overflow-x: auto; }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 28px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .foot-links { font-size: 13px; margin: 0 0 12px; }
+  .foot-links a { color: var(--muted); }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 920px; margin: 0 auto; }
+</style>
+  <link rel="stylesheet" href="/site-header.css" />
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/">배틀데이터</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/board/">게시판</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 스피드 실전 가이드</div>
+    <h1>포켓몬 챔피언스 스피드 실전 가이드</h1>
+    <p class="lead">"내가 먼저 때리나, 상대가 먼저 때리나" — 배틀의 절반은 이 판단입니다. 포켓몬 챔피언스의 스피드 실수치가 어떻게 정해지는지, 자주 만나는 포켓몬들의 스피드 라인은 어디인지, 그리고 순풍·스카프·마비 같은 배율이 어떻게 얽히는지 실전 관점으로 정리했습니다.</p>
+
+    <h2>챔피언스의 스피드 실수치 — 본가와 다릅니다</h2>
+    <p>포켓몬 챔피언스는 모든 포켓몬이 <strong>레벨 50, 개체값 31</strong>로 통일되고, 노력치 시스템이 본가와 다릅니다. 본가는 노력치 4당 실수치 1이지만, 챔피언스는 <strong>노력치 1당 실수치가 1씩 그대로 오릅니다</strong>(한 능력치당 최대 32, 합계 66). 성격 보정(×1.1)은 노력치까지 더한 값 전체에 곱해집니다.</p>
+    <div class="formula">스피드 실수치 = floor( ( floor((2×종족값+31)×50÷100) + 5 + 노력치 ) × 성격보정 )</div>
+    <p>예를 들어 종족값 102인 한카리아스는 무보정 122, 스피드에 노력치 32를 다 주면 154, 여기에 성격 보정(×1.1)까지 받은 "최속"은 169입니다. 이 세 단계(무보정 / 풀노력 / 최속)가 상대 스피드를 추정하는 기본 틀이 됩니다.</p>
+
+    <h2>주요 포켓몬 스피드 라인 표 (레벨 50 실수치)</h2>
+    <p>시즌 M-4 싱글·더블 사용률 상위권 위주로, 실전에서 가장 자주 재게 되는 스피드 라인을 계산했습니다. 내 포켓몬의 실수치가 상대의 "최속" 값보다 높아야 안심하고 선공할 수 있습니다.</p>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>포켓몬</th><th>종족값</th><th>무보정</th><th>풀노력 (+32)</th><th>최속 (+32, ×1.1)</th></tr></thead>
+      <tbody>
+        <tr><td><a href="/pokedex/aerodactyl/">프테라</a></td><td class="num">130</td><td class="num">150</td><td class="num">182</td><td class="num"><strong>200</strong></td></tr>
+        <tr><td><a href="/pokedex/meowscarada/">마스카나</a></td><td class="num">123</td><td class="num">143</td><td class="num">175</td><td class="num"><strong>192</strong></td></tr>
+        <tr><td><a href="/pokedex/greninja/">개굴닌자</a></td><td class="num">122</td><td class="num">142</td><td class="num">174</td><td class="num"><strong>191</strong></td></tr>
+        <tr><td><a href="/pokedex/whimsicott/">엘풍</a></td><td class="num">116</td><td class="num">136</td><td class="num">168</td><td class="num"><strong>184</strong></td></tr>
+        <tr><td><a href="/pokedex/starmie/">아쿠스타</a></td><td class="num">115</td><td class="num">135</td><td class="num">167</td><td class="num"><strong>183</strong></td></tr>
+        <tr><td><a href="/pokedex/gengar/">팬텀</a> · <a href="/pokedex/raichu/">라이츄</a></td><td class="num">110</td><td class="num">130</td><td class="num">162</td><td class="num"><strong>178</strong></td></tr>
+        <tr><td><a href="/pokedex/ninetales-alola/">나인테일(알로라)</a></td><td class="num">109</td><td class="num">129</td><td class="num">161</td><td class="num"><strong>177</strong></td></tr>
+        <tr><td><a href="/pokedex/delphox/">마폭시</a></td><td class="num">104</td><td class="num">124</td><td class="num">156</td><td class="num"><strong>171</strong></td></tr>
+        <tr><td><a href="/pokedex/garchomp/">한카리아스</a></td><td class="num">102</td><td class="num">122</td><td class="num">154</td><td class="num"><strong>169</strong></td></tr>
+        <tr><td><a href="/pokedex/charizard/">리자몽</a> · <a href="/pokedex/staraptor/">찌르호크</a></td><td class="num">100</td><td class="num">120</td><td class="num">152</td><td class="num"><strong>167</strong></td></tr>
+        <tr><td><a href="/pokedex/mimikyu/">따라큐</a></td><td class="num">96</td><td class="num">116</td><td class="num">148</td><td class="num"><strong>162</strong></td></tr>
+        <tr><td><a href="/pokedex/archaludon/">브리두라스</a></td><td class="num">85</td><td class="num">105</td><td class="num">137</td><td class="num"><strong>150</strong></td></tr>
+        <tr><td><a href="/pokedex/gyarados/">갸라도스</a></td><td class="num">81</td><td class="num">101</td><td class="num">133</td><td class="num"><strong>146</strong></td></tr>
+        <tr><td><a href="/pokedex/blaziken/">번치코</a></td><td class="num">80</td><td class="num">100</td><td class="num">132</td><td class="num"><strong>145</strong></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="note"><strong>표 읽는 법</strong> — 상대 마스카나가 나왔다면 최악(최속) 기준 192로 잡아야 합니다. 내 스피드가 170이라면 한카리아스 최속(169)까지는 이기지만 마스카나에게는 무조건 후공입니다. 이 계산은 Champions Helper가 게임 내 실측값으로 검증한 공식 그대로입니다.</div>
+
+    <h2>102라는 숫자의 의미 — "라인 굳히기"</h2>
+    <p>종족값 스피드에서 1~2 차이는 실수치 1~2 차이로 이어지고, 그 1이 선후공을 가릅니다. 사용률 1위 한카리아스가 102인 것이 대표적입니다 — 100 라인(리자몽·찌르호크)을 정확히 1 위에서 누릅니다. 그래서 챔피언스에서는 <strong>"많이 쓰이는 포켓몬의 딱 위"를 노린 스피드 조정</strong>이 유효합니다. 예컨대 내 포켓몬 실수치를 상대 한카리아스 최속(169)보다 1 높은 170으로 맞추는 식입니다. 노력치가 실수치에 1:1로 반영되는 챔피언스에서는 이런 미세 조정이 본가보다 훨씬 직관적입니다.</p>
+
+    <h2>스피드를 바꾸는 요소들</h2>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>요소</th><th>배율</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>구애스카프</td><td class="num">×1.5</td><td>기술이 하나로 고정되는 대가. 중속 어태커의 기습 역전 수단</td></tr>
+        <tr><td>순풍</td><td class="num">×2</td><td>4턴간 아군 전체. 더블에서 엘풍(채용률 95.9%)·프테라가 대표 세터</td></tr>
+        <tr><td>마비</td><td class="num">×0.5</td><td>스피드 절반. 전기 타입과 땅 면역엔 통하지 않는 기술이 많음</td></tr>
+        <tr><td>검은철구</td><td class="num">×0.5</td><td>스피드 반감 + 비행/부유도 땅 기술에 맞게 됨</td></tr>
+        <tr><td>날씨 특성</td><td class="num">×2</td><td>엽록소(쾌청)·쓱쓱(비)·모래헤치기(모래) 등 — 해당 날씨에서만</td></tr>
+        <tr><td>랭크 변화</td><td class="num">±단계</td><td>용의춤·고속이동·스케일샷(+1), 위협은 공격만 깎음(스피드 무관)</td></tr>
+        <tr><td>가속(특성)</td><td class="num">매 턴 +1</td><td>번치코 — 한 턴 버틸수록 라인이 한 단계씩 올라감</td></tr>
+        <tr><td>트릭룸</td><td class="num">역전</td><td>5턴간 느린 쪽이 선공. 더블 키키링(트릭룸 96.2%)의 존재 이유</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>적용 순서 감각도 중요합니다. 랭크·아이템·마비가 겹치면 곱연산으로 계산되므로, 예를 들어 최속 169 한카리아스가 마비에 걸리면 84까지 떨어져 대부분의 파티 멤버가 선공할 수 있게 됩니다.</p>
+
+    <h2>동속이면 어떻게 되나</h2>
+    <p>실수치가 완전히 같으면 <strong>매 턴 50% 확률로 선후공이 무작위 결정</strong>됩니다. 유명 포켓몬끼리 같은 종족값(팬텀·라이츄 110 등)이 흔하므로, 미러 매치나 동속 라인에서는 "이길 수도 질 수도 있는 코인 토스"임을 전제로 플레이해야 합니다. 확실히 이기고 싶다면 노력치 1이라도 더 투자해 동속을 깨는 것이 챔피언스식 해법입니다.</p>
+
+    <h2>선공기 — 스피드를 무시하는 예외</h2>
+    <p>선공기는 스피드 계산을 통째로 건너뜁니다. 시즌 M-4 채용률을 보면 선공기가 얼마나 중요한지 드러납니다: 누리레느 아쿠아제트 75.4%, 메타그로스 불릿펀치 92.2%, 핫삼 불릿펀치 99.8%, 대도각참 기습 99.4%(더블 1위), 따라큐 야습 97.8%, 님피아 전광석화 88.1%. <strong>아무리 빨라도 선공기 한 방 범위에 들어가면 위험</strong>하므로, 고속 어태커를 쓸 때는 "선공기로 나를 잡을 수 있는 상대"를 항상 계산에 넣어야 합니다. 반대로 내 쪽에 선공기가 하나도 없다면 순풍·트릭룸이 무너졌을 때 플랜 B가 없어집니다.</p>
+
+    <h2>실전에서는 — 헬퍼의 스피드 칩 읽기</h2>
+    <p>Champions Helper 데스크탑 앱은 배틀 중 상대 포켓몬의 스피드를 <strong>최속 / 풀노력 / 무보정 3단계 추정치</strong>로 표시하고 내 실수치와 나란히 보여 줍니다. 순풍·마비·스카프 추정까지 반영되므로 위 표를 외우지 않아도 실전에서 바로 선후공을 판단할 수 있습니다. 자세한 화면 설명은 <a href="/guide/app-guide/">프로그램 사용법 가이드</a>의 스피드 섹션을 참고하세요. 특정 매치업의 정확한 수치 비교는 <a href="/calc/">데미지 계산기</a>에서도 가능합니다.</p>
+
+    <div class="related">
+      <h3>함께 읽기</h3>
+      <a href="/guide/ev-nature/">노력치·성격 배분 가이드 →</a>
+      <a href="/guide/meta-singles/">싱글 메타 분석 →</a>
+      <a href="/guide/damage-formula/">데미지 계산 공식 →</a>
+    </div>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="/about/">사이트 소개</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

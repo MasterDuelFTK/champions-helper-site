@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>포켓몬 챔피언스 파티 구성 입문 — 역할·상성 보완·선출까지 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스에서 이기는 파티를 짜는 법. 역할 분담(에이스·받이·기점 차단), 약점 겹침 진단, 물리/특수 밸런스, 6마리에서 3마리를 고르는 선출 사고방식까지 단계별로 설명합니다." />
+<link rel="canonical" href="https://champions-helper.com/guide/team-building/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/team-building/" />
+<meta property="og:title" content="포켓몬 챔피언스 파티 구성 입문 — 역할·상성 보완·선출" />
+<meta property="og:description" content="역할 분담, 약점 겹침 진단, 선출 사고방식까지 — 이기는 파티 만들기." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="포켓몬 챔피언스 파티 구성 입문" />
+<meta name="twitter:description" content="역할·상성 보완·선출 사고방식 정리." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "포켓몬 챔피언스 파티 구성 입문 — 역할·상성 보완·선출까지",
+  "description": "역할 분담과 약점 보완 중심의 파티 구성 방법론.",
+  "inLanguage": "ko",
+  "datePublished": "2026-07-12",
+  "url": "https://champions-helper.com/guide/team-building/",
+  "author": { "@type": "Organization", "name": "Champions Helper" },
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .article { max-width: 920px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 28px; font-weight: 800; margin: 0 0 10px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 20px; font-weight: 800; margin: 34px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 800; margin: 22px 0 8px; }
+  .article p { margin: 0 0 14px; }
+  .article strong { color: #fff; }
+  .article ul, .article ol { margin: 0 0 14px; padding-left: 22px; }
+  .article li { margin-bottom: 6px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+  th { background: var(--panel2); }
+  tr:last-child td { border-bottom: none; }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 28px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .foot-links { font-size: 13px; margin: 0 0 12px; }
+  .foot-links a { color: var(--muted); }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 920px; margin: 0 auto; }
+</style>
+  <link rel="stylesheet" href="/site-header.css" />
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/">배틀데이터</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/board/">게시판</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 파티 구성 입문</div>
+    <h1>포켓몬 챔피언스 파티 구성 입문</h1>
+    <p class="lead">좋아하는 포켓몬 6마리를 모으면 파티가 되지만, <strong>이기는 파티</strong>가 되려면 설계가 필요합니다. 역할 분담 → 약점 보완 → 메타 대비 → 선출 계획의 4단계로, 파티를 짜는 사고 과정을 처음부터 끝까지 따라가 봅니다.</p>
+
+    <h2>0단계 — 챔피언스 대전의 전제</h2>
+    <p>랭크 배틀은 <strong>6마리를 등록하고, 상대 6마리를 본 뒤 싱글은 3마리, 더블은 4마리를 선출</strong>하는 방식입니다. 즉 파티는 "6마리 세트"가 아니라 <strong>상대에 따라 조합을 바꿔 꺼내는 카드 덱</strong>에 가깝습니다. 6마리 전원이 함께 싸우는 게 아니므로, 서로 다른 상대 유형을 커버하는 "매치업 카드"를 6장 갖춘다는 감각이 중요합니다.</p>
+
+    <h2>1단계 — 역할부터 정한다</h2>
+    <p>포켓몬을 고르기 전에 자리를 먼저 정의하세요. 시즌 M-4 사용률 상위권을 역할로 분해하면 잘 짜인 파티의 골격이 보입니다.</p>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>역할</th><th>하는 일</th><th>대표 예 (시즌 M-4)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>에이스(스위퍼)</strong></td><td>후반 상대 파티를 쓸어 담는 승리 수단</td><td>따라큐(칼춤), 갸라도스(용의춤), 번치코(가속)</td></tr>
+        <tr><td><strong>고속 어태커</strong></td><td>위에서 때리며 초중반 템포 장악</td><td>마스카나, 개굴닌자, 아쿠스타</td></tr>
+        <tr><td><strong>물리 받이</strong></td><td>물리 에이스를 받아내고 회복으로 버티기</td><td>하마돈, 아머까오</td></tr>
+        <tr><td><strong>특수 받이</strong></td><td>특수 어태커를 받아내기</td><td>찌리배리, 라우드본</td></tr>
+        <tr><td><strong>기점 차단</strong></td><td>상대 랭크업·세팅을 끊기 (위협·도깨비불·앙코르·도발)</td><td>갸라도스·입치트(위협), 로토무(도깨비불)</td></tr>
+        <tr><td><strong>필드 요원</strong></td><td>스텔스록·날씨·순풍·트릭룸 등 판 깔기</td><td>하마돈·한카리아스(스텔스록), 엘풍(순풍)</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>한 마리가 두 역할을 겸하는 것이 이상적입니다. 사용률 1위 한카리아스가 좋은 예로, 고속 어태커이면서 스텔스록 요원(채용률 48.5%)을 겸합니다. <strong>6마리 안에 승리 수단(에이스)이 최소 둘</strong>은 있어야 하나가 막혔을 때 플랜 B가 생깁니다.</p>
+
+    <h2>2단계 — 약점 겹침을 진단한다</h2>
+    <p>파티가 무너지는 가장 흔한 이유는 "같은 타입에 다 같이 약한 것"입니다. 자주 나오는 실수 패턴:</p>
+    <ul>
+      <li><strong>물·불꽃·풀 스타터 3마리</strong> — 각자 약점은 달라 보여도, 전원이 최속 한카리아스(지진·역린)보다 느리면 타입과 무관하게 순서대로 정리당합니다. 약점은 타입만이 아니라 <strong>스피드 축</strong>으로도 겹칩니다.</li>
+      <li><strong>바위 약점 편중</strong> — 리자몽·프테라·갸라도스처럼 비행 계열을 모으면 스텔스록(상위권 셋이 채용) 한 번에 파티 전체 체력이 갈립니다.</li>
+      <li><strong>페어리 받이 부재</strong> — 시즌 M-4는 따라큐·누리레느·알로라 나인테일 등 페어리 강세 메타입니다. 강철·독 내성이 하나도 없으면 후반 페어리 스윕을 못 막습니다.</li>
+    </ul>
+    <p>진단 방법은 단순합니다. 18개 타입 각각에 대해 "이 타입 공격을 반감 이하로 받는 멤버가 있는가?"를 체크하는 것. 수작업으로 해도 되지만, <a href="/builder/">파티 빌더</a>의 추천 패널이 슬롯을 채울 때마다 <strong>겹약점·내성 없음 태그를 자동 진단</strong>하고 보완 후보를 제안하므로 그대로 활용하면 됩니다.</p>
+
+    <h2>3단계 — 물리/특수와 화력 라인을 맞춘다</h2>
+    <p>공격이 전원 물리라면 하마돈·아머까오 한 마리에 파티가 잠기고, 전원 특수라면 찌리배리·라우드본이 벽이 됩니다. <strong>물리/특수 어태커를 섞고</strong>, 특히 "받이를 받이로 두지 않는" 수단 — 도발, 앙코르, 랭크업 후 일격, 급소 확정기(마스카나 트릭플라워처럼 방어 랭크업을 무시) — 를 한둘 넣어 두세요.</p>
+    <p>화력은 감이 아니라 수치로 확인합니다. 내 에이스의 주력기가 메타 상위 포켓몬에게 몇 %가 들어가는지 <a href="/calc/">데미지 계산기</a>로 훑어 보면 "확정 2타인 줄 알았는데 난수 3타"인 구멍이 미리 보입니다.</p>
+
+    <h2>4단계 — 상위 메타를 이름으로 대비한다</h2>
+    <p>추상적인 밸런스보다 효과적인 것이 "구체적 상대 대비"입니다. <a href="/guide/meta-singles/">싱글 메타 분석</a>의 상위권 기준으로 최소한 이 질문에 답할 수 있어야 합니다.</p>
+    <ol>
+      <li>한카리아스(1위)의 지진을 무효·반감으로 받는 멤버는? 그 멤버가 얼음·페어리로 반격 가능한가?</li>
+      <li>따라큐(2위)의 칼춤 기점을 끊을 수단(위협·도깨비불·앙코르)이 있는가?</li>
+      <li>브리두라스·메타그로스(3·5위) 강철 축을 부술 불꽃·격투·땅 기술이 있는가?</li>
+      <li>하마돈(6위)의 하품 루프에 말리지 않을 수단(교체 유도 무시·잠듦 허용 계획)이 있는가?</li>
+    </ol>
+
+    <h2>5단계 — 선출을 미리 연습한다</h2>
+    <p>파티의 완성은 등록이 아니라 선출입니다. 상대 6마리를 보고 3마리(더블 4마리)를 고르는 90초 동안, 36가지 매치업을 머리로 도는 것은 불가능에 가깝습니다. 그래서 <strong>"이 유형이 보이면 이 3마리"라는 선출 패키지를 미리 2~3개</strong> 만들어 두는 것이 실전 요령입니다. 예: 대면 구성(고속 어태커 3), 사이클 구성(받이 2+에이스), 안티 세팅 구성(기점 차단 2+스위퍼).</p>
+    <p>Champions Helper 데스크탑 앱을 쓰면 선출 화면에서 <strong>내 6마리 × 상대 6마리 전 조합의 확정 타수·스피드 우위를 히트맵으로</strong> 보여 주고 추천 트리오까지 제안하므로, 선출 감각을 데이터로 훈련할 수 있습니다. 다른 유저들의 완성 파티 구성이 궁금하다면 <a href="/board/">파티 공유 게시판</a>에서 실제 전적과 함께 볼 수 있습니다.</p>
+
+    <div class="note"><strong>요약 체크리스트</strong> — ① 승리 수단 2개 이상 ② 18타입 반감 체크(특히 페어리·땅·바위) ③ 물리/특수 혼합 ④ 기점 차단 수단 ⑤ 스텔스록 대비(바위 약점 편중 금지) ⑥ 선출 패키지 2~3개 사전 구상.</div>
+
+    <div class="related">
+      <h3>함께 읽기</h3>
+      <a href="/guide/meta-singles/">싱글 메타 분석 →</a>
+      <a href="/guide/ev-nature/">노력치·성격 배분 →</a>
+      <a href="/guide/mega-picks/">메가진화 픽 가이드 →</a>
+      <a href="/board/">파티 공유 게시판 →</a>
+    </div>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="/about/">사이트 소개</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

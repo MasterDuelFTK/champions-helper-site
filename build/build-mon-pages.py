@@ -342,7 +342,7 @@ PAGE = """<!DOCTYPE html>
 
 <footer>
   <div class="wrap">
-    <p class="foot-links"><a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a> · <a href="/pokedex/">도감</a></p>
+    <p class="foot-links"><a href="/about/">사이트 소개</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a> · <a href="/pokedex/">도감</a></p>
     <p class="disclaimer">
       Champions Helper는 팬이 만든 비공식 보조 도구입니다.
       &ldquo;Pok&eacute;mon&rdquo;(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pok&eacute;mon Company의
@@ -473,6 +473,14 @@ STATIC_ROUTES = [
     ("/builder/", "weekly", "0.8"),
     ("/board/", "daily", "0.7"),
     ("/guide/", "monthly", "0.7"),
+    ("/about/", "yearly", "0.5"),
+    ("/guide/meta-singles/", "weekly", "0.8"),
+    ("/guide/meta-doubles/", "weekly", "0.8"),
+    ("/guide/speed-guide/", "monthly", "0.7"),
+    ("/guide/ev-nature/", "monthly", "0.7"),
+    ("/guide/team-building/", "monthly", "0.7"),
+    ("/guide/mega-picks/", "monthly", "0.7"),
+    ("/guide/status-moves/", "monthly", "0.7"),
     ("/guide/app-guide/", "monthly", "0.8"),
     ("/guide/getting-started/", "monthly", "0.7"),
     ("/guide/damage-formula/", "monthly", "0.7"),
@@ -588,7 +596,7 @@ BD_PAGE = """<!DOCTYPE html>
 
 <footer>
   <div class="wrap">
-    <p class="foot-links"><a href="https://forms.gle/vzavUFn5xFDtdpu66" target="_blank" rel="noopener">🐞 버그 제보</a> · <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">💬 디스코드</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="foot-links"><a href="https://forms.gle/vzavUFn5xFDtdpu66" target="_blank" rel="noopener">🐞 버그 제보</a> · <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">💬 디스코드</a> · <a href="/about/">사이트 소개</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
     <p class="attrib" style="margin:0 0 10px">{attrib}</p>
     <p class="disclaimer">
       Champions Helper는 팬이 만든 비공식 보조 도구입니다.

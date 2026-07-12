@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>포켓몬 챔피언스 상태이상·변화기 대응 가이드 — 화상·마비·하품·앙코르 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스에서 배틀을 뒤집는 것은 공격기가 아니라 변화기입니다. 화상·마비·독·잠듦의 실전 가치, 도깨비불·하품·앙코르·막말내뱉기 대응법, 회복 열매 선택까지 정리했습니다." />
+<link rel="canonical" href="https://champions-helper.com/guide/status-moves/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/status-moves/" />
+<meta property="og:title" content="포켓몬 챔피언스 상태이상·변화기 대응 가이드" />
+<meta property="og:description" content="화상·마비·하품·앙코르 — 변화기의 실전 가치와 대응법." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="포켓몬 챔피언스 상태이상·변화기 대응 가이드" />
+<meta name="twitter:description" content="상태이상의 실전 가치와 대응법 정리." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "포켓몬 챔피언스 상태이상·변화기 대응 가이드",
+  "description": "상태이상별 실전 가치와 주요 변화기 대응법.",
+  "inLanguage": "ko",
+  "datePublished": "2026-07-12",
+  "url": "https://champions-helper.com/guide/status-moves/",
+  "author": { "@type": "Organization", "name": "Champions Helper" },
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .article { max-width: 920px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 28px; font-weight: 800; margin: 0 0 10px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 20px; font-weight: 800; margin: 34px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 800; margin: 22px 0 8px; }
+  .article p { margin: 0 0 14px; }
+  .article strong { color: #fff; }
+  .article ul { margin: 0 0 14px; padding-left: 22px; }
+  .article li { margin-bottom: 6px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+  th { background: var(--panel2); }
+  tr:last-child td { border-bottom: none; }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 28px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .foot-links { font-size: 13px; margin: 0 0 12px; }
+  .foot-links a { color: var(--muted); }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 920px; margin: 0 auto; }
+</style>
+  <link rel="stylesheet" href="/site-header.css" />
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/">배틀데이터</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/board/">게시판</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 상태이상·변화기 대응 가이드</div>
+    <h1>포켓몬 챔피언스 상태이상·변화기 대응 가이드</h1>
+    <p class="lead">랭크가 올라갈수록 게임을 결정하는 것은 화력보다 <strong>변화기</strong>입니다. 시즌 M-4 채용률을 보면 하마돈의 하품이 95.4%, 어흥염(더블)의 막말내뱉기가 89% — 상위권일수록 공격기 자리를 변화기에 내줍니다. 상태이상별 실전 가치와, 자주 맞게 되는 변화기들의 대응법을 정리했습니다.</p>
+
+    <h2>상태이상 5종 — 무엇이 얼마나 아픈가</h2>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>상태이상</th><th>효과</th><th>실전 가치</th></tr></thead>
+      <tbody>
+        <tr><td><strong>화상</strong></td><td>물리 공격 절반 + 매 턴 지속 데미지</td><td>물리 어태커 기능 정지. 사실상 "물리 전용 위협 2회분"</td></tr>
+        <tr><td><strong>마비</strong></td><td>스피드 절반 + 일정 확률 행동 불가</td><td>고속 에이스의 선공권 박탈. 전기 타입에는 통하지 않음</td></tr>
+        <tr><td><strong>독/맹독</strong></td><td>매 턴 데미지 (맹독은 점점 증가)</td><td>회복형 받이 파훼 수단. 독·강철 타입에는 무효</td></tr>
+        <tr><td><strong>잠듦</strong></td><td>수 턴 행동 불가</td><td>사실상 한 마리 일시 퇴장. 하품 루프의 핵심</td></tr>
+        <tr><td><strong>얼음</strong></td><td>풀릴 때까지 행동 불가</td><td>발동 기술이 적은 대신 걸리면 치명적</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>중요한 공통 규칙: <strong>상태이상은 교체해도 낫지 않습니다.</strong> 한 번 화상을 입은 물리 에이스는 그 판 내내 반쪽입니다. 그래서 "누가 상태이상을 받아도 되는가"를 선출 단계부터 계산해야 합니다.</p>
+
+    <h2>도깨비불 — 물리 파티의 천적</h2>
+    <p>로토무(워시)의 도깨비불 채용률 76.3%, 라우드본 87.8%. 이들이 파티에 보이면 <strong>내 물리 에이스가 화상 한 방에 무력화될 수 있다</strong>는 뜻입니다. 대응 옵션은 넷입니다.</p>
+    <ul>
+      <li><strong>불꽃 타입</strong>은 화상에 걸리지 않습니다 — 번치코·리자몽 등은 도깨비불을 무시하고 덤빌 수 있습니다.</li>
+      <li><strong>특수 어태커로 압박</strong> — 화상은 특수 화력을 깎지 못합니다.</li>
+      <li><strong>특성 근성·기술 객기</strong> — 오히려 상태이상을 화력으로 바꿉니다(근성: 물리 1.5배, 객기: 위력 2배). 찌르호크(싱글 26위)가 대표적인 "도깨비불을 맞아 주고 싶은" 포켓몬입니다.</li>
+      <li><strong>회복 열매</strong> — 아래 열매 문단 참고.</li>
+    </ul>
+
+    <h2>하품 루프 — 하마돈의 95.4%</h2>
+    <p>하품은 맞은 포켓몬이 <strong>다음 턴 끝에 잠들게</strong> 만듭니다. 그대로 있으면 잠들고, 교체하면 하마돈(채용률 95.4%)이 스텔스록(75.3%)을 깔거나 다음 포켓몬에게 또 하품을 겁니다 — 이것이 "하품 루프"입니다. 대응은 세 갈래입니다.</p>
+    <ul>
+      <li><strong>한 마리를 재워 주기</strong> — 잠들어도 되는 멤버(받이·역할이 끝난 포켓몬)로 받고, 그 사이 기점을 잡습니다.</li>
+      <li><strong>루프 자체를 끊기</strong> — 도발로 하품을 봉쇄하거나, 하마돈이 버틸 수 없는 특수 대미지(물·풀·얼음)로 압박합니다.</li>
+      <li><strong>풀 타입·불면 계열 특성</strong> — 가루 기술이 아닌 하품은 풀 타입에도 통하므로 주의(방진 고글류 무효 대상 아님). 특성으로 잠듦 자체를 막는 포켓몬이 가장 확실합니다.</li>
+    </ul>
+
+    <h2>앙코르 — 세터와 받이의 카운터</h2>
+    <p>앙코르는 상대가 마지막으로 쓴 기술을 수 턴 반복하게 강제합니다. 엘풍(더블, 72.4%)은 짓궂은마음으로 <strong>변화기를 선제 앙코르</strong>하기까지 합니다. 칼춤을 춘 따라큐가 칼춤만 반복하게 되는 순간, 기점이 오히려 처형대가 됩니다. 랭크업·회복·방어 같은 변화기를 쓸 때는 항상 "이 턴에 앙코르가 날아오면?"을 자문하세요. 반대로 내가 앙코르를 채용하면 하마돈·아머까오 같은 회복 받이를 가장 값싸게 파훼할 수 있습니다.</p>
+
+    <h2>막말내뱉기와 위협 — 랭크 깎기 게임 (더블)</h2>
+    <p>더블 4위 어흥염의 막말내뱉기 채용률은 89% — 상대의 공격·특공을 깎으면서 <strong>자신은 교체로 빠지는</strong> 기술입니다. 위협(내보내기만 해도 상대 둘 공격 -1)과 함께 더블의 "랭크 깎기" 축을 이룹니다. 이 축이 무서운 이유는 교체 사이클을 돌 때마다 깎임이 누적되기 때문입니다. 대응은 <strong>랭크 하락을 역이용하는 특성</strong> — 오기(깎일 때마다 공격 +2, 더블 1위 대도각참 97.3%)·승기(특공 +1)·클리어바디(하락 무효, 메타그로스 99.3%) — 혹은 특수 어태커 위주 선출입니다.</p>
+
+    <h2>회복 열매 — 무엇을 들려 보낼까</h2>
+    <p>상태이상 대책의 마지막 조각은 지닌 도구입니다.</p>
+    <ul>
+      <li><strong>리샘열매</strong> — 모든 상태이상을 1회 회복. 무엇이 날아올지 모르는 에이스의 범용 보험.</li>
+      <li><strong>복분열매</strong> — 화상 전용. 도깨비불이 예상되는 물리 에이스에게.</li>
+      <li><strong>버치열매</strong> — 마비 전용. 선공권이 생명인 고속 어태커에게.</li>
+    </ul>
+    <p>열매는 1회용이므로 "언제 소모되느냐"까지가 계산입니다. 상대가 열매를 확인한 뒤 두 번째 상태이상을 노리는 플레이도 흔하다는 점을 기억하세요.</p>
+
+    <div class="note"><strong>헬퍼 활용</strong> — Champions Helper 데스크탑 앱은 배틀 로그에서 화상·마비를 자동 인식해 <strong>교체 후에도 그 포켓몬의 데미지 계산에 계속 반영</strong>합니다(상태이상은 낫지 않으므로). 시뮬레이션 패널에서 상태이상을 직접 지정해 "화상 걸린 내 에이스의 화력"을 미리 볼 수도 있습니다. 자세한 조작은 <a href="/guide/app-guide/">프로그램 사용법</a> 참고.</div>
+
+    <div class="related">
+      <h3>함께 읽기</h3>
+      <a href="/guide/meta-singles/">싱글 메타 분석 →</a>
+      <a href="/guide/meta-doubles/">더블 메타 분석 →</a>
+      <a href="/guide/abilities-items/">특성·지닌도구 효과 →</a>
+    </div>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="/about/">사이트 소개</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>포켓몬 챔피언스 노력치·성격 배분 가이드 — 32/66 시스템 완전 이해 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스의 노력치는 본가와 다릅니다. 노력치 1 = 실수치 1, 능력치당 최대 32·합계 66. 어태커·내구형 배분 패턴과 성격 보정 선택, 내구 조정 개념까지 실전 기준으로 정리했습니다." />
+<link rel="canonical" href="https://champions-helper.com/guide/ev-nature/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/ev-nature/" />
+<meta property="og:title" content="포켓몬 챔피언스 노력치·성격 배분 가이드" />
+<meta property="og:description" content="노력치 1 = 실수치 1. 챔피언스 32/66 노력치 시스템과 실전 배분 패턴 정리." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="포켓몬 챔피언스 노력치·성격 배분 가이드" />
+<meta name="twitter:description" content="챔피언스 노력치 시스템과 실전 배분 패턴." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "포켓몬 챔피언스 노력치·성격 배분 가이드 — 32/66 시스템 완전 이해",
+  "description": "챔피언스 노력치 시스템(칸당 32·합계 66·실수치 직접 가산)과 실전 배분 패턴.",
+  "inLanguage": "ko",
+  "datePublished": "2026-07-12",
+  "url": "https://champions-helper.com/guide/ev-nature/",
+  "author": { "@type": "Organization", "name": "Champions Helper" },
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .article { max-width: 920px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 28px; font-weight: 800; margin: 0 0 10px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 20px; font-weight: 800; margin: 34px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 800; margin: 22px 0 8px; }
+  .article p { margin: 0 0 14px; }
+  .article strong { color: #fff; }
+  .article ul { margin: 0 0 14px; padding-left: 22px; }
+  .article li { margin-bottom: 6px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+  th { background: var(--panel2); }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: center; }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+  .formula { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 16px; margin: 8px 0 16px; font-family: Consolas, monospace; font-size: 13.5px; overflow-x: auto; }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 28px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .foot-links { font-size: 13px; margin: 0 0 12px; }
+  .foot-links a { color: var(--muted); }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 920px; margin: 0 auto; }
+</style>
+  <link rel="stylesheet" href="/site-header.css" />
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/">배틀데이터</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/board/">게시판</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 노력치·성격 배분 가이드</div>
+    <h1>포켓몬 챔피언스 노력치·성격 배분 가이드</h1>
+    <p class="lead">본가 감각으로 "252/252/4"를 떠올렸다면 챔피언스에선 다시 배워야 합니다. 챔피언스의 노력치는 <strong>1 포인트가 실수치 1</strong>로 직결되고, 능력치당 최대 32·합계 66이라는 훨씬 작은 예산을 어디에 쓰느냐의 게임입니다. 배분 원리와 실전 패턴을 정리했습니다.</p>
+
+    <h2>챔피언스 노력치 시스템의 3가지 규칙</h2>
+    <ul>
+      <li><strong>노력치 1 = 실수치 +1.</strong> 본가처럼 4로 나누지 않고 실수치에 그대로 더해집니다. 투자 효과가 눈에 보이는 직관적인 구조입니다.</li>
+      <li><strong>능력치당 최대 32.</strong> 본가의 252에 해당하는 "풀투자"가 챔피언스에서는 32입니다.</li>
+      <li><strong>합계 최대 66.</strong> 두 능력치에 풀투자(32+32=64)하면 2가 남습니다. 이 자투리 2를 어디에 쓸지도 선택입니다.</li>
+    </ul>
+    <div class="formula">실수치(HP 외) = floor( ( floor((2×종족값+31)×50÷100) + 5 + 노력치 ) × 성격보정 )
+HP 실수치   = floor((2×종족값+31)×50÷100) + 60 + 노력치</div>
+    <p>성격 보정은 <strong>한 능력치를 ×1.1, 다른 한 능력치를 ×0.9</strong>로 만듭니다. 게임 화면에는 능력치 옆 화살표(▲/▼)로 표시됩니다. 중요한 포인트는 <strong>×1.1이 노력치를 더한 값 전체에 곱해진다는 것</strong> — 그래서 성격 보정은 풀투자한 능력치에 줄 때 효율이 가장 높습니다(값이 클수록 ×1.1의 절대 증가량이 커지기 때문).</p>
+
+    <h2>기본 배분 패턴 4가지</h2>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>패턴</th><th>배분</th><th>대상</th><th>노림수</th></tr></thead>
+      <tbody>
+        <tr><td><strong>풀공·풀스핏</strong></td><td>공격(또는 특공) 32 / 스피드 32 / 잔여 2</td><td>고속 어태커 (마스카나·개굴닌자·팬텀)</td><td>화력과 선공권 최대화. 성격은 스피드 ▲가 표준("최속"), 화력이 부족하면 공격 ▲</td></tr>
+        <tr><td><strong>풀HP·풀방</strong></td><td>HP 32 / 방어(또는 특방) 32 / 잔여 2</td><td>받이 (하마돈·아머까오·찌리배리)</td><td>담당 방향(물리/특수)의 피격 데미지 최소화. 성격 ▲도 같은 방향</td></tr>
+        <tr><td><strong>HP+양내구</strong></td><td>HP 32 / 방어 17 / 특방 17</td><td>사이클 중계형·따라큐류</td><td>어느 쪽도 확정 1타 당하지 않는 밸런스. 세부 수치는 가상 적 기준으로 조정</td></tr>
+        <tr><td><strong>내구 조정 어태커</strong></td><td>공격 32 / 스피드 필요량 / 나머지 HP</td><td>중속 에이스 (브리두라스·번치코)</td><td>"이길 상대"의 최속만 넘기고 남는 예산을 내구로 — 아래 조정 개념 참고</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>조정의 핵심 — "필요한 만큼만" 스피드</h2>
+    <p>합계 66은 빠듯한 예산이라, 본가 이상으로 <strong>과투자가 아깝습니다</strong>. 스피드 투자의 목적은 "특정 상대보다 1 빠르기"입니다. 예를 들어 <a href="/guide/speed-guide/">스피드 가이드</a>의 라인 표에서 상대 한카리아스 최속이 169라면, 내 실수치를 170으로 만드는 데 필요한 노력치만 주고 나머지는 화력이나 내구로 돌리는 식입니다. 노력치 1 = 실수치 1이므로 이 계산이 암산 수준으로 간단합니다 — 챔피언스 조정의 가장 큰 매력입니다.</p>
+    <p>내구 조정도 같은 원리입니다. 자주 만나는 공격(예: 한카리아스의 지진)을 <strong>"확정 1타"에서 "난수 1타"로, 난수 1타에서 "확정 2타"로</strong> 넘기는 데 필요한 HP·방어 수치가 존재합니다. <a href="/calc/">데미지 계산기</a>에 상대 공격과 내 배분을 넣으면 데미지 %와 확정 타수가 바로 나오므로, 몇 포인트를 어디에 넣어야 판정이 바뀌는지 직접 확인하며 조정할 수 있습니다.</p>
+
+    <h2>성격(▲/▼) 선택 — 무엇을 깎을 것인가</h2>
+    <p>▲만큼 중요한 게 ▼입니다. 원칙은 단순합니다: <strong>쓰지 않는 공격 능력치를 깎으세요.</strong></p>
+    <ul>
+      <li>물리 어태커 → 특공 ▼ (특수기를 안 쓴다면 손해 0)</li>
+      <li>특수 어태커 → 공격 ▼ (혼동 자해·속임수 피해도 줄어드는 덤)</li>
+      <li>받이 → 반대편 공격 ▼, ▲는 HP가 아니라 방어/특방에 (HP는 ×1.1 보정 대상이 아니므로)</li>
+    </ul>
+    <p>예외도 있습니다. 트릭룸 파티의 저속 에이스는 스피드 ▼로 "더 느리게" 만드는 것이 이득이고(더블 상위권 대도각참·어흥염 계열 발상), 자이로볼을 쓰는 포켓몬도 스피드가 낮을수록 위력이 오릅니다.</p>
+
+    <h2>실전 예시 — 브리두라스 특공 194 만들기</h2>
+    <p>사용률 3위 브리두라스(특공 종족값 125)로 계산해 보겠습니다. 기본 실수치는 floor((2×125+31)×50÷100)+5 = 145. 노력치 32를 주면 177, 특공 ▲(×1.1)까지 받으면 <strong>floor(177×1.1) = 194</strong>가 됩니다. 무보정 145와 풀투자+보정 194의 차이는 데미지로 약 34% — 같은 용성군이 확정 2타에서 확정 1타로 바뀌는 수준의 격차입니다. 이 수치는 실제 게임에서 검증된 값으로, Champions Helper의 실수치 계산이 이 공식을 그대로 사용합니다.</p>
+
+    <h2>자주 하는 실수</h2>
+    <ul>
+      <li><strong>모든 능력치에 조금씩 뿌리기</strong> — 66을 6칸에 11씩 나누면 아무 판정도 바뀌지 않습니다. 판정(선후공·확정 타수)이 바뀌는 곳에 몰아주세요.</li>
+      <li><strong>동속 방치</strong> — 미러전이 잦은 인기 포켓몬(한카리아스 등)은 같은 배분끼리 동속 50% 코인 토스가 됩니다. 1 포인트로 코인 토스를 없앨 수 있다면 싼 투자입니다.</li>
+      <li><strong>HP에 ▲ 배정</strong> — 성격 보정은 HP에 적용되지 않습니다. HP는 노력치로만 올립니다.</li>
+      <li><strong>본가 세팅 복사</strong> — 본가의 "252/252/4 최속" 감각은 총량이 다른 챔피언스에서 그대로 통하지 않습니다. 챔피언스 실전 배분은 <a href="/battle-data/">배틀데이터</a>에서 실제 채용 기술과 함께 감을 잡는 것을 권합니다.</li>
+    </ul>
+
+    <div class="note"><strong>도구 활용</strong> — <a href="/builder/">파티 빌더</a>는 노력치를 조절할 때마다 실수치가 실시간으로 다시 계산되고, 합계 66 초과를 자동으로 막아 줍니다. 배분을 저장하면 데스크탑 앱의 실시간 데미지 계산에도 그대로 반영됩니다.</div>
+
+    <div class="related">
+      <h3>함께 읽기</h3>
+      <a href="/guide/speed-guide/">스피드 실전 가이드 →</a>
+      <a href="/guide/damage-formula/">데미지 계산 공식 →</a>
+      <a href="/guide/team-building/">파티 구성 입문 →</a>
+    </div>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="/about/">사이트 소개</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

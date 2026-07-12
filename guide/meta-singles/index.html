@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>포켓몬 챔피언스 싱글 메타 분석 — 시즌 M-4 사용률 상위 30 리포트 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스 싱글 랭크배틀 시즌 M-4 실전 채용률 데이터로 본 메타 분석. 한카리아스·따라큐·브리두라스가 왜 강한지, 유형별 상위권 분류와 파티 구성 시 대비법까지 정리했습니다." />
+<link rel="canonical" href="https://champions-helper.com/guide/meta-singles/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/meta-singles/" />
+<meta property="og:title" content="포켓몬 챔피언스 싱글 메타 분석 — 시즌 M-4 사용률 리포트" />
+<meta property="og:description" content="실전 채용률 데이터로 본 싱글 랭크배틀 메타. 상위 30마리를 유형별로 분류하고 대비법을 정리했습니다." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="포켓몬 챔피언스 싱글 메타 분석 (시즌 M-4)" />
+<meta name="twitter:description" content="채용률 데이터 기반 싱글 랭크배틀 메타 리포트." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "포켓몬 챔피언스 싱글 메타 분석 — 시즌 M-4 사용률 상위 30 리포트",
+  "description": "싱글 랭크배틀 시즌 M-4 채용률 데이터 기반 메타 분석과 대비법.",
+  "inLanguage": "ko",
+  "datePublished": "2026-07-12",
+  "url": "https://champions-helper.com/guide/meta-singles/",
+  "author": { "@type": "Organization", "name": "Champions Helper" },
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .article { max-width: 920px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 28px; font-weight: 800; margin: 0 0 10px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 20px; font-weight: 800; margin: 34px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 800; margin: 22px 0 8px; }
+  .article p { margin: 0 0 14px; }
+  .article strong { color: #fff; }
+  .article ul { margin: 0 0 14px; padding-left: 22px; }
+  .article li { margin-bottom: 6px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+  th { background: var(--panel2); }
+  tr:last-child td { border-bottom: none; }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 28px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .foot-links { font-size: 13px; margin: 0 0 12px; }
+  .foot-links a { color: var(--muted); }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 920px; margin: 0 auto; }
+</style>
+  <link rel="stylesheet" href="/site-header.css" />
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/">배틀데이터</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/board/">게시판</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 싱글 메타 분석 (시즌 M-4)</div>
+    <h1>포켓몬 챔피언스 싱글 메타 분석 — 시즌 M-4 리포트</h1>
+    <p class="lead">싱글 랭크배틀에서 실제로 어떤 포켓몬이, 어떤 기술과 특성으로 쓰이고 있을까요? 시즌 M-4 실전 채용률 데이터(2026년 7월 12일 기준)를 바탕으로 사용률 상위권을 유형별로 분석하고, 파티를 짤 때 무엇을 대비해야 하는지 정리했습니다.</p>
+    <div class="note"><strong>데이터 기준</strong> — 이 글의 순위·채용률 수치는 バトルデータベース チャンピオンズ(champs.pokedb.tokyo)가 집계한 싱글 랭크배틀 시즌 M-4 데이터를 2026-07-12에 수집한 것입니다. 시즌이 진행되며 수치는 계속 변합니다. 항상 최신 수치는 12시간마다 자동 갱신되는 <a href="/battle-data/">배틀데이터</a> 페이지에서 확인하세요.</div>
+
+    <h2>사용률 상위 10 한눈에 보기</h2>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>순위</th><th>포켓몬</th><th>타입</th><th>대표 특성 (채용률)</th><th>핵심 기술 (채용률)</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><a href="/pokedex/garchomp/">한카리아스</a></td><td>드래곤·땅</td><td>까칠한피부 (99.6%)</td><td>지진 99.6% · 스텔스록 48.5% · 스케일샷 39.6%</td></tr>
+        <tr><td>2</td><td><a href="/pokedex/mimikyu/">따라큐</a></td><td>고스트·페어리</td><td>탈 (100%)</td><td>치근거리기 98.6% · 야습 97.8% · 칼춤 85.2%</td></tr>
+        <tr><td>3</td><td><a href="/pokedex/archaludon/">브리두라스</a></td><td>강철·드래곤</td><td>지구력 (67.5%)</td><td>용성군 72.8% · 러스터캐논 72.6% · 10만볼트 62.3%</td></tr>
+        <tr><td>4</td><td><a href="/pokedex/primarina/">누리레느</a></td><td>물·페어리</td><td>급류 (96.7%)</td><td>문포스 98.8% · 물거품아리아 86.6% · 아쿠아제트 75.4%</td></tr>
+        <tr><td>5</td><td><a href="/pokedex/metagross/">메타그로스</a></td><td>강철·에스퍼</td><td>클리어바디 (99.3%)</td><td>사이코팽 94.8% · 불릿펀치 92.2% · 지진 57.4%</td></tr>
+        <tr><td>6</td><td><a href="/pokedex/hippowdon/">하마돈</a></td><td>땅</td><td>모래날림 (99.9%)</td><td>지진 98.6% · 하품 95.4% · 스텔스록 75.3%</td></tr>
+        <tr><td>7</td><td><a href="/pokedex/meowscarada/">마스카나</a></td><td>풀·악</td><td>변환자재 (92.7%)</td><td>트릭플라워 97.3% · 트리플악셀 83.5% · 유턴 71.6%</td></tr>
+        <tr><td>8</td><td><a href="/pokedex/gyarados/">갸라도스</a></td><td>물·비행</td><td>위협 (99.5%)</td><td>폭포오르기 84.6% · 용의춤 83.7% · 지진 82.1%</td></tr>
+        <tr><td>9</td><td><a href="/pokedex/blaziken/">번치코</a></td><td>불꽃·격투</td><td>가속 (98.3%)</td><td>플레어드라이브 85.4% · 인파이트 65.9%</td></tr>
+        <tr><td>10</td><td><a href="/pokedex/charizard/">리자몽</a></td><td>불꽃·비행</td><td>맹화 (88.6%)</td><td>솔라빔 60.2% · 에어슬래시 41.3% · 화염방사 41.2%</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>1위 한카리아스 — "지진 99.6%"가 말해 주는 것</h2>
+    <p>한카리아스는 시즌 M-4 싱글 사용률 1위입니다. 채용 데이터가 재미있는데, <strong>지진 채용률이 99.6%</strong>로 사실상 전원이 채용하고, 그다음이 확정기가 아니라 <strong>스텔스록(48.5%)</strong>입니다. 즉 절반 가까운 한카리아스가 단순 어태커가 아니라 <strong>선봉에서 스텔스록을 깔고 시작하는 "선발 겸 딜러"</strong>로 운용됩니다.</p>
+    <p>스피드 종족값 102는 100 라인(리자몽·찌르호크)을 딱 1~2 웃도는 절묘한 수치입니다. 드래곤·땅 자속 조합은 반감으로 받아낼 수 있는 포켓몬이 많지 않고, 특성 까칠한피부(99.6%)는 접촉 기술을 쓴 상대의 HP를 깎아 연속기·선공기 견제에도 은근한 압박을 줍니다. 스케일샷(39.6%)형은 공격하면서 스피드를 올려 스위퍼로 전환할 수 있어, 상대 입장에선 <strong>형태를 확정하기 전까지 함부로 받아내기 어렵습니다</strong>.</p>
+    <p>대비는 결국 타입입니다. 얼음·페어리·드래곤 기술이 약점이며, 특히 얼음은 4배가 아니어도 고위력 기술이면 충분히 아픕니다. 내 파티에 한카리아스보다 빠른 얼음·페어리 딜러가 있는지 <a href="/calc/">데미지 계산기</a>로 확정 타수를 미리 확인해 두세요.</p>
+
+    <h2>2위 따라큐 — 탈 100%의 기점 마련형</h2>
+    <p>따라큐의 특성 <strong>탈은 채용률 100%</strong>, 그리고 <strong>칼춤이 85.2%</strong>입니다. 조합이 말해 주듯, 탈로 첫 피해를 한 번 무효화하는 사이에 칼춤을 추고 야습(97.8%)·치근거리기(98.6%)·섀도클로(71.4%)로 쓸어 담는 기점 마련형이 표준입니다. 고스트·페어리 자속은 격투·드래곤을 무효·저항으로 받아내는 수비 상성도 우수합니다.</p>
+    <p>대비법은 두 가지 축입니다. 첫째, <strong>탈을 값싸게 벗기기</strong> — 위력이 낮은 선공기나 연속기로 탈만 소모시키면 본체 내구는 높지 않습니다. 둘째, <strong>칼춤 기점을 주지 않기</strong> — 갸라도스·입치트·찌르호크의 위협(공격 랭크 -1)으로 칼춤 한 번을 상쇄하거나, 도깨비불로 물리 공격 자체를 반감시키는 방법이 널리 쓰입니다.</p>
+
+    <h2>수비 사이클 축 — 하마돈·아머까오·찌리배리·라우드본</h2>
+    <p>상위권에는 명확한 "받이" 그룹이 있습니다. <strong>하마돈(6위)</strong>은 하품 95.4%·스텔스록 75.3%·게으름피우기 67.1%로, 상대를 강제 교체시키며 스텔스록 데미지를 누적시키는 사이클의 심장입니다. <strong>아머까오(14위)</strong>는 날개쉬기 98.7%에 철벽+바디프레스(68.5%) 조합으로 물리를 받고, <strong>찌리배리(29위)</strong>는 물붓기·맹독·볼트체인지로 특수를 받으며, <strong>라우드본(22위)</strong>은 특성 천진(99.4%)으로 상대의 랭크업을 무시한 채 플레어송과 도깨비불을 뿌립니다.</p>
+    <p>이 그룹을 상대할 때 핵심은 <strong>회복 소스를 끊거나 회복량을 넘는 딜을 한 번에 넣는 것</strong>입니다. 도발·앙코르로 회복기를 잠그거나, 랭크업 후 일격으로 돌파하세요. 어중간한 딜은 게으름피우기·날개쉬기 한 번에 도로 회복됩니다.</p>
+
+    <h2>변환자재 고속 어태커 — 마스카나·개굴닌자</h2>
+    <p><strong>마스카나(7위, 스피드 123)</strong>와 <strong>개굴닌자(12위, 스피드 122)</strong>는 특성 변환자재(각 92.7%·65.8%)로 쓰는 기술의 타입으로 자신이 변하면서 모든 기술에 자속 보정을 받습니다. 마스카나의 트릭플라워(97.3%)는 급소 확정이라 상대의 방어 랭크업·화상 감소를 무시하고, 개굴닌자는 악의파동·냉동빔·물수리검 등 기술폭이 넓어 받아내기 까다롭습니다.</p>
+    <p>둘 다 내구는 종잇장이므로 <strong>선공기</strong>(아쿠아제트·불릿펀치·기습)나 <strong>더 빠른 포켓몬</strong>으로 위에서 두드리는 것이 정석 대응입니다. 스피드 라인 판단이 헷갈리면 <a href="/guide/speed-guide/">스피드 실전 가이드</a>를 참고하세요.</p>
+
+    <h2>기점형 스위퍼 — 번치코·갸라도스·핫삼</h2>
+    <p><strong>번치코(9위)</strong>는 특성 가속(98.3%)으로 매 턴 스피드가 오르므로 한 턴만 버티면 최속권을 넘어섭니다. <strong>갸라도스(8위)</strong>는 위협으로 물리 상대에게 기점을 만들고 용의춤(83.7%)을 춥니다. <strong>핫삼(21위)</strong>은 칼춤(68%) 후 테크니션 보정 불릿펀치(99.8%)로 선공 스윕을 노립니다. 공통점은 <strong>랭크업 1회를 허용하는 순간 게임이 기울어진다</strong>는 것 — 랭크업 턴에 맞춰 도깨비불·위협·앙코르로 끊거나, 처음부터 기점을 주지 않는 플레이가 필요합니다.</p>
+
+    <h2>시즌 M-4 메타가 말하는 세 가지</h2>
+    <ul>
+      <li><strong>스텔스록이 어디에나 있습니다.</strong> 한카리아스 48.5%, 하마돈 75.3%, 브리두라스 38.3% — 상위권 셋이 전부 스텔스록 요원을 겸합니다. 리자몽(바위 4배)처럼 스텔스록에 치명적인 포켓몬을 쓸 거라면 교체 횟수를 아끼는 운영이 필수입니다.</li>
+      <li><strong>페어리가 강세입니다.</strong> 따라큐(2위)·누리레느(4위)·알로라 나인테일(15위)·입치트(30위)까지, 드래곤 억제와 격투 견제를 겸하는 페어리가 폭넓게 포진해 있습니다. 파티에 페어리를 받아낼 강철·독 내성이 없으면 후반 스윕에 무너지기 쉽습니다.</li>
+      <li><strong>선공기 가치가 높습니다.</strong> 누리레느 아쿠아제트 75.4%, 메타그로스 불릿펀치 92.2%, 핫삼 불릿펀치 99.8%, 망나뇽 신속 45.3% — 고속 어태커가 많은 메타일수록 스피드를 무시하는 선공기의 채용이 늘어납니다. 내 에이스가 선공기 한 방 범위에 들어가는지 <a href="/calc/">계산기</a>로 확인해 두세요.</li>
+    </ul>
+
+    <h2>파티를 짤 때 최소한 점검할 것</h2>
+    <p>사용률 상위권은 "만날 확률이 가장 높은 상대"입니다. 새 파티를 만들었다면 최소한 다음을 점검하세요.</p>
+    <ul>
+      <li>한카리아스의 지진·역린을 받는 멤버가 있는가? (비행/부유 + 페어리·얼음 반격)</li>
+      <li>따라큐의 칼춤 기점을 끊을 수단(위협·도깨비불·앙코르)이 있는가?</li>
+      <li>스텔스록을 맞으며 시작해도 계획이 유지되는가? (바위 약점 편중 주의)</li>
+      <li>브리두라스·메타그로스 등 강철을 부술 불꽃·격투·땅 기술이 있는가?</li>
+    </ul>
+    <p><a href="/builder/">파티 빌더</a>의 추천 패널은 이 채용률 데이터를 그대로 사용해 남은 슬롯의 상성 보완을 제안하므로, 위 점검을 자동으로 도와줍니다. 각 포켓몬의 실전 채용 기술 전체 목록은 <a href="/pokedex/">도감</a>의 각 상세 페이지에서 볼 수 있습니다.</p>
+
+    <div class="related">
+      <h3>함께 읽기</h3>
+      <a href="/guide/meta-doubles/">더블 메타 분석 →</a>
+      <a href="/guide/speed-guide/">스피드 실전 가이드 →</a>
+      <a href="/guide/team-building/">파티 구성 입문 →</a>
+      <a href="/battle-data/">실시간 배틀데이터 →</a>
+    </div>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="/about/">사이트 소개</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
