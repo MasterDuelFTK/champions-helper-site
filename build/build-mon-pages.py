@@ -187,6 +187,27 @@ def ability_usage_section(en, usage_map=None, season="", fmt="싱글"):
             '<div class="use-list">' + "".join(rows) + '</div>'
             f'<p class="attrib">{ATTRIB}{season_txt}</p></section>')
 
+def item_usage_section(en, usage_map=None, season="", fmt="싱글"):
+    # 도구 채용률(items) 섹션 — 특성 섹션의 도구판 거울. move-usage.json 의 items(내림차순 %)를
+    #   기술/특성과 동일한 use-list 레이아웃으로 렌더(CSS 재사용). items 없으면 조용히 생략(구버전 json 안전).
+    u = (USAGE if usage_map is None else usage_map).get(_norm(en))
+    if not u or not u.get("items"):
+        return ""
+    rows = []
+    for a in u["items"][:8]:
+        pct = a.get("pct")
+        w = min(100, pct) if isinstance(pct, (int, float)) else 0
+        ptxt = f"{pct:g}%" if isinstance(pct, (int, float)) else "-"
+        rows.append(f'<div class="use-row"><span class="use-nm">{esc(a["ko"])}</span>'
+                    f'<div class="bar"><i style="width:{w:.0f}%;background:#e0b26a"></i></div>'
+                    f'<span class="use-pct">{ptxt}</span></div>')
+    season_txt = f' · 시즌 {esc(season)} {fmt} 배틀' if season else ''
+    return (f'<section class="card"><h2>자주 드는 지닌도구 <span class="sub">{fmt} 채용률</span></h2>'
+            f'<p class="matchup-note" style="margin:0 0 12px">실제 랭크 배틀({fmt})에서 이 포켓몬이 지닌 도구의 채용률입니다. '
+            '상대가 구애 도구·기합의띠·열매 등 무엇을 들고 있을지 예측하는 데 참고하세요.</p>'
+            '<div class="use-list">' + "".join(rows) + '</div>'
+            f'<p class="attrib">{ATTRIB}{season_txt}</p></section>')
+
 def abil_cards(abils):
     return "".join(
         f'<div class="abil"><div class="an">{esc(a["ko"])}</div>'
@@ -439,8 +460,10 @@ def build_pages():
             abils=abil_cards(e["abil"]),
             usage=usage_section(e["en"], USAGE, USAGE_SEASON, "싱글")
                   + ability_usage_section(e["en"], USAGE, USAGE_SEASON, "싱글")
+                  + item_usage_section(e["en"], USAGE, USAGE_SEASON, "싱글")
                   + usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블")
-                  + ability_usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블"),
+                  + ability_usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블")
+                  + item_usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블"),
             mega=mega_section(e),
             prose=commentary(e),
             prev=pager_link(preve, "prev"),
