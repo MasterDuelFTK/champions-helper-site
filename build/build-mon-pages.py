@@ -166,6 +166,27 @@ def usage_section(en, usage_map=None, season="", fmt="싱글"):
             '<div class="use-list">' + "".join(rows) + '</div>'
             f'<p class="attrib">{ATTRIB}{season_txt}</p></section>')
 
+def ability_usage_section(en, usage_map=None, season="", fmt="싱글"):
+    # 특성 채용률(abils) 섹션 — usage_section(기술)의 특성판 거울. move-usage.json 의 abils(내림차순 %)를
+    #   기술과 동일한 use-list 레이아웃으로 렌더(CSS 재사용). abils 없으면 조용히 생략(구버전 json 안전).
+    u = (USAGE if usage_map is None else usage_map).get(_norm(en))
+    if not u or not u.get("abils"):
+        return ""
+    rows = []
+    for a in u["abils"][:8]:
+        pct = a.get("pct")
+        w = min(100, pct) if isinstance(pct, (int, float)) else 0
+        ptxt = f"{pct:g}%" if isinstance(pct, (int, float)) else "-"
+        rows.append(f'<div class="use-row"><span class="use-nm">{esc(a["ko"])}</span>'
+                    f'<div class="bar"><i style="width:{w:.0f}%;background:#6fd08a"></i></div>'
+                    f'<span class="use-pct">{ptxt}</span></div>')
+    season_txt = f' · 시즌 {esc(season)} {fmt} 배틀' if season else ''
+    return (f'<section class="card"><h2>자주 채용하는 특성 <span class="sub">{fmt} 채용률</span></h2>'
+            f'<p class="matchup-note" style="margin:0 0 12px">실제 랭크 배틀({fmt})에서 이 포켓몬이 채용한 특성의 비율입니다. '
+            '복수 특성 포켓몬이라면 상대가 어떤 특성일 확률이 높은지 예측하는 데 참고하세요.</p>'
+            '<div class="use-list">' + "".join(rows) + '</div>'
+            f'<p class="attrib">{ATTRIB}{season_txt}</p></section>')
+
 def abil_cards(abils):
     return "".join(
         f'<div class="abil"><div class="an">{esc(a["ko"])}</div>'
@@ -417,7 +438,9 @@ def build_pages():
             matchup=matchup_block(e["types"]),
             abils=abil_cards(e["abil"]),
             usage=usage_section(e["en"], USAGE, USAGE_SEASON, "싱글")
-                  + usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블"),
+                  + ability_usage_section(e["en"], USAGE, USAGE_SEASON, "싱글")
+                  + usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블")
+                  + ability_usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블"),
             mega=mega_section(e),
             prose=commentary(e),
             prev=pager_link(preve, "prev"),
@@ -537,6 +560,9 @@ BD_PAGE = """<!DOCTYPE html>
   .bd-nm {{ font-weight: 800; font-size: 14px; flex: none; width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
   .bd-mv {{ font-size: 12.5px; color: var(--muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
   .bd-mv b {{ color: var(--accent2); }}
+  .bd-ab {{ flex: none; max-width: 130px; font-size: 11.5px; font-weight: 700; color: var(--ok);
+    background: rgba(111,208,138,.12); border: 1px solid rgba(111,208,138,.32); border-radius: 4px;
+    padding: 1px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
   .bd-h {{ font-size: 16px; font-weight: 800; margin: 24px 0 10px; }}
   .bd-h .c {{ color: var(--muted); font-weight: 500; font-size: 13px; margin-left: 6px; }}
   .bd-toggle {{ display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin: 8px 0 4px; }}
@@ -571,8 +597,8 @@ BD_PAGE = """<!DOCTYPE html>
     <h1 style="font-size:28px;margin:0 0 8px;font-weight:800;">{fmt_label}배틀 실전 사용률</h1>
     <p style="color:var(--muted);margin:0;font-size:14.5px;line-height:1.7;">
       포켓몬 챔피언스 <strong style="color:var(--txt)">랭크 배틀 {season}</strong> 통계를 바탕으로, 포켓몬별로
-      실제 대전에서 자주 채용되는 기술과 채용률을 정리했습니다. 상대가 어떤 기술을 들고 오는지 예측하는 데 활용하세요.
-      각 포켓몬을 누르면 종족값·타입 상성과 함께 <strong style="color:var(--txt)">기술별 채용률 전체</strong>를 볼 수 있습니다.
+      실제 대전에서 자주 채용되는 기술·특성과 채용률을 정리했습니다. 상대가 어떤 기술·특성을 들고 오는지 예측하는 데 활용하세요.
+      각 포켓몬을 누르면 종족값·타입 상성과 함께 <strong style="color:var(--txt)">기술·특성별 채용률 전체</strong>를 볼 수 있습니다.
     </p>
   </div>
 
@@ -614,10 +640,15 @@ def _bd_row(e, u, rank):
     mv = ", ".join(
         f'{esc(m["ko"])} <b>{m["pct"]:g}%</b>' if isinstance(m.get("pct"), (int, float))
         else esc(m["ko"]) for m in top) or "기술 통계 없음"
+    # 1위 채용 특성칩(있으면). 채용률까지 표기 — 복수 특성 종족의 최다 채용을 한눈에.
+    ab = u.get("abils") or []
+    ab_html = (f'<span class="bd-ab">{esc(ab[0]["ko"])} {ab[0]["pct"]:g}%</span>'
+               if ab and isinstance(ab[0].get("pct"), (int, float)) else "")
     rk = f'<span class="bd-rank">{rank}</span>' if rank else '<span class="bd-rank">–</span>'
     return (f'<a class="bd-row" href="/pokedex/{slug(e["en"])}/">{rk}'
             f'<img src="/sprites/{esc(e["sprite"])}" alt="{esc(e["ko"])}" width="42" height="42" loading="lazy">'
             f'<span class="bd-nm">{esc(e["ko"])}</span>'
+            f'{ab_html}'
             f'<span class="bd-mv">{mv}</span></a>')
 
 def bd_toggle(active):
