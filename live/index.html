@@ -376,7 +376,7 @@
 <body>
   <div id="bar">
     <span id="status">로컬 헬퍼 연결 대기…</span>
-    <span id="version">v0.127</span>
+    <span id="version">v0.145</span>
   </div>
   <section id="top">
     <div class="section-title" id="top-title">상대 파티 (내 현재 포켓몬 기준 위력)</div>
@@ -1158,10 +1158,13 @@ function renderPartiesBlock(m) {
   // 113차 — 중앙 열: "상대 시점" 토글(항상) + 그 아래 "모든 시뮬 취소"(시뮬 활성 시).
   const mid = el("div", "pcol center");
   mid.appendChild(el("div", "section-title", " "));
-  const persp = el("button", "btn opp-persp" + (m.oppPerspective ? " on" : ""), m.oppPerspective ? "상대 시점 ✓" : "상대");
-  persp.title = "상대 시점 위력 — 상대가 공격자, 내 6마리가 방어자. 위력칩이 상대 기술 기준으로 반전.";
-  persp.onclick = () => sim("/api/sim/opp-perspective");
-  mid.appendChild(persp);
+  // 145차 — 동시 위력 모드에선 시점이 탭별로 고정(view=my/opp)이므로 "상대 시점" 토글을 숨긴다(단일 모드에서만 노출).
+  if (!m.dualMode) {
+    const persp = el("button", "btn opp-persp" + (m.oppPerspective ? " on" : ""), m.oppPerspective ? "상대 시점 ✓" : "상대");
+    persp.title = "상대 시점 위력 — 상대가 공격자, 내 6마리가 방어자. 위력칩이 상대 기술 기준으로 반전.";
+    persp.onclick = () => sim("/api/sim/opp-perspective");
+    mid.appendChild(persp);
+  }
   if (anySim) {
     mid.appendChild(el("div", "section-title", " "));   // 좌우 "내/상대 파티" 제목 높이 맞춤 → 버튼을 sprite 라인에 정렬
     const btn = el("button", "btn sim-reset", "모든 시뮬 취소");
@@ -1354,8 +1357,14 @@ function setStatus(txt, kind) {
 }
 let ws;
 let shuttingDown = false;   // 75차 — 헬퍼(오버레이) 종료 신호 받으면 true → 재연결 안 함
+// 145차 — 동시 위력 모드: URL ?view=my|opp 를 WS에 그대로 부착 → 서버가 이 탭에 그 시점 모델만 push.
+//   없으면(단일 모드 탭) 미부착 = 종전과 동일(전 소켓 broadcast).
+const VIEW_PARAM = (function () {
+  const v = new URLSearchParams(location.search).get("view");
+  return v === "my" || v === "opp" ? v : null;
+})();
 function connect() {
-  ws = new WebSocket(PCH_WS + "/ws/power");   // 87차 — 로컬 헬퍼 WS(사이트 경유 시 절대주소)
+  ws = new WebSocket(PCH_WS + "/ws/power" + (VIEW_PARAM ? "?view=" + VIEW_PARAM : ""));   // 87차 — 로컬 헬퍼 WS(사이트 경유 시 절대주소)
   ws.onopen = () => setStatus("연결됨 — 게임 매치 시작 시 데이터 표시", "ok");
   ws.onmessage = (e) => {
     let data; try { data = JSON.parse(e.data); } catch (err) { console.error(err); return; }
