@@ -263,6 +263,7 @@ def main():
         master = json.load(f)
     move_by_id = {mv["id"]: mv for mv in master.get("moves", []) if isinstance(mv.get("id"), int)}
     abil_by_id = {ab["id"]: ab for ab in master.get("abilities", []) if isinstance(ab.get("id"), int)}
+    abil_by_en = {ab.get("nameEn"): ab for ab in master.get("abilities", []) if ab.get("nameEn")}
     # 도구는 id 직결 불가(위 참조 주석) → nameEn / nameKo 인덱스로 resolve_item 이 매핑.
     item_en = {it.get("nameEn"): it for it in master.get("items", []) if it.get("nameEn")}
     item_ko = {it.get("nameKo"): it for it in master.get("items", []) if it.get("nameKo")}
@@ -320,6 +321,30 @@ def main():
                 continue
             abils.append({"en": ab.get("nameEn", ""), "ko": ab.get("nameKo") or ab.get("nameEn", ""),
                           "pct": rate})
+
+        # 153차 — 종족 스코프 특성 검증. 실사고: 그우린차 '대접(hospitality)'을 pokedb 가 ability_key=299 로
+        #   송출 → 전국 ID 299=심안(minds-eye)으로 오해석되어 /live 에 "심안 99.1%" 표시(더블).
+        #   op.gg 검증: 챔피언스 그우린차 특성 = 대접(단독 보유)·내열 — 심안은 그우린차가 가질 수 없다.
+        #   pokedb 의 신특성 key 가 전국 ID 와 어긋나는 케이스 방어: 해석 결과가 그 종족의 master abilities
+        #   목록에 없으면, 아직 안 나온 종족 특성이 정확히 하나일 때만 그걸로 치환(+stderr 로그).
+        #   애매하면(잔여 후보 0 또는 2+) 항목 유지 + WARN — 무단 삭제/추측으로 통계를 잃지 않는다.
+        sp_ab = [s for s in (sp or {}).get("abilities", []) if s]
+        if sp_ab:
+            have = {a["en"] for a in abils}
+            for a in abils:
+                if a["en"] in sp_ab:
+                    continue
+                cand = [s for s in sp_ab if s not in have]
+                fix = abil_by_en.get(cand[0]) if len(cand) == 1 else None
+                if fix is None:
+                    print(f"[abil][WARN] {name_en}: '{a['en']}' 는 종족 특성 {sp_ab} 밖(치환 불가 — 유지)",
+                          file=sys.stderr)
+                    continue
+                print(f"[abil-fix] {name_en}: {a['en']} → {fix.get('nameEn')} (종족 특성 스코프 치환)",
+                      file=sys.stderr)
+                a["en"] = fix.get("nameEn", "")
+                a["ko"] = fix.get("nameKo") or a["en"]
+                have.add(a["en"])
 
         # 도구 채용률(내림차순). item_key 직결 불가 → resolve_item(일본어명 → master). 매핑 실패는 miss_it 경고.
         items = []
