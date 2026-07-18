@@ -19,7 +19,7 @@ def _norm(s):
     return re.sub(r"[^a-z0-9]", "", str(s).lower())
 
 # 실전 사용률(선택) — helper-data/move-usage.json 이 있으면 상세페이지 + 배틀데이터 페이지에 반영.
-#   champs.pokedb.tokyo 유래(123차 소스 교체 — 구 championsbattledata 는 갱신이 매우 느림).
+#   championsbattledata.com API 유래(154차 소스 재교체 — pokedb 가 사용자 IP 차단, 출처표기 필수).
 #   key = 정규화된 master nameEn.
 USAGE, USAGE_SEASON = {}, ""
 try:
@@ -30,7 +30,7 @@ try:
 except FileNotFoundError:
     print("  (move-usage.json 없음 — 사용률 섹션 생략)")
 
-# 131차(더블배틀) — 더블 사용률(move-usage-double.json, pokedb rule=1). 있으면 도감 상세 "더블" 섹션 +
+# 131차(더블배틀) — 더블 사용률(move-usage-double.json, PCH_MOVE_RULE=1). 있으면 도감 상세 "더블" 섹션 +
 #   /battle-data/doubles/ 페이지 생성. 싱글과 완전 별개 메타(기술/포켓몬 사용률 다름). 없으면 조용히 생략(싱글만).
 USAGE_D, USAGE_D_SEASON = {}, ""
 try:
@@ -41,8 +41,8 @@ try:
 except FileNotFoundError:
     print("  (move-usage-double.json 없음 — 더블 섹션 생략)")
 
-ATTRIB = ('Battle data provided by <a href="https://champs.pokedb.tokyo/" '
-          'target="_blank" rel="noopener">バトルデータベース チャンピオンズ (champs.pokedb.tokyo)</a>')
+ATTRIB = ('Battle data provided by <a href="https://championsbattledata.com/" '
+          'target="_blank" rel="noopener">Pok&eacute;mon Champions Battle Data</a>')
 
 # 순위 = move-usage.json 의 rank(소스 column_position, 1~235 완전) 그대로 사용.
 #   (구 DENSE 재부여는 폼 미수록으로 구멍이 있던 시절의 임시조치 — 폼 도감 수록으로 폐기.)

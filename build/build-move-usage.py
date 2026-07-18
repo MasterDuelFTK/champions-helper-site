@@ -2,81 +2,57 @@
 # -*- coding: utf-8 -*-
 """
 Champions Helper — 상대 기술 사용률(move-usage) 빌드.
-  champs.pokedb.tokyo (싱글 rule=0) → helper-data/move-usage.json
+  championsbattledata.com API (Singles/Doubles) → helper-data/move-usage[-double].json
 
-123차 — 소스 교체: championsbattledata.com API(갱신 매우 느림) → champs.pokedb.tokyo 실시간 추종
-  (feedback 지시). pokedb 는 서버렌더 HTML 이지만 기술 데이터가 data-move-detail 속성에 JSON 으로
-  박혀 있고, 그 move_key 가 전국 기술 ID = master.json moves 의 id 와 완전 일치 → 이름 번역(일↔한)
-  없이 ID 직결 매칭(가장 안전). 종족도 URL 의 도감번호-폼번호(0445-00)로 매칭 — 이름 무관.
+154차 — 소스 재교체: champs.pokedb.tokyo → championsbattledata.com API.
+  pokedb 가 사용자 거주지 IP 를 403 으로 차단(2026-07-18 실측 — 브라우저·시크릿 포함 전면).
+  championsbattledata 는 123차 이전 원래 소스("갱신 매우 느림"으로 폐기)였으나 현재는 매일 갱신
+  (index generatedAt·dailyDataFolders 실측) → 24h cron 이면 충분. CI(GitHub 러너)도 직접 접속 가능
+  (123차 이전 cron 실적 — pokedb 와 달리 클라우드 IP 차단 없음, 릴레이 불요. 단 브라우저 UA 필수).
+
+매칭: API 가 영어 표기명("Dragon Claw"/"Rough Skin"/"Focus Sash")을 주므로 정규화(영숫자 소문자)로
+  master.json nameEn(slug 표기 "dragon-claw")과 직결. pokedb 의 일본어 브릿지(pokeapi-names.json) 불요.
+  메가스톤만 예외 — 영문 스톤명("Feraligite")이 master 의 Z-A 스킴("feraligatr-mega-stone")과 달라
+  스톤 접미(-ite) → 종족 접두 매칭 폴백(resolve_item). 구세대 스톤(gengarite)·X/Y(charizardite-x)는 직결.
 
 용도: /live "상대" 토글(상대 시점 위력) 모드에서, 상대 포켓몬이 자주 쓰는 기술 상위 N개를
   위력칩으로 보여준다. + 사이트 도감 상세페이지 "실전 사용 기술" 섹션 / battle-data 순위 페이지.
 
-종족 사용 순위(rank): /pokemon/list?rule=0 (한 페이지 235종, 사용률 내림차순)의
-  <div class="pokemon-rank"> 숫자 그대로. 1~235 완전(중복·구멍 검증 후 출력).
+종족 사용 순위(rank): /api/battle/{format}/{slug} rows 의 column_position = 그 엔티티의 순위(1~235).
+  순위 카탈로그 = /api/index 의 pokemon(235종 — 순위를 갖는 배틀 엔티티 전체, 메가 페이지 제외).
+  ★개별 HTML 페이지의 rank 셀은 지역폼 짝에서 값이 섞이는 소스 결함 전력 → API column_position 만 쓰고
+  요약표(/pokemon-champions-*-usage/)와 교차검증(불일치 시 경고).
 
-출력 스키마(구버전 + abils/items 추가 — additive 라 헬퍼 exe·사이트 구버전 무영향):
+출력 스키마(pokedb 버전과 완전 동일 — 헬퍼 exe·사이트 빌드 무변경):
   { version, format, season, count, pokemon: { <master nameEn>: {
       name, base, isForm, moves:[{en,ko,pct}], abils:[{en,ko,pct}], items:[{en,ko,pct}], rank } } }
   키 = master.json species nameEn (헬퍼 UsageKeyCandidates·사이트 usage_for 가 이 키로 조회).
-  abils(126차) = 특성 채용률(내림차순) — 선출 정보/파티 추천이 "최다 채용 특성" 가정에 사용.
-    ability_key = 전국 특성 ID = master abilities.id 완전 일치(move_key 와 동일한 ID 직결 매칭).
-  items = 도구 채용률(내림차순). ★item_key 는 전국ID 아닌 게임 내부 ID라 master 직결 불가 →
-    pokedb 가 함께 주는 일본어 이름을 pokeapi-names.json 브릿지로 master 매핑(resolve_item).
-    일반 도구=일본어→PokeAPI slug→master nameEn / 메가스톤(○○ナイト)=종족 한글→master nameKo.
 
 자동화(master.json/sprites 와 독립 — 기술 사용률만 따로 갱신):
-  .github/workflows/move-usage.yml 가 cron(12h)으로 이 스크립트를 실행 → helper-data/move-usage.json +
-  move-usage-version.json 을 커밋·push → GitHub Pages(champions-helper.com/helper-data) 재배포 →
+  .github/workflows/move-usage.yml 가 cron(24h — 소스가 매일 갱신)으로 이 스크립트를 실행 →
+  helper-data/move-usage.json + move-usage-version.json 을 커밋·push → GitHub Pages 재배포 →
   헬퍼가 켤 때 버전 확인·다운로드(즉시 반영). 개발자 수동 개입 0.
 
 로컬 실행: python build/build-move-usage.py [LIMIT]
   LIMIT(선택) = 처음 N종족만 처리(검증용). 미지정 = 전종족.
 
-pokedb 이용 메모: 프로그램 다운로드 허용(과도한 부하 금지 — DELAY 로 완화, 12h 1회 236 요청).
-  앱은 파일을 로컬 캐시해 서빙해야 함 → 정확히 이 구조(빌드 1회 → 우리 호스팅에서 헬퍼가 수신).
+API 메모: championsbattledata 는 기본 urllib User-Agent 를 403 으로 막는다 → 브라우저 UA 필수.
+  api-rules 준수(출처표기 = build-mon-pages ATTRIB) + DELAY 로 부하 완화(24h 1회 236 요청/포맷).
 """
-import html as _html
 import json, os, re, sys, time, urllib.request
 
 REPO   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # build/ 의 상위 = repo 루트
 HELPER = os.path.join(REPO, "helper-data")
-
-# 도구 채용률(items) 매핑 참조 — pokedb item_key 는 moves/abilities 와 달리 전국ID가 아닌 게임 내부 ID라
-#   master item id 와 직결 불가. pokedb 가 함께 주는 *일본어 이름*을 브릿지로 사용한다.
-#   pokeapi-names.json(build/build-pokeapi-names.py 가 생성·커밋) = {items:{일본어:slug}, species_norm:{정규화 일본어:한글}}.
-#   일반 도구: 일본어 → PokeAPI slug → master nameEn. 메가스톤(○○ナイト, Z-A 신규는 PokeAPI 미수록):
-#   ナイト·Ｘ/Ｙ 떼고 ー 정규화 → 종족 한글명 → "○○나이트[X/Y]" → master nameKo 매칭(id 스킴 무관).
-try:
-    with open(os.path.join(HELPER, "pokeapi-names.json"), encoding="utf-8") as _f:
-        _PN = json.load(_f)
-    ITEM_JA2SLUG   = _PN.get("items", {})
-    SPECIES_NORM2KO = _PN.get("species_norm", {})
-except Exception as _e:  # noqa: BLE001 — 참조 없으면 도구만 비운 채 진행(기술/특성은 무관)
-    ITEM_JA2SLUG, SPECIES_NORM2KO = {}, {}
-    print(f"[warn] pokeapi-names.json 로드 실패({_e}) — items 매핑 생략", file=sys.stderr)
-SITE   = "https://champs.pokedb.tokyo"
-# 131차(더블배틀) — rule 파라미터화. env PCH_MOVE_RULE 로 배틀 형식 전환:
-#   0 = 싱글(기존 동작 무변경, move-usage.json) / 1 = 더블(move-usage-double.json).
-#   ID 직결 매칭(move_key/ability_key/도감번호)은 rule 무관 동일 → 파싱 로직 전부 공용, URL·출력파일만 분기.
-#   더블은 기술/포켓몬 사용률 메타가 싱글과 완전히 다름(예 가브리아스 방어 76.5%) — 별도 수집 필수.
+API    = "https://championsbattledata.com"
+# 131차(더블배틀) — rule 파라미터화 유지. env PCH_MOVE_RULE 로 배틀 형식 전환:
+#   0 = 싱글(move-usage.json) / 1 = 더블(move-usage-double.json). yml 은 이 env 만 바꿔 두 번 실행.
 RULE   = int(os.environ.get("PCH_MOVE_RULE", "0"))
 FORMAT = "Doubles" if RULE == 1 else "Singles"
 OUT_MOVE = "move-usage-double.json" if RULE == 1 else "move-usage.json"
 OUT_VER  = "move-usage-double-version.json" if RULE == 1 else "move-usage-version.json"
-TOP_N  = 12                 # 위력칩 4개 + 편집 드롭다운(5위~) 여유분 (pokedb 페이지는 상위 10 노출)
-UA     = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "ja,en-US;q=0.8,en;q=0.6",
-    "Referer": "https://champs.pokedb.tokyo/",
-}
-
-# pokedb 는 클라우드 DC IP 대역을 전면 403(GitHub Actions 러너 실측 — robots.txt 포함 전부).
-#   → CI 에선 Cloudflare Worker 릴레이(pch-relay, upstream 고정 + 비밀 헤더) 경유로 fetch.
-#   로컬(거주지 IP)은 env 미설정 = 직접 접속. workflow 가 secrets 로 env 2개를 주입한다.
-RELAY     = os.environ.get("PCH_FETCH_RELAY", "").rstrip("/")
-RELAY_KEY = os.environ.get("PCH_RELAY_KEY", "")
+SUMMARY_PAGE = "pokemon-champions-doubles-usage" if RULE == 1 else "pokemon-champions-singles-usage"
+TOP_N  = 12                 # 위력칩 4개 + 편집 드롭다운(5위~) 여유분
+UA     = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) PCH-move-usage/1.0"}
 DELAY  = 0.35               # 정중한 호출 간격(초)
 
 # 무인 cron 안전핀 — 사이트 개편 등으로 파싱이 무너지면 옛(정상) json 을 덮지 않고 실패 종료.
@@ -84,251 +60,200 @@ MIN_POKEMON = 150           # 정상 = 235종
 MAX_EMPTY_RATIO = 0.5       # 기술 0개 페이지가 절반 넘으면 파싱 붕괴로 간주
 
 
-def fetch_text(url, tries=3):
-    headers = dict(UA)
-    if RELAY and url.startswith(SITE):
-        url = RELAY + url[len(SITE):]
-        headers["X-Relay-Key"] = RELAY_KEY
+def fetch(url, tries=3, as_json=True):
     last = None
     for i in range(tries):
         try:
-            req = urllib.request.Request(url, headers=headers)
+            req = urllib.request.Request(url, headers=UA)
             with urllib.request.urlopen(req, timeout=40) as r:
-                return r.read().decode("utf-8", "replace")
+                body = r.read().decode("utf-8", "replace")
+                return json.loads(body) if as_json else body
         except Exception as e:  # noqa: BLE001 — best-effort 재시도
             last = e
             time.sleep(1.5 * (i + 1))
     raise last
 
 
-# pokedb "도감번호-폼번호" → master.json species nameEn (폼번호 00 = 원종, 도감번호=master id 로 자동).
-#   전수 검증 2026-07-04 — 29폼 페이지 <title> 일어 표기로 정체 확인(예 0479-04=スピンロトム=rotom-fan).
-#   새 폼이 리스트에 나타나면 여기 한 줄 추가(누락 시 [skip][WARN] 로그로 드러남).
-FORM2MASTER = {
-    "0026-01": "raichu-alola",
-    "0038-01": "ninetales-alola",
-    "0059-01": "arcanine-hisui",
-    "0080-02": "slowbro-galar",            # 01 = 메가야도란(별도 페이지 없음)
-    "0128-01": "tauros-paldea-combat-breed",
-    "0128-02": "tauros-paldea-blaze-breed",
-    "0128-03": "tauros-paldea-aqua-breed",  # ウォーター種
-    "0157-01": "typhlosion-hisui",
-    "0199-01": "slowking-galar",
-    "0479-01": "rotom-heat",
-    "0479-02": "rotom-wash",
-    "0479-03": "rotom-frost",
-    "0479-04": "rotom-fan",                 # スピンロトム
-    "0479-05": "rotom-mow",                 # カットロトム
-    "0503-01": "samurott-hisui",
-    "0571-01": "zoroark-hisui",
-    "0618-01": "stunfisk-galar",
-    "0666-18": "vivillon",                  # 팬시무늬 = cosmetic → base 종이 순위 대표
-    "0670-05": "floette",                   # えいえん(이터널플라워) = master 플라엣테(670) 그 자체
-    "0678-01": "meowstic-female",
-    "0706-01": "goodra-hisui",
-    "0711-01": "gourgeist-small",           # こだま
-    "0711-02": "gourgeist-large",           # おおだま
-    "0711-03": "gourgeist-super",           # ギガだま
-    "0713-01": "avalugg-hisui",
-    "0724-01": "decidueye-hisui",
-    "0745-01": "lycanroc-midnight",         # まよなか
-    "0745-02": "lycanroc-dusk",             # たそがれ
-    "0902-01": "basculegion-female",
+def norm(s):
+    """영어 표기명 정규화(영숫자만 소문자). 'Dragon Claw' ↔ 'dragon-claw' 매칭용."""
+    return re.sub(r"[^a-z0-9]", "", (s or "").lower())
+
+
+# championsbattledata 카탈로그 slug → master.json species nameEn.
+#   지역폼 = 접두(alolan-) ↔ 접미(-alola) 표기 차이 / 폼 수식어(-form/-variety/-breed) 표기 차이 /
+#   cosmetic·기본폼(외형만, master 에 독립 종 없음)은 base 종 nameEn 으로 흡수.
+#   여기 없는 slug 는 정규화 직결(norm(slug) == norm(species nameEn))로 자동 매칭.
+#   신규 폼이 카탈로그에 나타나 매칭 실패하면 [skip][WARN] 로그로 드러남 → 여기 한 줄 추가.
+SLUG2MASTER = {
+    "alolan-raichu": "raichu-alola",
+    "alolan-ninetales": "ninetales-alola",
+    "hisuian-arcanine": "arcanine-hisui",
+    "hisuian-typhlosion": "typhlosion-hisui",
+    "hisuian-samurott": "samurott-hisui",
+    "hisuian-zoroark": "zoroark-hisui",
+    "hisuian-goodra": "goodra-hisui",
+    "hisuian-avalugg": "avalugg-hisui",
+    "hisuian-decidueye": "decidueye-hisui",
+    "galarian-slowbro": "slowbro-galar",
+    "galarian-slowking": "slowking-galar",
+    "galarian-stunfisk": "stunfisk-galar",
+    "paldean-tauros-combat-breed": "tauros-paldea-combat-breed",
+    "paldean-tauros-blaze-breed": "tauros-paldea-blaze-breed",
+    "paldean-tauros-aqua-breed": "tauros-paldea-aqua-breed",
+    "gourgeist-small-variety": "gourgeist-small",
+    "gourgeist-large-variety": "gourgeist-large",
+    "gourgeist-jumbo-variety": "gourgeist-super",
+    "lycanroc-midnight-form": "lycanroc-midnight",
+    "lycanroc-dusk-form": "lycanroc-dusk",
+    # cosmetic/기본형 — base 종으로 흡수
+    "aegislash-shield-forme": "aegislash",
+    "basculegion-male": "basculegion",
+    "maushold-family-of-four": "maushold",
+    "vivillon-fancy-pattern": "vivillon",
+    "florges-red-flower": "florges",
+    "furfrou-natural-form": "furfrou",
+    "palafin-zero-form": "palafin",
 }
 
 
-def parse_season(src):
-    """리스트 페이지 제목 'シーズンM-3（シングルバトル）' → 'Season M-3' (구 스키마 라벨 호환)."""
-    m = re.search(r"シーズン(M-\d+)", src)
-    return f"Season {m.group(1)}" if m else ""
+def season_label(idx):
+    """/api/index → 'Season M-4' (pokedb 버전 라벨 형식 유지 — 사이트 '시즌 {season}' 표시 호환).
+    dailyDataFolders 마지막 항목('M4/16_07_2026')의 시즌 폴더가 최신. battle 응답 season 은 'Current'라 불용."""
+    folders = idx.get("dailyDataFolders") or idx.get("battleDataFolders") or []
+    folder = (folders[-1].split("/")[0] if folders else "").strip()
+    m = re.match(r"^([A-Za-z]+)(\d+)$", folder)
+    return f"Season {m.group(1)}-{m.group(2)}" if m else (folder or "")
 
 
-def parse_list(src):
-    """/pokemon/list — (rank, dex, form) 리스트(사용률 내림차순). 순위는 명시 숫자 파싱."""
-    rows = re.findall(
-        r'href="/pokemon/show/(\d{4})-(\d{2})\?[^"]*"[^>]*>\s*'
-        r'<div class="pokemon-rank[^>]*>\s*(\d+)\s*</div>',
-        src)
-    return [(int(rk), dex, form) for dex, form, rk in rows]
+def find_species_by_stem(stem, sp_norms):
+    """스톤 어간 → 종족 nameEn. 스톤 영문명은 종족명을 줄이거나 변형(Feraligite←Feraligatr,
+    Dragoninite←Dragonite, Scraftinite←Scrafty) → 정확 일치 우선, 실패 시 어간을 한 글자씩
+    줄여가며(최대 3) 접두 유일 매칭."""
+    for cut in range(0, 4):
+        s = stem[: len(stem) - cut] if cut else stem
+        if len(s) < 4:
+            break
+        sp_en = sp_norms.get(s)
+        if sp_en:
+            return sp_en
+        cands = {v for k, v in sp_norms.items() if k.startswith(s) and len(k) - len(s) <= 4}
+        if len(cands) == 1:
+            return next(iter(cands))
+    return None
 
 
-def parse_moves(src):
-    """상세 페이지 data-move-detail JSON blob → [(move_key, rate)] (채용률 내림차순, dedup)."""
-    out, seen = [], set()
-    for blob in re.findall(r'data-move-detail="([^"]+)"', src):
-        try:
-            d = json.loads(_html.unescape(blob))
-        except Exception:  # noqa: BLE001 — blob 하나 손상은 건너뜀
-            continue
-        key, rate = d.get("move_key"), d.get("rate")
-        if not isinstance(key, int) or key in seen:
-            continue
-        seen.add(key)
-        out.append((d.get("rank", 9999), key, rate))
-    out.sort()
-    return [(k, r) for _, k, r in out]
-
-
-def parse_abilities(src):
-    """126차 — 상세 페이지 특성 채용률 → [(ability_key, rate)] (rank 순).
-    특성 파이차트 = pokemon-trend__column-abilities div 의 x-data="window.usagePieChart([...])"
-    (HTML-escape 된 JSON, ability_key = 전국 특성 ID). 섹션/blob 없으면 빈 리스트(안전)."""
-    i = src.find("pokemon-trend__column-abilities")
-    if i < 0:
-        return []
-    m = re.search(r'window\.usagePieChart\(\[(.*?)\]\)', src[i:i + 30000], re.S)
+def resolve_item(name, item_by_norm, sp_norms, stone_by_sp):
+    """영문 도구명 → master item dict 또는 None.
+    ① 정규화 직결(일반 도구·구세대 스톤 gengarite·X/Y charizardite-x 전부 커버).
+    ② 메가스톤 폴백: '○○ite[ X/Y]' → 종족 어간 매칭 → nameKo 스톤 인덱스(stone_by_sp).
+       인덱스가 nameKo('○○나이트') 기준이라 Z-A 스킴({sp}-mega-stone)·구세대 스킴(gengarite)·
+       master nameEn 오표기(druddigonite=드래캄나이트 등)까지 전부 흡수."""
+    it = item_by_norm.get(norm(name))
+    if it:
+        return it
+    m = re.match(r"^(.*?)ite( ?[XY])?$", name.strip(), re.I)
     if not m:
-        return []
-    try:
-        entries = json.loads("[" + _html.unescape(m.group(1)) + "]")
-    except Exception:  # noqa: BLE001 — blob 손상은 특성 없이 진행(기술만이라도 유지)
-        return []
-    out = []
-    for d in entries:
-        key, rate = d.get("ability_key"), d.get("rate")
-        if isinstance(key, int) and isinstance(rate, (int, float)):
-            out.append((d.get("rank", 9999), key, rate))
-    out.sort()
-    return [(k, r) for _, k, r in out]
-
-
-def parse_items(src):
-    """도구 채용률 → [(japanese_name, rate)] (rank 순). 특성 파이차트와 동일 구조지만 pokemon-trend__column-items
-    div 의 window.usagePieChart([...]) 이고 키가 item_key(게임 내부 ID). item_key 는 master 와 직결 안 되므로
-    번역용으로 함께 오는 일본어 name 을 반환(resolve_item 이 master 로 매핑)."""
-    i = src.find("pokemon-trend__column-items")
-    if i < 0:
-        return []
-    m = re.search(r'window\.usagePieChart\(\[(.*?)\]\)', src[i:i + 30000], re.S)
-    if not m:
-        return []
-    try:
-        entries = json.loads("[" + _html.unescape(m.group(1)) + "]")
-    except Exception:  # noqa: BLE001 — blob 손상은 도구 없이 진행(기술/특성이라도 유지)
-        return []
-    out = []
-    for d in entries:
-        name, rate = d.get("name"), d.get("rate")
-        if isinstance(name, str) and name and isinstance(rate, (int, float)):
-            out.append((d.get("rank", 9999), name, rate))
-    out.sort()
-    return [(nm, r) for _, nm, r in out]
-
-
-_ZEN_XY = {"Ｘ": "X", "Ｙ": "Y", "X": "X", "Y": "Y"}
-
-
-def _norm_jp(s):
-    """일본어 종족명 정규화 — 장음(ー)·중점(・) 제거. pokedb 메가스톤은 종족명 장음을 줄여 표기
-    (カイリュー→カイリュ)하므로 양쪽을 이 정규화로 맞춘다."""
-    return (s or "").replace("ー", "").replace("・", "")
-
-
-def resolve_item(ja, master_en, master_ko):
-    """pokedb 일본어 도구명 → (nameEn, nameKo) 또는 (None, None).
-    ① 일반 도구: 일본어 → PokeAPI slug(ITEM_JA2SLUG) → master nameEn.
-    ② 메가스톤(○○ナイト): ナイト·Ｘ/Ｙ 제거 → 종족 한글(SPECIES_NORM2KO) → "○○나이트[X/Y]" → master nameKo."""
-    slug = ITEM_JA2SLUG.get(ja)
-    if slug and slug in master_en:
-        it = master_en[slug]
-        return it.get("nameEn", slug), it.get("nameKo") or slug
-    s = ja
-    xy = ""
-    if s and s[-1] in _ZEN_XY and s[:-1].endswith("ナイト"):
-        xy = _ZEN_XY[s[-1]]
-        s = s[:-1]
-    if s.endswith("ナイト"):
-        stem = _norm_jp(s[:-3])
-        ko = SPECIES_NORM2KO.get(stem)
-        if ko is None and stem:
-            # 일부 메가스톤은 종족명 끝음절을 줄여 표기(ブリガロン→ブリガロナイト, ドラミドロ→ドラミドナイト).
-            #   정확 매칭 실패 시 stem 을 접두로 갖는 종족을 찾아 유일하면 채택(길이차 ≤2 로 오매칭 방지).
-            cands = {v for k, v in SPECIES_NORM2KO.items()
-                     if k.startswith(stem) and 0 <= len(k) - len(stem) <= 2}
-            if len(cands) == 1:
-                ko = next(iter(cands))
-        if ko:
-            name_ko = ko + "나이트" + xy
-            it = master_ko.get(name_ko)
-            if it:
-                return it.get("nameEn", ""), it.get("nameKo", name_ko)
-    return None, None
+        return None
+    stem = norm(m.group(1))
+    if not stem:
+        return None
+    sp_en = find_species_by_stem(stem, sp_norms)
+    if sp_en is None:
+        return None
+    xy = m.group(2).strip().upper() if m.group(2) else ""
+    return stone_by_sp.get((norm(sp_en), xy)) or item_by_norm.get(norm(f"{sp_en}-mega-stone"))
 
 
 def main():
     limit = int(sys.argv[1]) if len(sys.argv) > 1 else None
 
-    # 1) 매핑 사전: master.json — moves(id → en/ko), species(id/nameEn).
+    # 1) 매핑 사전: master.json — moves/abilities/items(정규화 nameEn → dict), species(정규화 nameEn → dict).
     with open(os.path.join(HELPER, "master.json"), encoding="utf-8") as f:
         master = json.load(f)
-    move_by_id = {mv["id"]: mv for mv in master.get("moves", []) if isinstance(mv.get("id"), int)}
-    abil_by_id = {ab["id"]: ab for ab in master.get("abilities", []) if isinstance(ab.get("id"), int)}
-    abil_by_en = {ab.get("nameEn"): ab for ab in master.get("abilities", []) if ab.get("nameEn")}
-    # 도구는 id 직결 불가(위 참조 주석) → nameEn / nameKo 인덱스로 resolve_item 이 매핑.
-    item_en = {it.get("nameEn"): it for it in master.get("items", []) if it.get("nameEn")}
-    item_ko = {it.get("nameKo"): it for it in master.get("items", []) if it.get("nameKo")}
-    sp_by_id = {}
+    move_by_norm = {norm(mv.get("nameEn")): mv for mv in master.get("moves", []) if mv.get("nameEn")}
+    abil_by_norm = {norm(ab.get("nameEn")): ab for ab in master.get("abilities", []) if ab.get("nameEn")}
+    abil_by_en   = {ab.get("nameEn"): ab for ab in master.get("abilities", []) if ab.get("nameEn")}
+    item_by_norm = {norm(it.get("nameEn")): it for it in master.get("items", []) if it.get("nameEn")}
+    sp_by_norm = {}
     for sp in master.get("species", []):
-        if isinstance(sp.get("id"), int) and not sp.get("isMegaForm"):
-            sp_by_id.setdefault(sp["id"], sp)
-    print(f"[map] master moves: {len(move_by_id)}  abilities: {len(abil_by_id)}  items: {len(item_en)}  species: {len(sp_by_id)}", file=sys.stderr)
-
-    # 2) 사용률 랭킹 리스트(235종, 순위 명시) + 시즌 라벨.
-    list_src = fetch_text(f"{SITE}/pokemon/list?rule={RULE}")
-    season = parse_season(list_src)
-    entries = parse_list(list_src)
-    if limit:
-        entries = entries[:limit]
-    print(f"[idx] list entries: {len(entries)}  season: {season!r}", file=sys.stderr)
-    if not limit and len(entries) < MIN_POKEMON:
-        raise SystemExit(f"[abort] 리스트 파싱 {len(entries)}종 < {MIN_POKEMON} — 사이트 개편 의심, 기존 json 유지")
-
-    out, miss, miss_ab, miss_it, empty = {}, {}, {}, {}, 0
-    for n, (rank, dex, form) in enumerate(entries, 1):
-        # 종족 해석: 폼번호 00 = master id==도감번호 원종 / 그 외 = FORM2MASTER 테이블.
-        if form == "00":
-            sp = sp_by_id.get(int(dex))
-            name_en = sp.get("nameEn") if sp else None
-        else:
-            name_en = FORM2MASTER.get(f"{dex}-{form}")
-        if not name_en:
-            print(f"[skip][WARN] {dex}-{form} (rank {rank}) — master 매핑 없음(신규 폼? FORM2MASTER 보강)", file=sys.stderr)
+        if sp.get("nameEn") and not sp.get("isMegaForm"):
+            sp_by_norm.setdefault(norm(sp["nameEn"]), sp)
+    sp_norms = {k: v["nameEn"] for k, v in sp_by_norm.items()}   # 정규화 → nameEn (스톤 폴백용)
+    # 메가스톤 인덱스: (정규화 종족 nameEn, X/Y) → item. nameKo '○○나이트[X/Y]' 의 ○○를 종족 nameKo 로
+    #   매칭 — master 스톤 nameEn 이 두 스킴(gengarite / {sp}-mega-stone)이고 일부 오표기까지 있어 ko 가 기준.
+    sp_by_ko = {sp.get("nameKo"): sp for sp in master.get("species", [])
+                if sp.get("nameKo") and not sp.get("isMegaForm")}
+    stone_by_sp = {}
+    for it in master.get("items", []):
+        mk = re.match(r"^(.+?)나이트([XY])?$", it.get("nameKo") or "")
+        if not mk:
             continue
+        sp = sp_by_ko.get(mk.group(1))
+        if sp:
+            stone_by_sp.setdefault((norm(sp["nameEn"]), mk.group(2) or ""), it)
+    print(f"[map] master moves: {len(move_by_norm)}  abilities: {len(abil_by_norm)}  items: {len(item_by_norm)}  species: {len(sp_by_norm)}  stones: {len(stone_by_sp)}", file=sys.stderr)
+
+    # 2) 인덱스 — 순위 카탈로그(235종) + 페이지 메타(baseName/isForm) + 시즌 라벨.
+    idx = fetch(f"{API}/api/index")
+    season = season_label(idx)
+    pages_by_slug = {p.get("slug"): p for p in idx.get("pokemonPages", []) if p.get("slug")}
+    catalog = [p.get("slug") for p in idx.get("pokemon", []) if p.get("slug")]
+    if limit:
+        catalog = catalog[:limit]
+    print(f"[idx] catalog: {len(catalog)}  season: {season!r}", file=sys.stderr)
+    if not limit and len(catalog) < MIN_POKEMON:
+        raise SystemExit(f"[abort] 카탈로그 {len(catalog)}종 < {MIN_POKEMON} — 사이트 개편 의심, 기존 json 유지")
+
+    out, slug2key = {}, {}
+    miss, miss_ab, miss_it, empty = {}, {}, {}, 0
+    for n, slug in enumerate(catalog, 1):
+        # 종족 해석: SLUG2MASTER 테이블 → 없으면 정규화 직결(norm(slug) == norm(nameEn)).
+        name_en = SLUG2MASTER.get(slug)
+        sp = sp_by_norm.get(norm(name_en)) if name_en else sp_by_norm.get(norm(slug))
+        if sp is None:
+            print(f"[skip][WARN] {slug} — master 매핑 없음(신규 폼? SLUG2MASTER 보강)", file=sys.stderr)
+            continue
+        name_en = sp["nameEn"]
 
         try:
-            page = fetch_text(f"{SITE}/pokemon/show/{dex}-{form}?rule={RULE}")
-        except Exception as e:  # noqa: BLE001 — 개별 종족 실패는 건너뜀(순위만이라도 유지)
-            print(f"[skip] {dex}-{form} {name_en}: {e}", file=sys.stderr)
-            page = ""
+            data = fetch(f"{API}/api/battle/{FORMAT}/{slug}")
+        except Exception as e:  # noqa: BLE001 — 개별 종족 실패는 건너뜀
+            print(f"[skip] {slug} {name_en}: {e}", file=sys.stderr)
+            data = {}
+        rows = data.get("rows", [])
 
+        # 기술 채용률(내림차순 rank). master 에 없는 이름은 miss 경고만.
         moves = []
-        for key, rate in parse_moves(page)[:TOP_N]:
-            mv = move_by_id.get(key)
+        mrows = sorted((r for r in rows if r.get("category") == "move"), key=lambda r: r.get("rank", 9999))
+        for r in mrows[:TOP_N]:
+            en = (r.get("name") or "").strip()
+            mv = move_by_norm.get(norm(en)) if en else None
             if mv is None:
-                miss[key] = miss.get(key, 0) + 1
+                if en:
+                    miss[en] = miss.get(en, 0) + 1
                 continue
             moves.append({"en": mv.get("nameEn", ""), "ko": mv.get("nameKo") or mv.get("nameEn", ""),
-                          "pct": rate})
+                          "pct": r.get("percentage_value")})
         if not moves:
             empty += 1  # 기술 통계 없는 종(저사용·시즌 초)도 순위는 유지 — 구버전과 동일 정책.
 
-        # 126차 — 특성 채용률(내림차순). master 에 없는 ability_key 는 miss_ab 로 경고만(항목은 건너뜀).
+        # 특성 채용률(내림차순).
         abils = []
-        for key, rate in parse_abilities(page):
-            ab = abil_by_id.get(key)
+        for r in sorted((r for r in rows if r.get("category") == "ability"), key=lambda r: r.get("rank", 9999)):
+            en = (r.get("name") or "").strip()
+            ab = abil_by_norm.get(norm(en)) if en else None
             if ab is None:
-                miss_ab[key] = miss_ab.get(key, 0) + 1
+                if en:
+                    miss_ab[en] = miss_ab.get(en, 0) + 1
                 continue
             abils.append({"en": ab.get("nameEn", ""), "ko": ab.get("nameKo") or ab.get("nameEn", ""),
-                          "pct": rate})
+                          "pct": r.get("percentage_value")})
 
-        # 153차 — 종족 스코프 특성 검증. 실사고: 그우린차 '대접(hospitality)'을 pokedb 가 ability_key=299 로
-        #   송출 → 전국 ID 299=심안(minds-eye)으로 오해석되어 /live 에 "심안 99.1%" 표시(더블).
-        #   op.gg 검증: 챔피언스 그우린차 특성 = 대접(단독 보유)·내열 — 심안은 그우린차가 가질 수 없다.
-        #   pokedb 의 신특성 key 가 전국 ID 와 어긋나는 케이스 방어: 해석 결과가 그 종족의 master abilities
+        # 153차 — 종족 스코프 특성 검증(소스 무관 방어층 유지). 실사고: pokedb 가 그우린차 '대접'을
+        #   전국 ID 299(심안)로 송출 → /live "심안 99.1%" 오표시. 해석 결과가 그 종족의 master abilities
         #   목록에 없으면, 아직 안 나온 종족 특성이 정확히 하나일 때만 그걸로 치환(+stderr 로그).
         #   애매하면(잔여 후보 0 또는 2+) 항목 유지 + WARN — 무단 삭제/추측으로 통계를 잃지 않는다.
-        sp_ab = [s for s in (sp or {}).get("abilities", []) if s]
+        sp_ab = [s for s in sp.get("abilities", []) if s]
         if sp_ab:
             have = {a["en"] for a in abils}
             for a in abils:
@@ -346,34 +271,60 @@ def main():
                 a["ko"] = fix.get("nameKo") or a["en"]
                 have.add(a["en"])
 
-        # 도구 채용률(내림차순). item_key 직결 불가 → resolve_item(일본어명 → master). 매핑 실패는 miss_it 경고.
+        # 도구 채용률(내림차순). 매핑 실패는 miss_it 경고(resolve_item — 메가스톤 폴백 포함).
         items = []
-        for ja, rate in parse_items(page):
-            en, ko = resolve_item(ja, item_en, item_ko)
-            if en is None:
-                miss_it[ja] = miss_it.get(ja, 0) + 1
+        for r in sorted((r for r in rows if r.get("category") == "held_item"), key=lambda r: r.get("rank", 9999)):
+            en = (r.get("name") or "").strip()
+            it = resolve_item(en, item_by_norm, sp_norms, stone_by_sp) if en else None
+            if it is None:
+                if en:
+                    miss_it[en] = miss_it.get(en, 0) + 1
                 continue
-            items.append({"en": en, "ko": ko, "pct": rate})
+            items.append({"en": it.get("nameEn", ""), "ko": it.get("nameKo") or it.get("nameEn", ""),
+                          "pct": r.get("percentage_value")})
 
-        base_sp = sp_by_id.get(int(dex))
+        # 종족 사용 순위 = rows 의 column_position(전 행 동일 — 카탈로그 엔티티만 조회하므로 그대로 신뢰).
+        rank = None
+        for r in rows:
+            cp = r.get("column_position")
+            if isinstance(cp, int) and cp > 0:
+                rank = cp
+                break
+
+        page = pages_by_slug.get(slug, {})
+        base_sp = sp_by_norm.get(norm(page.get("baseName", "")))
         base_en = (base_sp or {}).get("nameEn") or name_en
+        is_form = bool(page.get("isForm", False)) or name_en != base_en
         if name_en in out:  # cosmetic 폼이 base 로 흡수될 때 등 — 먼저 잡힌(상위 순위) 항목 유지.
-            print(f"[dup][WARN] {dex}-{form} → {name_en} 키 중복(rank {out[name_en]['rank']} 유지, {rank} 버림)", file=sys.stderr)
+            print(f"[dup][WARN] {slug} → {name_en} 키 중복(rank {out[name_en].get('rank')} 유지, {rank} 버림)", file=sys.stderr)
             continue
-        out[name_en] = {"name": name_en, "base": base_en,
-                        "isForm": form != "00", "moves": moves, "abils": abils, "items": items, "rank": rank}
+        out[name_en] = {"name": name_en, "base": base_en, "isForm": is_form,
+                        "moves": moves, "abils": abils, "items": items, "rank": rank}
+        slug2key[slug] = name_en
         if n % 25 == 0:
-            print(f"[..] {n}/{len(entries)}", file=sys.stderr)
+            print(f"[..] {n}/{len(catalog)}", file=sys.stderr)
         time.sleep(DELAY)
 
-    # 3) 무결성 검증 — 순위 중복/구멍 + 파싱 붕괴 안전핀.
-    ranks = sorted(v["rank"] for v in out.values())
+    # 3) 무결성 검증 — 순위 중복/구멍 + 요약표 교차검증 + 파싱 붕괴 안전핀.
+    ranks = sorted(v["rank"] for v in out.values() if v.get("rank"))
     dup = sorted({r for r in ranks if ranks.count(r) > 1})
     holes = [r for r in range(1, (max(ranks) if ranks else 0) + 1) if r not in set(ranks)]
+    print(f"[rank] 순위 보유: {len(ranks)}/{len(out)}  max={max(ranks) if ranks else 0}", file=sys.stderr)
     if dup:
         print(f"[rank][WARN] 중복 순위: {dup}", file=sys.stderr)
     if holes:
         print(f"[rank][WARN] 빈 순위: {holes}", file=sys.stderr)
+    try:
+        tbl = fetch(f"{API}/{SUMMARY_PAGE}/", as_json=False)
+        trows = re.findall(r'<tr><td>(\d+)</td><td><a href="/pokemon/([^/]+)/">', tbl)
+        bad = [(s, int(rk), out[slug2key[s]].get("rank")) for rk, s in trows
+               if s in slug2key and out[slug2key[s]].get("rank") != int(rk)]
+        if bad:
+            print(f"[rank][WARN] 요약표 불일치: {bad}", file=sys.stderr)
+        else:
+            print(f"[rank] 요약표 교차검증 OK ({len(trows)}행 일치)", file=sys.stderr)
+    except Exception as e:  # noqa: BLE001 — 교차검증 실패는 경고만
+        print(f"[rank] 요약표 교차검증 실패(무시): {e}", file=sys.stderr)
     if not limit and out and empty / len(out) > MAX_EMPTY_RATIO:
         raise SystemExit(f"[abort] 기술 0개 페이지 {empty}/{len(out)} — 파싱 붕괴 의심, 기존 json 유지")
 
@@ -391,11 +342,11 @@ def main():
     item_n = sum(1 for v in out.values() if v.get("items"))
     print(f"[done] pokemon: {len(out)}  version: {version}  season: {season!r}  기술없음: {empty}종  특성보유: {abil_n}종  도구보유: {item_n}종", file=sys.stderr)
     if miss:
-        print(f"[miss][WARN] master 에 없는 move_key: {sorted(miss)} — master.json moves 보강 필요", file=sys.stderr)
+        print(f"[miss][WARN] master 에 없는 기술명: {sorted(miss)} — master.json moves 보강 필요", file=sys.stderr)
     if miss_ab:
-        print(f"[miss][WARN] master 에 없는 ability_key: {sorted(miss_ab)} — master.json abilities 보강 필요", file=sys.stderr)
+        print(f"[miss][WARN] master 에 없는 특성명: {sorted(miss_ab)} — master.json abilities 보강 필요", file=sys.stderr)
     if miss_it:
-        print(f"[miss][WARN] 매핑 실패 도구(일본어): {sorted(miss_it)} — pokeapi-names.json 갱신 또는 master.json items 보강 필요", file=sys.stderr)
+        print(f"[miss][WARN] 매핑 실패 도구: {sorted(miss_it)} — resolve_item/master.json items 보강 필요", file=sys.stderr)
 
 
 if __name__ == "__main__":

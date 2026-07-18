@@ -1,14 +1,17 @@
 name: Build move-usage
 
 # 상대 기술 사용률(move-usage.json) 자동 갱신.
-#   champs.pokedb.tokyo (싱글, 123차 소스 교체) → build/build-move-usage.py → helper-data/move-usage.json
-#   master.json/sprites 와 독립(기술 사용률만 12h 주기로 따로 갱신). 개발자 수동 개입 0.
+#   championsbattledata.com API (154차 소스 재교체 — pokedb 가 사용자 IP 차단)
+#   → build/build-move-usage.py → helper-data/move-usage.json
+#   master.json/sprites 와 독립(기술 사용률만 24h 주기로 따로 갱신 — 소스가 매일 갱신). 개발자 수동 개입 0.
+#   릴레이 불요: championsbattledata 는 GitHub 러너 직접 접속 가능(123차 이전 cron 실적.
+#   pokedb 시절의 pch-relay/secrets 는 미사용 — 만약 언젠가 403 이 나면 그 구조를 upstream 만 바꿔 재사용).
 #   push 대상: dev(작업 브랜치) + dev:main(GitHub Pages 재배포) — 사이트 운영 규칙과 동일.
 
 on:
   schedule:
-    - cron: "0 0,12 * * *"   # 매일 00:00 / 12:00 UTC (12시간 주기)
-  workflow_dispatch: {}        # 수동 실행도 허용(테스트/즉시 갱신)
+    - cron: "0 12 * * *"   # 매일 12:00 UTC (24시간 주기 — 소스 일일 갱신이 ~10:30 UTC 관측, 그 후 수집)
+  workflow_dispatch: {}      # 수동 실행도 허용(테스트/즉시 갱신)
 
 permissions:
   contents: write
@@ -30,21 +33,15 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Build move-usage.json (싱글, rule=0)
+      - name: Build move-usage.json (싱글)
         run: python build/build-move-usage.py
-        env:
-          # pokedb 가 클라우드 IP 전면 403 → Cloudflare Worker 릴레이 경유(123차). 로컬 실행은 env 없이 직접.
-          PCH_FETCH_RELAY: ${{ secrets.PCH_FETCH_RELAY }}
-          PCH_RELAY_KEY: ${{ secrets.PCH_RELAY_KEY }}
 
-      - name: Build move-usage-double.json (더블, rule=1)
-        # 131차 — 더블배틀 사용률(pokedb rule=1). 싱글과 완전 별개 메타. build-mon-pages 가 이 json 을 로드해
-        #   도감 상세 더블 섹션 + /battle-data/doubles/ 생성. 릴레이는 rule 을 path 에 포함하므로 그대로 통과.
+      - name: Build move-usage-double.json (더블)
+        # 131차 — 더블배틀 사용률. 싱글과 완전 별개 메타. build-mon-pages 가 이 json 을 로드해
+        #   도감 상세 더블 섹션 + /battle-data/doubles/ 생성.
         run: python build/build-move-usage.py
         env:
           PCH_MOVE_RULE: "1"
-          PCH_FETCH_RELAY: ${{ secrets.PCH_FETCH_RELAY }}
-          PCH_RELAY_KEY: ${{ secrets.PCH_RELAY_KEY }}
 
       # 사이트 정적 페이지(도감 상세 사용기술/순위·배틀데이터·sitemap)도 새 데이터로 재생성(123차) —
       #   json 만 갱신하면 헬퍼는 최신인데 사이트 표시가 뒤처지는 갭 제거.
@@ -62,7 +59,7 @@ jobs:
             echo "변경 없음 — 커밋 생략"
             exit 0
           fi
-          git commit -m "chore: move-usage 싱글+더블 자동 갱신 (champs.pokedb.tokyo)"
+          git commit -m "chore: move-usage 싱글+더블 자동 갱신 (championsbattledata.com)"
           # 실행 중 다른 push가 끼면(희귀) 여기서 거부됨 — 이번 결과는 옛 체크아웃 기준 생성물이라
           # 덮어쓰지 않고 조용히 종료(다음 주기가 최신 코드로 재생성). 강제 병합 금지.
           if ! git push origin dev; then
