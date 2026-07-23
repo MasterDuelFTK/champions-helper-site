@@ -105,6 +105,10 @@ SLUG2MASTER = {
     "gourgeist-jumbo-variety": "gourgeist-super",
     "lycanroc-midnight-form": "lycanroc-midnight",
     "lycanroc-dusk-form": "lycanroc-dusk",
+    # 회전로토무 — 소스가 fan-rotom/rotom-fan 두 slug로 중복 등재(rotom-fan 상세는 빈 응답 rows=0).
+    #   실데이터(rows=49, 싱글 rank 216·더블 rank 221)가 있는 fan-rotom 을 master 회전로토무(rotom-fan)로 매핑.
+    #   카탈로그상 fan-rotom 이 rotom-fan 보다 먼저 처리돼 데이터 적재 → 뒤의 빈 rotom-fan 은 dup 로직으로 폐기.
+    "fan-rotom": "rotom-fan",
     # cosmetic/기본형 — base 종으로 흡수
     "aegislash-shield-forme": "aegislash",
     "basculegion-male": "basculegion",
