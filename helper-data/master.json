@@ -44380,63 +44380,63 @@
     },
     {
       "id": 268,
-      "nameKo": "lingering-aroma",
+      "nameKo": "가시지않는향기",
       "nameEn": "lingering-aroma",
-      "descriptionKo": ""
+      "descriptionKo": "접촉한 상대의 특성을 자신과 동일하게 변경한다."
     },
     {
       "id": 269,
-      "nameKo": "seed-sower",
+      "nameKo": "넘치는씨",
       "nameEn": "seed-sower",
-      "descriptionKo": ""
+      "descriptionKo": "공격을 받으면 필드를 그래스필드로 만든다."
     },
     {
       "id": 270,
-      "nameKo": "thermal-exchange",
+      "nameKo": "열교환",
       "nameEn": "thermal-exchange",
-      "descriptionKo": ""
+      "descriptionKo": "불꽃타입 기술로 공격받으면 공격이 올라간다."
     },
     {
       "id": 271,
-      "nameKo": "anger-shell",
+      "nameKo": "분노의껍질",
       "nameEn": "anger-shell",
-      "descriptionKo": ""
+      "descriptionKo": "HP가 절반이 되면 방어와 특수방어가 떨어지고 공격과 특수공격, 스피드가 올라간다."
     },
     {
       "id": 272,
       "nameKo": "정화의소금",
       "nameEn": "purifying-salt",
-      "descriptionKo": "깨끗한 소금에 의해 상태이상이 되지 않는다."
+      "descriptionKo": "상태 이상이 되지 않는다. 고스트타입 기술로 입는 데미지가 반감된다."
     },
     {
       "id": 273,
-      "nameKo": "well-baked-body",
+      "nameKo": "노릇노릇바디",
       "nameEn": "well-baked-body",
-      "descriptionKo": ""
+      "descriptionKo": "불꽃타입 기술로 공격받으면 데미지 없이 방어가 크게 올라간다."
     },
     {
       "id": 274,
-      "nameKo": "wind-rider",
+      "nameKo": "바람타기",
       "nameEn": "wind-rider",
-      "descriptionKo": ""
+      "descriptionKo": "순풍이 불거나 바람 기술로 공격받으면 데미지를 받지 않고 공격이 올라간다."
     },
     {
       "id": 275,
-      "nameKo": "guard-dog",
+      "nameKo": "파수견",
       "nameEn": "guard-dog",
-      "descriptionKo": ""
+      "descriptionKo": "위협을 받으면 공격이 올라간다. 포켓몬을 교체시키는 기술이나 도구의 효과를 받지 않는다."
     },
     {
       "id": 276,
-      "nameKo": "rocky-payload",
+      "nameKo": "바위나르기",
       "nameEn": "rocky-payload",
-      "descriptionKo": ""
+      "descriptionKo": "바위타입 기술의 위력이 올라간다."
     },
     {
       "id": 277,
-      "nameKo": "wind-power",
+      "nameKo": "풍력발전",
       "nameEn": "wind-power",
-      "descriptionKo": ""
+      "descriptionKo": "바람 기술로 공격받으면 충전 상태가 된다."
     },
     {
       "id": 278,
@@ -44446,9 +44446,9 @@
     },
     {
       "id": 279,
-      "nameKo": "commander",
+      "nameKo": "사령탑",
       "nameEn": "commander",
-      "descriptionKo": ""
+      "descriptionKo": "같은 편에 어써러셔가 있으면 입속에 들어가 지시를 낸다."
     },
     {
       "id": 280,
@@ -44458,15 +44458,15 @@
     },
     {
       "id": 281,
-      "nameKo": "protosynthesis",
+      "nameKo": "고대활성",
       "nameEn": "protosynthesis",
-      "descriptionKo": ""
+      "descriptionKo": "부스트에너지를 지니고 있거나 날씨가 맑을 때 가장 높은 능력이 올라간다."
     },
     {
       "id": 282,
-      "nameKo": "quark-drive",
+      "nameKo": "쿼크차지",
       "nameEn": "quark-drive",
-      "descriptionKo": ""
+      "descriptionKo": "부스트에너지를 지니고 있거나 일렉트릭필드일 때 가장 높은 능력이 올라간다."
     },
     {
       "id": 283,
@@ -44476,39 +44476,39 @@
     },
     {
       "id": 284,
-      "nameKo": "vessel-of-ruin",
+      "nameKo": "재앙의그릇",
       "nameEn": "vessel-of-ruin",
-      "descriptionKo": ""
+      "descriptionKo": "이 특성을 가진 포켓몬을 제외한 모든 포켓몬의 특수공격을 약하게 만든다."
     },
     {
       "id": 285,
-      "nameKo": "sword-of-ruin",
+      "nameKo": "재앙의검",
       "nameEn": "sword-of-ruin",
-      "descriptionKo": ""
+      "descriptionKo": "이 특성을 가진 포켓몬을 제외한 모든 포켓몬의 방어를 약하게 만든다."
     },
     {
       "id": 286,
-      "nameKo": "tablets-of-ruin",
+      "nameKo": "재앙의목간",
       "nameEn": "tablets-of-ruin",
-      "descriptionKo": ""
+      "descriptionKo": "이 특성을 가진 포켓몬을 제외한 모든 포켓몬의 공격을 약하게 만든다."
     },
     {
       "id": 287,
-      "nameKo": "beads-of-ruin",
+      "nameKo": "재앙의구슬",
       "nameEn": "beads-of-ruin",
-      "descriptionKo": ""
+      "descriptionKo": "이 특성을 가진 포켓몬을 제외한 모든 포켓몬의 특수방어를 약하게 만든다."
     },
     {
       "id": 288,
-      "nameKo": "orichalcum-pulse",
+      "nameKo": "진홍빛고동",
       "nameEn": "orichalcum-pulse",
-      "descriptionKo": ""
+      "descriptionKo": "등장했을 때 날씨를 맑음으로 만든다."
     },
     {
       "id": 289,
-      "nameKo": "hadron-engine",
+      "nameKo": "하드론엔진",
       "nameEn": "hadron-engine",
-      "descriptionKo": ""
+      "descriptionKo": "등장했을 때 일렉트릭필드를 전개한다."
     },
     {
       "id": 290,
@@ -44536,9 +44536,9 @@
     },
     {
       "id": 294,
-      "nameKo": "costar",
+      "nameKo": "협연",
       "nameEn": "costar",
-      "descriptionKo": ""
+      "descriptionKo": "같은 편의 능력 상승에 편승한다."
     },
     {
       "id": 295,
@@ -44560,9 +44560,9 @@
     },
     {
       "id": 298,
-      "nameKo": "mycelium-might",
+      "nameKo": "균사의힘",
       "nameEn": "mycelium-might",
-      "descriptionKo": ""
+      "descriptionKo": "변화 기술을 사용할 때 행동이 느려지지만 상대의 특성에 방해받지 않는다."
     },
     {
       "id": 299,
@@ -44586,7 +44586,7 @@
       "id": 302,
       "nameKo": "독사슬",
       "nameEn": "toxic-chain",
-      "descriptionKo": ""
+      "descriptionKo": "기술이 명중했을 때 30% 확률로 상대를 맹독 상태로 만든다."
     },
     {
       "id": 303,
@@ -44598,7 +44598,7 @@
       "id": 304,
       "nameKo": "테라체인지",
       "nameEn": "tera-shift",
-      "descriptionKo": ""
+      "descriptionKo": "등장했을 때 테라스탈폼으로 변화한다."
     },
     {
       "id": 305,
@@ -44616,7 +44616,7 @@
       "id": 307,
       "nameKo": "독조종",
       "nameEn": "poison-puppeteer",
-      "descriptionKo": ""
+      "descriptionKo": "기술로 독 상태가 된 포켓몬은 혼란 상태도 된다."
     },
     {
       "id": 308,
@@ -44647,6 +44647,12 @@
       "nameKo": "불꽃의갈기",
       "nameEn": "fire-mane",
       "descriptionKo": "불꽃 타입 기술의 위력이 1.5배가 된다."
+    },
+    {
+      "id": 313,
+      "nameKo": "하바네로분출",
+      "nameEn": "spicy-spray",
+      "descriptionKo": "기술로 데미지를 입으면 상대를 화상 상태로 만든다."
     }
   ],
   "items": [

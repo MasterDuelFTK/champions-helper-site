@@ -27,6 +27,9 @@
     window.PCH_WS    = local ? ("ws://" + location.host) : "ws://127.0.0.1:8732";
     // PCH_ASSET = sprite/type-icon 이미지 prefix. 헬퍼 직접 서빙이면 same-origin(""), 사이트 경유면 same-origin https(helper-data).
     window.PCH_ASSET = local ? "" : "https://champions-helper.com/helper-data";
+    // 160차 — LNA(로컬 네트워크 액세스) 권한 게이트 판정용. 페이지 origin이 loopback이면(헬퍼 직접 서빙·python
+    //   미리보기) 페이지 자체가 local 주소공간이라 크롬 LNA가 적용되지 않는다 → 게이트 통째 skip.
+    window.PCH_LOOPBACK = loopback;
   })();
 </script>
 <style>
@@ -53,16 +56,17 @@
   #status.warn { color: #e0b000; }
   /* 98차 — /live 버전 표시(최상단 바 우측, 게임 요소 없는 구간). wwwroot↔사이트 동기화 추적용. */
   #version { font-size: 11px; color: var(--muted); margin-left: auto; opacity: 0.65; }
-  /* 매치업 타이틀 바: [내 필드칩(좌)] [매치업+날씨(중앙)] [상대 필드칩(우)] */
+  /* 매치업 타이틀 바(152차): [내 필드칩(좌)] [필드+날씨 드롭다운(정중앙)] [상대 필드칩(우)] — "매치업" 글자 삭제 */
   .mu-title-bar { display: flex; align-items: center; gap: 8px; margin: 0 0 2px 2px; }
   .field-chips { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
   #mu-my-field, #mu-opp-field { flex: 1 1 0; }
   #mu-opp-field { justify-content: flex-end; }
   .mu-title-center { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; }
-  .mu-label { margin: 0; }
   /* 83차 — 필드 시뮬 드롭다운(날씨=중앙, 벽=상대측). 타이틀바 한 줄 유지(작게). 펼침은 네이티브라 세로 안 밀림. */
   .field-sel { font-size: 10px; font-weight: 700; color: var(--txt); background: #2a2e36; border: 1px solid var(--line); border-radius: 4px; padding: 1px 2px; cursor: pointer; max-width: 94px; vertical-align: middle; }
   .field-sel.sim-on { border-color: #FFEE00; border-width: 1.5px; color: #FFEE00; }
+  /* 152차 — 실제 인식값 자동 드롭(필드/날씨 드롭다운): 순풍 tw-on과 같은 파란테. 시뮬(sim-on)과 구분. */
+  .field-sel.real-on { border-color: #2E6FD8; border-width: 1.5px; color: #6fa8ff; }
   /* 127차 — 기타 배수(상태이상 옆). [−][직접 입력][＋] — 버튼은 기술 위력 -/+와 동일(.pbtn), 0.1 단위.
      네이티브 스피너는 숨김(누르기 어렵다는 피드백으로 pbtn 교체). ≠1이면 입력창 노란테. */
   .mult-wrap { display: flex; align-items: center; gap: 3px; }
@@ -241,7 +245,17 @@
     border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; cursor: pointer;
   }
   .dd-header:hover { background: #424955; }
-  .dd-arrow { color: var(--muted); font-size: 10px; margin-left: 8px; }
+  .dd-arrow { color: var(--muted); font-size: 10px; margin-left: 8px; flex: 0 0 auto; }
+  /* 160차(feedback) — 긴 이름(메타그로스나이트 등)이 두 줄로 접혀 패널 높이가 튀던 것 → 한 줄 고정.
+     폭을 넘치면 fitOneLine()이 폰트를 12→9px까지 줄이고, 그래도 모자라면 말줄임(…)이 받는다. */
+  /* ★flex-grow는 0 — 늘리면 span이 남는 폭을 채우고, 헤더가 button이라 기본 text-align:center가 상속돼
+     짧은 이름이 가운데로 밀린다(실사고). 줄어들기만 하면 되므로 0 1 auto + 명시적 좌측정렬. */
+  /* ★padding-right = 이탤릭(「추정」 표시) 마지막 획이 글자 폭 바깥으로 삐치는 만큼의 여유.
+     scrollWidth는 그 삐침을 안 세므로 "안 넘침"으로 판정되는데 overflow:hidden은 잘라버린다 → 끝 글자 잘림.
+     margin-right로 상쇄해 실제 레이아웃 폭은 그대로 유지(다른 요소 밀림 없음). */
+  .dd-label { flex: 0 1 auto; min-width: 0; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    padding-right: 3px; margin-right: -3px; }
+  .ab-fixed .ab-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 3px; margin-right: -3px; }
   /* 펼침 목록은 흐름 밖(absolute)으로 띄워 아래 노력치/성격 행을 밀어내지 않음 */
   .dd-list {
     position: absolute; top: 100%; left: 0; right: 0; z-index: 50; margin-top: 2px;
@@ -260,6 +274,14 @@
   .ab-desc { font-size: 10px; color: var(--muted); line-height: 1.35; margin-top: 2px; white-space: normal; }
   .ab-fixed { max-width: 200px; padding: 4px 8px; background: #353a44; border: 1px solid var(--line); border-radius: 4px; }
   .ab-cur-desc { max-width: 200px; font-size: 10px; color: var(--muted); line-height: 1.35; margin-top: 3px; white-space: normal; }
+  /* 147차 — 파란테(현재 나온 상대) 확정 패널. 시뮬(노란)과 구분해 파란 계열 강조 = 파티행 파란 테두리와 같은 의미. */
+  .sim-panel.confirm { border-color: #4aa3ff; }
+  .conf-tag { font-size: 11px; color: #7ab0ff; font-weight: 700; margin-left: 6px; }
+  /* 「추정」(채용률 1위 자동값) = 흐리게 / 「확정」(사용자 지정) = 또렷 — 사용자 채택 시각 구분 */
+  .dd-header.est, .ab-fixed.est { opacity: 0.62; font-style: italic; }
+  .dd-header.conf { border-color: #4aa3ff; color: #cfe6ff; }
+  .conf-note { font-size: 10px; color: var(--muted); line-height: 1.35; margin-top: 3px; white-space: normal; }
+  .dd-pct { font-size: 10px; color: var(--muted); margin-left: 4px; }
 
   /* 113차 — 상대 시점 모드("상대" 토글, 모든 시뮬 취소 위). on=초록 활성. */
   .btn.opp-persp {
@@ -371,12 +393,53 @@
   /* 121차 — 셀 클릭 상세 패널(그리드 아래). */
   .pick-detail { margin-top: 8px; background: #20262e; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 11.5px; color: #c7ccd4; line-height: 1.65; display: none; }
   .pick-reason { font-size: 10.5px; color: #9aa0a8; }
+  /* 133차 — 더블: 필드 미니 sprite 2개는 이름 바로 아래 고정(스피드·메가컬럼 위 → 포켓몬 교체/메가로 스피드 줄수 변해도 안 밀림).
+     광역기 토글은 중앙 매치업(mu-center) 아래 고정·기본 ON(사용자 지시). */
+  .actives-row { display: flex; gap: 4px; align-items: center; justify-content: center; margin: 3px 0; }
+  .active-mini { width: 34px; height: 34px; border: 2px solid transparent; border-radius: 6px; background: #20262e;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; box-sizing: border-box; }
+  .active-mini.sel { border-color: #4aa3ff; cursor: default; }
+  .active-mini .spr-mini { width: 28px; height: 28px; object-fit: contain; image-rendering: pixelated; }
+  .spread-btn { font-size: 11px; font-weight: 700; padding: 3px 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: #2a2e36; color: var(--muted); cursor: pointer; align-self: center; margin-top: auto; }
+  .spread-btn.on { color: #ffd24a; border-color: #ffd24a; }
+  /* 138차 — 더블 "상태 초기화" 상시 토글("모든 시뮬 취소" 아래, 필드 4마리 = 내2+상대2). 미니는 active-mini 재사용,
+     picked=초기화 ON(노란테 — 시뮬처럼 보이지만 실전 랭크 조작이라 모든 시뮬 취소와 무관). 복수 선택 가능. */
+  .cs-label { font-size: 10px; color: var(--muted); margin-top: 8px; text-align: center; }
+  .cs-row { display: flex; gap: 4px; align-items: center; justify-content: center; margin-top: 3px; }
+  .cs-row .active-mini { cursor: pointer; }
+  .cs-row .active-mini.picked { border-color: #ffd24a; }
+  .cs-gap { width: 8px; }
+  /* 160차 — LNA(로컬 네트워크 액세스) 권한 게이트. 기본 숨김 — 권한이 'prompt'/'denied'일 때만 표시.
+     이미 허용(granted)·미지원 브라우저·헬퍼 직접 서빙은 이 오버레이를 아예 만들지 않는다(종전 동작 유지). */
+  #lna-gate { position: fixed; inset: 0; z-index: 60; display: none; align-items: center; justify-content: center;
+    background: rgba(15, 17, 20, 0.95); padding: 20px; }
+  #lna-gate.on { display: flex; }
+  .lna-box { max-width: 560px; width: 100%; padding: 26px 30px; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; text-align: center; }
+  .lna-title { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+  .lna-desc { font-size: 13px; color: var(--muted); line-height: 1.75; margin-bottom: 16px; }
+  .lna-steps { text-align: left; font-size: 12.5px; color: var(--txt); background: var(--panel2);
+    border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; line-height: 1.9; }
+  .lna-path { font-family: Consolas, monospace; font-size: 12px; color: #7fb3ff; word-break: break-all; }
+  .lna-btn { font-size: 14px; font-weight: 700; padding: 11px 28px; border-radius: 8px;
+    border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; }
+  .lna-btn:hover { filter: brightness(1.15); }
 </style>
 </head>
 <body>
   <div id="bar">
     <span id="status">로컬 헬퍼 연결 대기…</span>
-    <span id="version">v0.145</span>
+    <span id="version">v0.160</span>
+  </div>
+  <!-- 160차 — LNA 권한 게이트(공개 도메인 → 로컬 헬퍼 연결에 크롬 권한 필요). 기본 숨김, 내용은 showLnaGate가 채움. -->
+  <div id="lna-gate">
+    <div class="lna-box">
+      <div class="lna-title" id="lna-title"></div>
+      <div class="lna-desc" id="lna-desc"></div>
+      <div class="lna-steps" id="lna-steps" style="display:none"></div>
+      <button class="lna-btn" id="lna-btn"></button>
+    </div>
   </div>
   <section id="top">
     <div class="section-title" id="top-title">상대 파티 (내 현재 포켓몬 기준 위력)</div>
@@ -384,11 +447,12 @@
   </section>
   <section id="mid">
     <div class="mu-box">
-      <!-- 매치업 글자 중앙 · 측별 필드칩(벽/순풍)은 그 플레이어 쪽 끝(내=좌/상대=우) · 날씨는 공통이라 중앙 -->
+      <!-- 152차 — 정중앙 = [필드 드롭다운][날씨 드롭다운]만("매치업" 글자 삭제 — 중앙 밀림 제거, 사용자 지시).
+           측별 칩(벽/순풍)은 그 플레이어 쪽 끝(내=좌/상대=우). 필드/날씨는 전역 공통이라 중앙. -->
       <div class="mu-title-bar">
         <div id="mu-my-field" class="field-chips left"></div>
         <div class="mu-title-center">
-          <span class="section-title mu-label">매치업</span>
+          <span id="mu-terrain" class="field-chips"></span>
           <span id="mu-weather" class="field-chips"></span>
         </div>
         <div id="mu-opp-field" class="field-chips right"></div>
@@ -431,6 +495,9 @@ let lastModel = null;      // 74차 — 드롭다운 펼침 토글 시 재렌더
 let oppItemOpen = false;   // 74차 — 상대 도구 드롭다운 펼침 상태(WS 갱신에도 유지)
 let myItemOpen = false;    // 107차 — 내 도구 드롭다운 펼침 상태
 let oppAbilityOpen = false; // 82차 — 상대 특성 드롭다운 펼침 상태
+let confItemOpen = false;   // 147차 — 파란테(현재 상대) 확정 도구 드롭다운 펼침 상태
+let confAbilOpen = false;   // 147차 — 파란테 확정 특성 드롭다운 펼침 상태
+let confMyItemOpen = false; // 160차 — 내 확정 도구 드롭다운 펼침 상태
 let oppEditSlot = null;     // 113차 — 상대 시점 기술 편집 중인 슬롯(0~3, null=없음)
 let oppNameEditIdx = null;  // 122차 — 상단 6슬롯 종족 교체 편집 중인 슬롯(0~5, null=없음). 내 시점만.
 let showRealDamage = false; // 113차 — "실제 수치" 토글(% ↔ 실 데미지). 내/상대 위력 위력칩 공통. 하단 중앙 고정 버튼.
@@ -442,21 +509,22 @@ const LABEL_BG = { White: "#FFFFFF", LightGreen: "#C8F0C0", Orange: "#FFC880", L
 const FORM = { base: "#C8C8C8", megaX: "#FF9F9F", megaY: "#FFC890", myMega: "#9FD0FF" };
 const STAT_KO = ["공", "방", "특공", "특방", "스피드"];   // 랭크·성격 인덱스(0~4)
 const EV_KO = ["HP", "공", "방", "특공", "특방", "스피드"]; // 노력치 인덱스(0~5)
-const OPP_ITEMS = ["없음", "돌격조끼", "구애스카프", "진화의휘석", "검은철구"]; // 66차 가정 도구(107차 검은철구=스피드½ 추가)
 // 107차 — 내 도구 시뮬 목록(탁쳐떨구기로 제거/트릭으로 교체된 도구 대응). 그룹별 분류 표시.
 const MY_ITEM_GROUPS = [
   { label: "위력", items: ["생명의구슬", "달인의띠", "힘의머리띠", "박식안경", "구애머리띠", "구애안경", "전기구슬"] },
   { label: "스피드", items: ["구애스카프", "검은철구"] },
   { label: "타입강화 ×1.2", items: ["실크스카프", "목탄", "신비의물방울", "기적의씨", "자석", "부드러운모래", "용의이빨", "검은띠", "독바늘", "예리한부리", "휘어진스푼", "은빛가루", "딱딱한돌", "저주의부적", "검은안경", "금속코트", "녹지않는얼음", "요정의깃털"] },
 ];
+// 66차 가정 도구(107차 검은철구=스피드½ 추가) 중 방어 전용 — 구애스카프/검은철구는 스피드 그룹에 이미 있어 중복 제외.
+const OPP_ITEMS_DEF = ["돌격조끼", "진화의휘석"];
+// 149차(feedback) — 상대 도구 시뮬 = 내 도구와 같은 전체 목록 + 방어 도구. 종전엔 내 시점에서 5종(돌격조끼/구애스카프/
+//   진화의휘석/검은철구)만 골랐는데, 상대 도구(_oppSimItemKo)는 시점 공유 단일 상태라 내 시점에서 지정한 도구가
+//   상대 시점 위력(동시 위력 모드의 상대 탭 포함)에도 그대로 흐른다 → 목록을 시점별로 나눌 이유가 없다.
+//   공격 도구는 상대가 방어자일 때 계산에 안 걸리고(ItemRegistry isAttackerSide), 방어 도구는 상대가 공격자일 때
+//   안 걸리므로 전체 노출이 안전(오적용 0).
+const OPP_ITEM_GROUPS = MY_ITEM_GROUPS.concat([{ label: "방어", items: OPP_ITEMS_DEF }]);
 // 위력창 stat별 색(공=붉은/방=주황/특공=보라/특방=연분홍/스피드=하늘)
 const STAT_COLOR = ["#F09B9B", "#FFC880", "#C8A2E0", "#FFC8DC", "#B0E0F0"];
-const WEATHER = {
-  Rain: ["비", "#2E6FD8", "#fff"], Sand: ["모래바람", "#E0B000", "#1a1a1a"],
-  Snow: ["눈", "#F0F0F0", "#1a1a1a"], Hail: ["눈", "#F0F0F0", "#1a1a1a"],
-  Sun: ["쾌청", "#D83A3A", "#fff"],
-};
-
 function el(tag, cls, txt) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -882,7 +950,7 @@ function renderOpponents(list, mirror) {
 }
 
 // ── 매치업 ───────────────────────────────────────────────────
-function muSide(name, sprite, stages, burned, paralyzed, speedEl, mirror, types, aegisToggle, aegisBlade, side) {
+function muSide(name, sprite, stages, burned, paralyzed, speedEl, mirror, types, aegisToggle, aegisBlade, side, actives, sel) {
   const s = el("div", "mu-side" + (mirror ? " mirror" : ""));
   // info = sprite(위) / 타입 / 이름 / 스피드 (세로). 랭크칩은 sprite 옆 — 내=왼/상대=오른.
   const info = el("div", "mu-info");
@@ -901,6 +969,20 @@ function muSide(name, sprite, stages, burned, paralyzed, speedEl, mirror, types,
   }
   if (types && types.length) info.appendChild(typeIcons(types));
   info.appendChild(el("div", "mu-name", name || "—"));
+  // 133차 — 더블: 필드 미니 sprite 2개를 이름 바로 아래 고정(스피드 위). 스피드/메가컬럼이 아래에 있어 포켓몬 교체·메가로 줄수가 변해도
+  //   미니 위치는 안 밀림(사용자 지시 "미니 위치 고정"). 파란테=현재 계산 기준, 클릭=그 슬롯 기준 전환(백엔드 그 조합만 재계산).
+  //   인식 전(빈 슬롯)이면 spritePath 없어 34px 빈 틀만 표시 → 더블 모드 켜짐을 즉시 확인.
+  if (actives && actives.length) {
+    const ar = el("div", "actives-row");
+    actives.forEach((a) => {
+      const cell = el("div", "active-mini" + (a.index === sel ? " sel" : ""));
+      if (a.spritePath) { const img = el("img", "spr-mini"); img.src = PCH_ASSET + a.spritePath; img.alt = a.name || ""; cell.appendChild(img); }
+      cell.title = a.index === sel ? (a.name || "") + " — 현재 계산 기준" : "클릭: " + (a.name || "") + " 기준으로 계산";
+      if (a.index !== sel) cell.onclick = () => sim("/api/sim/double/view", { side: side, idx: a.index }); // 이미 선택된 건 클릭 무시(중복 계산 방지).
+      ar.appendChild(cell);
+    });
+    info.appendChild(ar);
+  }
   if (speedEl) info.appendChild(speedEl);
   const ranks = rankBadges(stages, burned, paralyzed);
   if (mirror) { s.appendChild(info); s.appendChild(ranks); }
@@ -909,12 +991,19 @@ function muSide(name, sprite, stages, burned, paralyzed, speedEl, mirror, types,
 }
 function renderMatchup(m) {
   const host = el("div", "matchup-row");
-  host.appendChild(muSide(m.myName, m.mySpritePath, m.myStages, m.myBurned, m.myParalyzed, renderMySpeed(m.mySpeeds), false, m.myTypes, m.myAegisToggle, m.myAegisBlade, "my"));
-  // 중앙: 기술 리스트(위 정렬)
+  const d = m.double;   // 133차 — 더블 부가(필드 미니·광역기). null이면 싱글(muSide가 actives 무시).
+  host.appendChild(muSide(m.myName, m.mySpritePath, m.myStages, m.myBurned, m.myParalyzed, renderMySpeed(m.mySpeeds), false, m.myTypes, m.myAegisToggle, m.myAegisBlade, "my", d ? d.myActives : null, d ? d.selMy : -1));
+  // 중앙: 기술 리스트(위 정렬) + (더블) 광역기 토글 — 중앙 하단 고정·기본 ON(사용자 지시). 더블 모드면 인식 전에도 상존.
   const center = el("div", "mu-center" + (m.oppPerspective ? " opp-persp" : ""));
   center.appendChild(m.oppPerspective ? renderOppCenter(m) : renderCenter(m));
+  if (d) {
+    const spreadBtn = el("button", "spread-btn" + (d.spread ? " on" : ""), "광역기 " + (d.spread ? "✓" : "✕"));
+    spreadBtn.title = d.spread ? "광역기 ×0.75 적용 중(더블 복수 대상) — 클릭: 단일 대상 ×1.0" : "단일 대상 ×1.0 — 클릭: 광역기 ×0.75";
+    spreadBtn.onclick = () => sim("/api/sim/double/spread");
+    center.appendChild(spreadBtn);
+  }
   host.appendChild(center);
-  host.appendChild(muSide(m.oppName, m.oppSpritePath, m.oppStages, m.oppBurned, m.oppParalyzed, renderOppSpeed(m.oppSpeeds), true, m.oppTypes, m.oppAegisToggle, m.oppAegisBlade, "opp"));
+  host.appendChild(muSide(m.oppName, m.oppSpritePath, m.oppStages, m.oppBurned, m.oppParalyzed, renderOppSpeed(m.oppSpeeds), true, m.oppTypes, m.oppAegisToggle, m.oppAegisBlade, "opp", d ? d.oppActives : null, d ? d.selOpp : -1));
   return host;
 }
 
@@ -952,32 +1041,32 @@ function adjRow(label, valueText, onMinus, onPlus, minusLabel, plusLabel, valueC
   return r;
 }
 // 74차 — 상대 시뮬 지닌도구 드롭다운(헤더 클릭 펼침/접힘). 항목 클릭 → POST + 접힘.
-function oppItemDropdown(m, persp) {
+// 147차 — 3층 규약(내 도구 시뮬 107차와 동일): null=미지정(확정/추정 도구를 그대로 따름) / "none"=도구 없음 / 그 외=지정.
+//   덕분에 파란테 → 노란테(시뮬)로 켜도 도구 가정이 이어져 위력이 튀지 않는다.
+function oppItemDropdown(m) {
   const wrap = el("div", "dropdown");
-  const sel = m.oppSimItemKo || "없음";
+  const cur = m.oppSimItemKo;
+  const selLabel = cur == null ? "확정/추정 도구 따름" : (cur === "none" ? "없음 (도구 없음)" : cur);
   const header = el("button", "dd-header");
-  header.appendChild(el("span", null, sel));
+  header.appendChild(el("span", "dd-label", selLabel));
   header.appendChild(el("span", "dd-arrow", oppItemOpen ? "▲" : "▼"));
   header.onclick = () => { oppItemOpen = !oppItemOpen; if (lastModel) render(lastModel); };
   wrap.appendChild(header);
   if (oppItemOpen) {
     const list = el("div", "dd-list");
-    const addOpt = (it) => {
-      const cur = it === "없음" ? !m.oppSimItemKo : m.oppSimItemKo === it;
-      const opt = el("div", "dd-opt" + (cur ? " sel" : ""), it + (cur ? "  ✓" : ""));
-      opt.onclick = () => { oppItemOpen = false; sim("/api/sim/opp/item", { itemKo: it === "없음" ? "" : it }); };
+    const addOpt = (label, itemKo, isCur) => {
+      const opt = el("div", "dd-opt" + (isCur ? " sel" : ""), label + (isCur ? "  ✓" : ""));
+      opt.onclick = () => { oppItemOpen = false; sim("/api/sim/opp/item", { itemKo }); };
       list.appendChild(opt);
     };
-    // 114차 — 상대 시점(persp)=상대가 공격자 → 공격도구(위력/타입강화) 그룹. 내 시점=상대가 방어자 → 방어 가정도구(OPP_ITEMS).
-    if (persp) {
-      addOpt("없음");
-      MY_ITEM_GROUPS.forEach((g) => {
-        list.appendChild(el("div", "dd-grp", g.label));
-        g.items.forEach((it) => addOpt(it));
-      });
-    } else {
-      OPP_ITEMS.forEach(addOpt);
-    }
+    addOpt("확정/추정 도구 따름", "", cur == null);
+    addOpt("없음 (도구 없음)", "none", cur === "none");
+    // 149차 — 시점 무관 전체 목록(공격 도구 + 방어 도구). 114차의 시점별 분기(persp면 공격도구/아니면 방어도구 5종)는
+    //   폐기 — 상대 도구는 시점 공유 단일 상태라 어느 탭에서 고르든 양 시점에 반영된다(OPP_ITEM_GROUPS 주석).
+    OPP_ITEM_GROUPS.forEach((g) => {
+      list.appendChild(el("div", "dd-grp", g.label));
+      g.items.forEach((it) => addOpt(it, it, cur === it));
+    });
     wrap.appendChild(list);
   }
   return wrap;
@@ -988,7 +1077,7 @@ function myItemDropdown(m) {
   const cur = m.mySimItemKo; // null=미시뮬(실제 도구), "none"=제거, else=도구명
   const selLabel = cur == null ? "실제 도구" : (cur === "none" ? "없음 (제거)" : cur);
   const header = el("button", "dd-header");
-  header.appendChild(el("span", null, selLabel));
+  header.appendChild(el("span", "dd-label", selLabel));
   header.appendChild(el("span", "dd-arrow", myItemOpen ? "▲" : "▼"));
   header.onclick = () => { myItemOpen = !myItemOpen; if (lastModel) render(lastModel); };
   wrap.appendChild(header);
@@ -1018,21 +1107,24 @@ function oppAbilityDropdown(m) {
   if (m.oppSimAbilityLocked) {
     const sel = choices[0];
     const box = el("div", "ab-fixed");
-    box.appendChild(el("div", "ab-name", (sel ? sel.ko : (m.oppSimAbilityKo || "")) + "  (자동)"));
-    // 83차 — 메가 자동 특성도 설명줄 숨김(세로 스크롤 방지). 이름만 표시.
+    const nm = el("div", "ab-name", (sel ? sel.ko : (m.oppSimAbilityKo || "")) + "  (자동)");
+    // 83차 — 인라인 설명줄은 숨김(세로 스크롤 방지). 159차 — 대신 hover 툴팁으로 효과 노출(확정 패널 메가와 파리티).
+    if (sel && sel.desc) nm.title = sel.desc;
+    box.appendChild(nm);
     wrap.appendChild(box);
     return wrap;
   }
   const curKo = m.oppSimAbilityKo || null;
   const header = el("button", "dd-header");
-  header.appendChild(el("span", null, curKo || "선택 안 함"));
+  // 147차 — 미지정이면 확정/추정 특성이 그대로 계산에 쓰인다("선택 안 함"=미반영이던 종전 의미 변경).
+  header.appendChild(el("span", "dd-label", curKo || "확정/추정 특성 따름"));
   header.appendChild(el("span", "dd-arrow", oppAbilityOpen ? "▲" : "▼"));
   header.onclick = () => { oppAbilityOpen = !oppAbilityOpen; if (lastModel) render(lastModel); };
   wrap.appendChild(header);
   // 83차 — 접힌 상태(선택만)엔 효과설명 숨김(세로 스크롤 방지). 설명은 펼친 드롭다운 항목에서만.
   if (oppAbilityOpen) {
     const list = el("div", "dd-list");
-    const none = el("div", "dd-opt" + (!curKo ? " sel" : ""), "선택 안 함" + (!curKo ? "  ✓" : ""));
+    const none = el("div", "dd-opt" + (!curKo ? " sel" : ""), "확정/추정 특성 따름" + (!curKo ? "  ✓" : ""));
     none.onclick = () => { oppAbilityOpen = false; sim("/api/sim/opp/ability", { abilityKo: "" }); };
     list.appendChild(none);
     choices.forEach((c) => {
@@ -1089,14 +1181,13 @@ function mySimPanel(m) {
 }
 function oppSimPanel(m) {
   const p = el("div", "sim-panel");
-  // 114차 — 상대 시점(persp)=상대가 공격자 → 지닌도구를 공격도구로. 랭크/노력치/성격은 시점 무관 전체 유지.
-  const persp = !!m.oppPerspective;
+  // 149차 — 지닌도구는 시점 무관 전체 목록(114차의 시점별 분기 폐기, oppItemDropdown 주석). 랭크/노력치/성격도 시점 무관 전체 유지(114차).
   p.appendChild(oppSimHead("상대 시뮬: " + (m.oppName || ""), m.oppSimMegaForms, m.oppSimMegaIndex));
   // 83차 — 지닌도구 + 특성을 수평 2칸으로(세로 스크롤 제거). 각 드롭다운 펼침은 absolute라 옆칸 안 밀림.
   const cols = el("div", "sim-cols");
   const itemCol = el("div", "sim-col");
   itemCol.appendChild(el("div", "sim-sub", "지닌도구"));
-  itemCol.appendChild(oppItemDropdown(m, persp));
+  itemCol.appendChild(oppItemDropdown(m));
   cols.appendChild(itemCol);
   // 82차 — 특성 (메가=자동 고정 / 비메가=후보 드롭다운, 효과설명 표시). 후보 있을 때만 둘째 칸.
   if ((m.oppSimAbilityChoices && m.oppSimAbilityChoices.length) || m.oppSimAbilityLocked) {
@@ -1140,14 +1231,159 @@ function oppSimPanel(m) {
   });
   return p;
 }
+// 147차(feedback) — 파란테(현재 나온 상대) 확정 패널의 드롭다운. kind="ability"|"item".
+//   ★시뮬이 아니다: 여기서 고른 값은 "확정 지식" → 그 판이 끝날 때까지 그 종족에 영속(교체·재등장해도 유지,
+//   "모든 시뮬 취소"로도 안 풀림). 안 고르면 채용률 1위 「추정」(흐리게)이 그대로 위력 계산에 들어간다.
+function confDropdown(m, kind) {
+  const isAb = kind === "ability";
+  const wrap = el("div", "dropdown");
+  const locked = isAb ? m.oppConfirmAbilityLocked : m.oppConfirmItemLocked;
+  const curKo = isAb ? m.oppConfirmAbilityKo : m.oppConfirmItemKo;
+  // 메가 = 특성 폼 고정 / 도구는 메가스톤(효과 없음) → 표시만.
+  if (locked) {
+    const box = el("div", "ab-fixed");
+    const nm = el("div", "ab-name", isAb ? (curKo || "?") + "  (메가 고정)" : "메가스톤  (도구 효과 없음)");
+    box.appendChild(nm);
+    // 159차 — 메가 고정 특성은 드롭다운이 없어 이름만 떴다. 효과 설명을 이름 아래 + hover 툴팁으로 노출.
+    const mdesc = isAb ? m.oppConfirmAbilityDesc : null;
+    if (mdesc) { nm.title = mdesc; box.appendChild(el("div", "ab-desc", mdesc)); }
+    wrap.appendChild(box);
+    return wrap;
+  }
+  const confirmed = isAb ? m.oppConfirmAbilityConfirmed : m.oppConfirmItemConfirmed;
+  const pct = (isAb ? m.oppConfirmAbilityPct : m.oppConfirmItemPct) || 0;
+  const choices = (isAb ? m.oppConfirmAbilityChoices : m.oppConfirmItemChoices) || [];
+  const open = isAb ? confAbilOpen : confItemOpen;
+  const post = (v) => {
+    if (isAb) { confAbilOpen = false; sim("/api/sim/opp/confirm/ability", { abilityKo: v }); }
+    else { confItemOpen = false; sim("/api/sim/opp/confirm/item", { itemKo: v }); }
+  };
+  const label = curKo == null ? (isAb ? "특성 정보 없음" : "도구 정보 없음")
+    : (curKo === "none" ? "없음 (도구 없음)" : curKo);
+  const header = el("button", "dd-header " + (confirmed ? "conf" : "est"));
+  // 159차 — 접힌 헤더에서도 현재 특성 효과를 hover로 볼 수 있게(드롭다운 열면 옵션 desc가 이미 뜸).
+  if (isAb && m.oppConfirmAbilityDesc) header.title = m.oppConfirmAbilityDesc;
+  header.appendChild(el("span", "dd-label", label));
+  if (!confirmed && pct > 0) header.appendChild(el("span", "dd-pct", "추정 " + pct.toFixed(1) + "%"));
+  header.appendChild(el("span", "dd-arrow", open ? "▲" : "▼"));
+  header.onclick = () => { if (isAb) confAbilOpen = !confAbilOpen; else confItemOpen = !confItemOpen; if (lastModel) render(lastModel); };
+  wrap.appendChild(header);
+  if (open) {
+    const list = el("div", "dd-list");
+    const addOpt = (labelText, val, isCur, desc, pctv) => {
+      const opt = el("div", "dd-opt" + (isCur ? " sel" : ""));
+      const nm = el("div", "ab-name", labelText + (isCur ? "  ✓" : ""));
+      if (pctv > 0) nm.appendChild(el("span", "dd-pct", pctv.toFixed(1) + "%"));
+      opt.appendChild(nm);
+      if (desc) opt.appendChild(el("div", "ab-desc", desc));
+      opt.onclick = () => post(val);
+      list.appendChild(opt);
+    };
+    if (confirmed) addOpt("확정 해제 (채용률 추정으로)", "", false);
+    if (!isAb) addOpt("없음 (도구 없음 확정)", "none", confirmed && curKo === "none");
+    choices.forEach((c) => addOpt(c.ko, c.ko, confirmed && curKo === c.ko, c.desc, c.pct));
+    // 채용률 목록에 없는 도구도 확정할 수 있게 수동 그룹(공격 도구 + 방어 도구)을 뒤에 붙인다. 149차 — 상대 시뮬
+    //   드롭다운과 같은 단일 소스(OPP_ITEM_GROUPS)로 통일.
+    if (!isAb) {
+      OPP_ITEM_GROUPS.forEach((g) => {
+        list.appendChild(el("div", "dd-grp", g.label));
+        g.items.forEach((it) => addOpt(it, it, confirmed && curKo === it));
+      });
+    }
+    wrap.appendChild(list);
+  }
+  wrap.appendChild(el("div", "conf-note", confirmed ? "확정 — 이 판 끝까지 유지" : "채용률 1위 추정 — 고르면 확정"));
+  return wrap;
+}
+// 160차(feedback) — 내 확정 도구 드롭다운. 상대 확정 도구(confDropdown)의 내 측 판.
+//   왜 필요한가: 상대가 탁쳐서떨구기·트릭으로 내 도구를 실제로 바꾸면, 종전엔 노란테 시뮬을 열어 도구를 지정해야 했고
+//   그마저 시뮬을 끄거나 다른 포켓몬으로 옮기면 날아갔다(109차 정책). 확정은 그 종족에 영속 → 교체 후 돌아와도 유지.
+function myConfDropdown(m) {
+  const wrap = el("div", "dropdown");
+  const confirmed = !!m.myConfirmItemConfirmed;
+  const curKo = m.myConfirmItemKo;
+  const builder = m.myConfirmBuilderItemKo;
+  const label = curKo == null ? "없음 (도구 미등록)" : (curKo === "none" ? "없음 (도구 없음)" : curKo);
+  const header = el("button", "dd-header " + (confirmed ? "conf" : "est"));
+  header.appendChild(el("span", "dd-label", label));
+  header.appendChild(el("span", "dd-arrow", confMyItemOpen ? "▲" : "▼"));
+  header.onclick = () => { confMyItemOpen = !confMyItemOpen; if (lastModel) render(lastModel); };
+  wrap.appendChild(header);
+  if (confMyItemOpen) {
+    const post = (v) => { confMyItemOpen = false; sim("/api/sim/my/confirm/item", { itemKo: v }); };
+    const list = el("div", "dd-list");
+    const addOpt = (labelText, val, isCur) => {
+      const opt = el("div", "dd-opt" + (isCur ? " sel" : ""));
+      opt.appendChild(el("div", "ab-name", labelText + (isCur ? "  ✓" : "")));
+      opt.onclick = () => post(val);
+      list.appendChild(opt);
+    };
+    if (confirmed) addOpt("확정 해제 (등록 도구 " + (builder || "없음") + "로)", "", false);
+    addOpt("없음 (도구 없음 확정)", "none", confirmed && curKo === "none");
+    // 후보 = 내 시뮬 도구와 같은 단일 소스(MY_ITEM_GROUPS). 상대가 트릭으로 넘긴 도구도 여기서 고른다.
+    MY_ITEM_GROUPS.forEach((g) => {
+      list.appendChild(el("div", "dd-grp", g.label));
+      g.items.forEach((it) => addOpt(it, it, confirmed && curKo === it));
+    });
+    wrap.appendChild(list);
+  }
+  wrap.appendChild(el("div", "conf-note", confirmed ? "확정 — 이 판 끝까지 유지" : "빌더 등록 도구 — 바뀌었으면 지정"));
+  return wrap;
+}
+// 160차 — 내 파란테(현재 나온 내 포켓몬) 패널. 도구=드롭다운(확정) / 특성=표시 전용(내 빌드에 이미 확정돼 있음).
+//   내 시뮬(노란테) 중이면 mySimPanel이 대신 뜬다(상대 쪽 규약과 동일).
+function myConfirmPanel(m) {
+  const p = el("div", "sim-panel confirm");
+  const h = el("div", "sim-head");
+  h.appendChild(el("span", "sim-head-name", "현재 내 포켓몬: " + (m.myConfirmName || "")));
+  p.appendChild(h);
+  const cols = el("div", "sim-cols");
+  const itemCol = el("div", "sim-col");
+  itemCol.appendChild(el("div", "sim-sub", "지닌도구"));
+  itemCol.appendChild(myConfDropdown(m));
+  cols.appendChild(itemCol);
+  const abCol = el("div", "sim-col");
+  abCol.appendChild(el("div", "sim-sub", "특성"));
+  // 특성은 편집 대상이 아니라 표시 전용 — 드롭다운과 같은 폭·높이의 고정 박스로 대칭만 맞춘다.
+  const box = el("div", "ab-fixed");
+  const nm = el("div", "ab-name", m.myConfirmAbilityKo || "—");
+  if (m.myConfirmAbilityDesc) nm.title = m.myConfirmAbilityDesc;
+  box.appendChild(nm);
+  if (m.myConfirmAbilityDesc) box.appendChild(el("div", "ab-desc", m.myConfirmAbilityDesc));
+  abCol.appendChild(box);
+  cols.appendChild(abCol);
+  p.appendChild(cols);
+  return p;
+}
+// 147차 — 파란테 상대 자동 펼침 패널(시뮬 아님). 상대 시뮬(노란테) 중이면 oppSimPanel이 대신 뜬다.
+function oppConfirmPanel(m) {
+  const p = el("div", "sim-panel confirm");
+  const h = el("div", "sim-head");
+  h.appendChild(el("span", "sim-head-name", "현재 상대: " + (m.oppConfirmName || "")));
+  p.appendChild(h);
+  const cols = el("div", "sim-cols");
+  const itemCol = el("div", "sim-col");
+  itemCol.appendChild(el("div", "sim-sub", "지닌도구"));
+  itemCol.appendChild(confDropdown(m, "item"));
+  cols.appendChild(itemCol);
+  const abCol = el("div", "sim-col");
+  abCol.appendChild(el("div", "sim-sub", "특성"));
+  abCol.appendChild(confDropdown(m, "ability"));
+  cols.appendChild(abCol);
+  p.appendChild(cols);
+  return p;
+}
 function renderPartiesBlock(m) {
   const host = el("div", "parties");
   const mine = el("div", "pcol");
   const mh = el("div", "section-title", "내 파티");
   if (m.simActive) mh.appendChild(el("span", "sim-tag", "시뮬 중"));
+  else if (m.myConfirmActive && m.myConfirmItemConfirmed) mh.appendChild(el("span", "conf-tag", "도구 확정됨")); // 160차
   mine.appendChild(mh);
   mine.appendChild(renderParty(m.myParty, "my"));
+  // 160차 — 내 시뮬(노란테)이면 시뮬 패널, 아니면 파란테(현재 내 포켓몬) 확정 패널(상대 쪽과 동일 규약).
   if (m.simActive) mine.appendChild(mySimPanel(m));
+  else if (m.myConfirmActive) mine.appendChild(myConfirmPanel(m));
   host.appendChild(mine);
 
   // 91차 — 중앙 빈 공간(좌=내 시뮬/우=상대 시뮬 사이)에 "모든 시뮬 취소" 버튼.
@@ -1172,16 +1408,41 @@ function renderPartiesBlock(m) {
     btn.onclick = () => sim("/api/sim/reset-all");
     mid.appendChild(btn);
   }
+  // 138차 — 더블 "상태 초기화" 상시 토글("모든 시뮬 취소" 아래). 클리어스모그 기술명 OCR이 불안정해 인식 트리거식 폐기 —
+  //   필드 4마리(내2+상대2)를 상시 표시, 초기화당한 포켓몬을 사용자가 직접 토글(노란테, 복수 선택).
+  //   ON=랭크 초기화(이전 랭크는 백엔드 스냅샷 보관) / 재클릭=해제(이전+이후 랭크 병합 복원). 교체되면 자동 꺼짐.
+  //   실전 추적 조작(시뮬 아님 — 모든 시뮬 취소로 안 되돌아감).
+  const dd = m.double;
+  if (dd) {
+    mid.appendChild(el("div", "cs-label", "상태 초기화"));
+    const csRow = el("div", "cs-row");
+    const csCell = (a, side, resets) => {
+      const on = !!(resets && resets[a.index]);
+      const cell = el("div", "active-mini" + (on ? " picked" : ""));
+      if (a.spritePath) { const img = el("img", "spr-mini"); img.src = PCH_ASSET + a.spritePath; img.alt = a.name || ""; cell.appendChild(img); }
+      cell.title = (a.name || "빈 슬롯") + (on ? " — 클릭: 초기화 해제(이전 랭크 복원)" : " — 클릭: 랭크 초기화(클리어스모그 등)");
+      if (a.spritePath) cell.onclick = () => sim("/api/sim/double/statreset", { side: side, idx: a.index });
+      csRow.appendChild(cell);
+    };
+    (dd.myActives || []).forEach((a) => csCell(a, "my", dd.myStatReset));
+    csRow.appendChild(el("div", "cs-gap", ""));
+    (dd.oppActives || []).forEach((a) => csCell(a, "opp", dd.oppStatReset));
+    mid.appendChild(csRow);
+  }
   host.appendChild(mid);
 
   const opp = el("div", "pcol right");
   const oh = el("div", "section-title", "상대 파티");
   if (m.oppSimActive) {
-    oh.appendChild(el("span", "sim-tag", "시뮬 중" + (m.oppSimItemKo && m.oppSimItemKo !== "없음" ? " · " + m.oppSimItemKo : "")));
+    oh.appendChild(el("span", "sim-tag", "시뮬 중" + (m.oppSimItemKo && m.oppSimItemKo !== "none" ? " · " + m.oppSimItemKo : "")));
+  } else if (m.oppConfirmActive && (m.oppConfirmAbilityConfirmed || m.oppConfirmItemConfirmed)) {
+    oh.appendChild(el("span", "conf-tag", "확정 지정됨"));   // 147차 — 시뮬(노란)과 구분되는 실전 확정 지식
   }
   opp.appendChild(oh);
   opp.appendChild(renderParty(m.oppParty, "opp"));
+  // 147차 — 상대 시뮬(노란테)이면 시뮬 패널, 아니면 파란테(현재 상대) 확정 패널 자동 펼침.
   if (m.oppSimActive) opp.appendChild(oppSimPanel(m));
+  else if (m.oppConfirmActive) opp.appendChild(oppConfirmPanel(m));
   host.appendChild(opp);
   return host;
 }
@@ -1191,6 +1452,9 @@ function mkChip(label, bg, fg) { const c = el("span", "chip", label); c.style.ba
 // 83차 — 필드 시뮬 드롭다운(네이티브 select). active=시뮬 중(노란테). onchange → POST(빈 key=시뮬 해제).
 //   selected는 attribute로 설정 — applyRegion이 innerHTML 비교라 property면 값 변화가 감지 안 됨(DOM 갱신 skip 버그 방지).
 const WEATHER_OPTS = [["", "날씨"], ["none", "없음"], ["sun", "쾌청"], ["rain", "비"], ["sand", "모래바람"], ["snow", "눈"]];
+// 152차 — 필드(테레인) 드롭다운. 빈=시뮬 해제(실제 인식 따름) / none=필드 없음 시뮬 / 그 외=해당 필드.
+const TERRAIN_OPTS = [["", "필드"], ["none", "없음"], ["electric", "일렉트릭필드"], ["grassy", "그래스필드"], ["misty", "미스트필드"], ["psychic", "사이코필드"]];
+const TERRAIN_TO_KEY = { None: "none", Electric: "electric", Grassy: "grassy", Misty: "misty", Psychic: "psychic" };
 const SCREEN_OPTS = [["", "벽"], ["none", "없음"], ["reflect", "리플렉터"], ["light", "빛의장막"], ["aurora", "오로라베일"]];
 // 98차(feedback#3) — 상태이상 시뮬(하단 시뮬). 빈=미시뮬(실제 따름) / 정상=상태없음 강제 / 그 외=지정. 화상=물리½·마비=스피드½ + 객기/hex 등 자동 위력.
 const STATUS_OPTS = [["", "상태이상"], ["none", "정상"], ["burn", "화상"], ["paralysis", "마비"], ["poison", "독"], ["badpoison", "맹독"], ["sleep", "잠"], ["freeze", "얼음"]];
@@ -1266,8 +1530,9 @@ function tailwindToggle(m, side) {
   t.onclick = () => sim("/api/sim/" + side + "/tailwind", {});
   return t;
 }
-// 측별 벽 칩 + 순풍 토글 + 드롭다운(타입 / 상대만 벽). 측은 위치(매치업 좌/우)로 구분 → 라벨에 "내/상대" 접두 없음.
+// 측별 벽 칩 + 순풍 토글 + 드롭다운(타입/벽). 측은 위치(매치업 좌/우)로 구분 → 라벨에 "내/상대" 접두 없음.
 // 98차(feedback#2) — 드롭다운은 항상 바깥쪽(내=좌끝/상대=우끝) 고정, 그 안쪽에 순풍, 더 안쪽에 벽칩. 칩이 늘어도 드롭다운 안 밀림.
+// 144차 — 벽 시뮬 드롭다운 양측화(종전 상대만): 내측 벽 = 상대 시점 위력 경감(싱글 ×0.5·더블 ×2/3, 대칭 UX).
 function fieldChips(m, side) {
   const f = document.createDocumentFragment();
   // 84차 — 타입 시뮬 드롭다운(측 = 위치로 구분: 내=좌/상대=우). 네이티브 select라 팝업이 흐름 밖 → 세로 스크롤 안 생김.
@@ -1276,43 +1541,54 @@ function fieldChips(m, side) {
   const reflect = side === "my" ? m.myReflect : m.oppReflect;
   const light = side === "my" ? m.myLightScreen : m.oppLightScreen;
   const aurora = side === "my" ? m.myAuroraVeil : m.oppAuroraVeil;
-  // 상대측(opp)에만 벽 시뮬 드롭다운(절반 위력). 시뮬 중엔 실제 벽 칩 숨김(드롭다운이 대체 표시).
-  let screenSel = null;
-  if (side === "opp") {
-    const curVal = m.simOppScreenActive
-      ? (m.simOppReflect ? "reflect" : m.simOppLightScreen ? "light" : m.simOppAuroraVeil ? "aurora" : "none")
-      : "";
-    screenSel = fieldSelect(SCREEN_OPTS, curVal, m.simOppScreenActive, "/api/sim/opp/screen");
-  }
+  // 벽 시뮬 드롭다운(상대벽=내 위력 경감 / 내벽=상대 시점 위력 경감). 시뮬 중엔 실제 벽 칩 숨김(드롭다운이 대체 표시).
+  const scrActive = side === "my" ? m.simMyScreenActive : m.simOppScreenActive;
+  const scrReflect = side === "my" ? m.simMyReflect : m.simOppReflect;
+  const scrLight = side === "my" ? m.simMyLightScreen : m.simOppLightScreen;
+  const scrAurora = side === "my" ? m.simMyAuroraVeil : m.simOppAuroraVeil;
+  const curVal = scrActive
+    ? (scrReflect ? "reflect" : scrLight ? "light" : scrAurora ? "aurora" : "none")
+    : "";
+  const screenSel = fieldSelect(SCREEN_OPTS, curVal, scrActive, "/api/sim/" + side + "/screen");
   const tw = tailwindToggle(m, side);
   const chips = [];
-  const hideRealScreen = side === "opp" && m.simOppScreenActive;
-  if (!hideRealScreen) {
+  if (!scrActive) {
     if (reflect) chips.push(mkChip("리플렉터", "#E08000", "#1a1a1a"));
     if (light) chips.push(mkChip("빛의장막", "#2E6FD8", "#fff"));
     if (aurora) chips.push(mkChip("오로라베일", "#20B0B0", "#fff"));
   }
   if (side === "my") {
-    // 내측(좌끝→안쪽): [타입드롭][순풍][벽칩…]
+    // 내측(좌끝→안쪽): [타입드롭][벽드롭][순풍][벽칩…] — 드롭다운이 좌끝 고정(상대측의 거울).
     f.appendChild(typeSel);
+    f.appendChild(screenSel);
     f.appendChild(tw);
     chips.forEach(c => f.appendChild(c));
   } else {
     // 상대측(안쪽→우끝): [벽칩…][순풍][벽드롭][타입드롭] — 드롭다운이 우끝 고정.
     chips.forEach(c => f.appendChild(c));
     f.appendChild(tw);
-    if (screenSel) f.appendChild(screenSel);
+    f.appendChild(screenSel);
     f.appendChild(typeSel);
   }
   return f;
 }
-// 날씨 = 필드 공통(측 무관) → 중앙. 드롭다운(시뮬) + 실제 날씨 칩(시뮬 중엔 숨김).
+// 152차 — 날씨/필드 = 전역(측 무관) → 정중앙 드롭다운 2개만(별도 칩 없음, 사용자 지시).
+//   실제 인식값 = 드롭다운에 자동 드롭 + 파란테(real-on, 순풍 파란테와 동일 의미) / 수동 선택 = 시뮬 노란테(sim-on).
+//   시뮬 해제(첫 옵션 "날씨"/"필드")를 고르면 실제 인식값으로 복귀.
 function weatherControl(m) {
-  const f = document.createDocumentFragment();
-  const curVal = m.simWeatherActive ? (WEATHER_TO_KEY[m.simWeather] || "none") : "";
-  f.appendChild(fieldSelect(WEATHER_OPTS, curVal, m.simWeatherActive, "/api/sim/weather"));
-  if (!m.simWeatherActive) { const w = WEATHER[m.weather]; if (w) f.appendChild(mkChip(w[0], w[1], w[2])); }
-  return f;
+  const real = m.weather && m.weather !== "None";
+  const curVal = m.simWeatherActive ? (WEATHER_TO_KEY[m.simWeather] || "none") : (real ? (WEATHER_TO_KEY[m.weather] || "") : "");
+  const sel = fieldSelect(WEATHER_OPTS, curVal, m.simWeatherActive, "/api/sim/weather");
+  if (!m.simWeatherActive && real) sel.classList.add("real-on");
+  return sel;
+}
+// 152차 — 필드(테레인) 드롭다운(weatherControl 거울). 감지=자동 드롭+파란테 / 수동=시뮬 노란테. 칩 없음.
+function terrainControl(m) {
+  const real = m.terrain && m.terrain !== "None";
+  const curVal = m.simTerrainActive ? (TERRAIN_TO_KEY[m.simTerrain] || "none") : (real ? (TERRAIN_TO_KEY[m.terrain] || "") : "");
+  const sel = fieldSelect(TERRAIN_OPTS, curVal, m.simTerrainActive, "/api/sim/terrain");
+  if (!m.simTerrainActive && real) sel.classList.add("real-on");
+  return sel;
 }
 
 // ── 전체 렌더 ────────────────────────────────────────────────
@@ -1343,10 +1619,31 @@ function render(m) {
   if (m.oppPerspective) fillOppMoveList(m.oppUsageCandidates);
   applyRegion("#mu-my-field", [fieldChips(m, "my")]);
   applyRegion("#mu-opp-field", [fieldChips(m, "opp")]);
+  applyRegion("#mu-terrain", [terrainControl(m)]); // 152차 — 필드 드롭다운(중앙, 날씨 왼쪽).
   applyRegion("#mu-weather", [weatherControl(m)]);
   applyRegion("#opps", [...renderOpponents(m.opponents, m.oppPerspective).childNodes]);
   applyRegion("#matchup", [renderMatchup(m)]);
   applyRegion("#parties", [...renderPartiesBlock(m).childNodes]);
+  fitDropdownLabels();   // 160차 — DOM 반영 후 긴 이름 한 줄 맞춤(측정 필요 → 렌더 마지막)
+}
+
+// 160차(feedback) — 드롭다운 헤더의 긴 이름이 두 줄로 접히던 문제.
+//   "메타그로스나이트"처럼 이름이 칸 폭보다 길면 줄바꿈돼 확정 패널 높이가 튀고 레이아웃이 흔들렸다.
+//   CSS만으론 자동 축소가 안 되므로(폰트 크기는 콘텐츠 길이에 반응하지 않음) 렌더 직후 실측해서 줄인다.
+//   12px에서 시작해 1px씩 최소 9px까지 축소, 그래도 넘치면 CSS의 text-overflow: ellipsis가 마무리.
+function fitOneLine(node, maxPx, minPx) {
+  if (!node) return;
+  let px = maxPx;
+  node.style.fontSize = px + "px";
+  // clientWidth = 쓸 수 있는 폭 / scrollWidth = 실제 필요한 폭. +1은 소수점 반올림 여유.
+  while (px > minPx && node.scrollWidth > node.clientWidth + 1) {
+    px -= 1;
+    node.style.fontSize = px + "px";
+  }
+}
+function fitDropdownLabels() {
+  document.querySelectorAll(".dd-label").forEach((n) => fitOneLine(n, 12, 9));
+  document.querySelectorAll(".ab-fixed .ab-name").forEach((n) => fitOneLine(n, 12, 9));
 }
 
 // ── WebSocket ────────────────────────────────────────────────
@@ -1365,14 +1662,112 @@ const VIEW_PARAM = (function () {
 })();
 function connect() {
   ws = new WebSocket(PCH_WS + "/ws/power" + (VIEW_PARAM ? "?view=" + VIEW_PARAM : ""));   // 87차 — 로컬 헬퍼 WS(사이트 경유 시 절대주소)
-  ws.onopen = () => setStatus("연결됨 — 게임 매치 시작 시 데이터 표시", "ok");
+  ws.onopen = () => { wsEverOpened = true; setStatus("연결됨 — 게임 매치 시작 시 데이터 표시", "ok"); };
   ws.onmessage = (e) => {
     let data; try { data = JSON.parse(e.data); } catch (err) { console.error(err); return; }
     if (data && data.__shutdown) { handleShutdown(); return; }   // 헬퍼 중지 → 탭 닫기/안내
     render(data);
   };
-  ws.onclose = () => { if (shuttingDown) return; setStatus("연결 끊김 — 재연결 시도…", "warn"); setTimeout(connect, 1500); };
+  ws.onclose = () => {
+    if (shuttingDown) return;
+    // 160차 — "한 번도 연결된 적 없음"은 권한 미허용일 수 있다. 종전엔 여기서 1.5초 재시도만 조용히 반복해
+    //   프롬프트를 실수로 닫은 사용자가 영영 안내를 못 봤다(크롬은 무시 3회부터 임시차단 → 재시도는 자동 거부).
+    //   상태를 재조회해 prompt/denied면 게이트를 다시 띄운다. granted/미지원이면 종전 재시도 루프 그대로.
+    if (LNA_APPLIES && !wsEverOpened) {
+      lnaState().then((st) => {
+        if (st === "prompt" || st === "denied") { showLnaGate(st); return; }
+        setStatus("연결 끊김 — 재연결 시도…", "warn");
+        setTimeout(connect, 1500);
+      });
+      return;
+    }
+    setStatus("연결 끊김 — 재연결 시도…", "warn");
+    setTimeout(connect, 1500);
+  };
   ws.onerror = () => { try { ws.close(); } catch (_) {} };
+}
+
+// ── 160차 — LNA(Local Network Access) 권한 게이트 ──────────────────────────────
+// 배경: Chrome 141+는 공개 origin(champions-helper.com)이 loopback(127.0.0.1)에 접근할 때 권한을 요구한다
+//   (142=fetch/XHR 강제, 145=권한 2분할 loopback-network/local-network, 147=WebSocket까지 확대).
+// 사용자 실제 피해 2가지와 그 원인:
+//   ① "권한창이 아예 안 뜬다" — 헬퍼가 게임 도중 탭을 자동으로 연다. 게임이 전체화면이면 브라우저는 뒤에서 뜨고,
+//      크롬은 비활성·비가시 탭의 권한창을 띄우지 않는다. 페이지가 로드 즉시 WS를 붙으러 가니 요청이 조용히 삼켜짐.
+//   ② "실수로 닫으면 다시 안 뜬다" — 크롬은 3회 무시부터 임시차단이라 1회 닫은 건 안 막혀 있는데,
+//      기존 코드가 새 요청을 제대로 내지 않고 조용한 재시도만 반복해 영영 안 뜬 것처럼 보였다.
+// 해결: 연결을 "탭이 보이고 + 사용자가 버튼을 누른" 시점으로 미룬다(= 크롬이 프롬프트를 띄우는 조건 충족).
+// ★기존 사용자 안전: granted(이미 허용) / 조회 불가(미지원·예외·타임아웃) / 헬퍼 직접 서빙(loopback origin)은
+//   전부 즉시 connect() = 종전과 100% 동일 경로. 새 화면은 "지금 깨져 있는 사용자"에게만 나타난다.
+const LNA_APPLIES = !window.PCH_LOOPBACK;
+const LNA_TEST = new URLSearchParams(location.search).get("lnatest");   // dev 검증용 상태 강제(granted|prompt|denied)
+let wsEverOpened = false;
+let lnaStatusObj = null;   // PermissionStatus — 설정에서 허용으로 바뀌면 onchange로 자동 연결
+
+/// 현재 LNA 권한 상태. 'granted'|'prompt'|'denied'|'unknown'. 어떤 실패든 'unknown'(=종전 동작)으로 떨어진다.
+async function lnaState() {
+  if (LNA_TEST) return LNA_TEST;
+  if (!LNA_APPLIES) return "granted";
+  if (!navigator.permissions || !navigator.permissions.query) return "unknown";
+  // 권한명은 크롬 버전마다 다르다 — 145+ 'loopback-network', 142~144 'local-network-access'. 모르는 이름은 throw.
+  const probe = (async () => {
+    for (const name of ["loopback-network", "local-network-access"]) {
+      try {
+        const st = await navigator.permissions.query({ name });
+        if (st && st.state) { lnaStatusObj = st; return st.state; }
+      } catch (_) { /* 이 브라우저가 모르는 권한명 → 다음 후보 */ }
+    }
+    return "unknown";
+  })();
+  // 조회가 늦어져도 화면이 멈추지 않게 상한. 늦으면 'unknown' = 종전 즉시연결.
+  return await Promise.race([probe, new Promise((r) => setTimeout(() => r("unknown"), 500))]);
+}
+
+function showLnaGate(state) {
+  const denied = state === "denied";
+  $("#lna-title").textContent = denied
+    ? "브라우저가 로컬 연결을 차단했습니다"
+    : "헬퍼와 연결할 준비가 되었습니다";
+  $("#lna-desc").innerHTML = denied
+    ? "이 브라우저에서 로컬 네트워크 액세스가 차단되어 헬퍼의 실시간 데이터를 받을 수 없습니다.<br>아래 순서로 허용한 뒤 [다시 시도]를 눌러 주세요."
+    : "아래 버튼을 누르면 브라우저가 <b>로컬 네트워크 액세스 허용</b> 여부를 묻습니다.<br><b>허용</b>을 눌러야 헬퍼가 계산한 위력 데이터가 표시됩니다.";
+  const steps = $("#lna-steps");
+  if (denied) {
+    steps.style.display = "block";
+    steps.innerHTML = "① 주소창 왼쪽 아이콘(🔒 또는 ⚙) 클릭 → <b>사이트 설정</b><br>"
+      + "② <b>로컬 네트워크 액세스</b>를 <b>허용</b>으로 변경 (항목이 2개면 둘 다)<br>"
+      + "③ 항목이 보이지 않으면 아래 주소를 주소창에 붙여넣어 설정<br>"
+      + '<span class="lna-path">chrome://settings/content/localNetworkAccess</span>';
+  } else {
+    steps.style.display = "none";
+  }
+  $("#lna-btn").textContent = denied ? "다시 시도" : "헬퍼 연결하기";
+  $("#lna-gate").classList.add("on");
+  setStatus(denied ? "브라우저 권한 차단됨 — 허용 후 다시 시도" : "브라우저 권한 허용 필요", "warn");
+  // 설정 화면에서 허용으로 바꾸면 버튼을 안 눌러도 자동 복귀.
+  if (lnaStatusObj) {
+    lnaStatusObj.onchange = () => {
+      if (lnaStatusObj.state === "granted" && $("#lna-gate").classList.contains("on")) {
+        $("#lna-gate").classList.remove("on");
+        setStatus("연결 시도 중…");
+        connect();
+      }
+    };
+  }
+}
+
+$("#lna-btn").onclick = () => {
+  // 사용자 제스처 + 활성 탭에서 요청 → 크롬이 프롬프트를 확실히 표시한다.
+  $("#lna-gate").classList.remove("on");
+  setStatus("연결 시도 중…");
+  connect();
+};
+
+/// 진입점. 권한이 필요한 상태일 때만 게이트를 세우고, 그 외에는 종전처럼 즉시 연결한다.
+async function startConnect() {
+  let st = "unknown";
+  try { st = await lnaState(); } catch (_) { st = "unknown"; }
+  if (st === "prompt" || st === "denied") { showLnaGate(st); return; }
+  connect();
 }
 // 75차 — 헬퍼 중지: WS 닫고(서버 소켓 정리 → 헬퍼 재시작 시 새 위력창 열림) 탭 닫기 시도.
 //   브라우저가 직접 연 탭은 window.close()를 거부할 수 있음 → 그땐 종료 안내 화면으로 전환.
@@ -1459,7 +1854,9 @@ function renderPickInfo(info, offline) {
         const box = el("div", "pick-reco-mon");
         if (m.spritePath) { const i = el("img"); i.src = PCH_ASSET + m.spritePath; i.alt = m.nameKo; box.appendChild(i); }
         box.appendChild(el("div", "nm", m.nameKo));
-        if (mi === t.leadIdx) box.appendChild(el("div", "pick-lead-badge", "★ 선봉"));
+        // 142차(더블) — 더블 = 4마리 추천 + 리드 페어(leadIdx/lead2Idx) "★ 리드" 2개. 싱글 = 선봉 1개(기존).
+        if (mi === t.leadIdx || (t.lead2Idx >= 0 && mi === t.lead2Idx))
+          box.appendChild(el("div", "pick-lead-badge", info.doubles ? "★ 리드" : "★ 선봉"));
         mons.appendChild(box);
       });
       card.appendChild(mons);
@@ -1564,7 +1961,7 @@ $("#pick-toggle").onclick = togglePickModal;
 $("#pick-close").onclick = togglePickModal;
 $("#pick-refresh").onclick = fetchPickInfo;
 $("#pick-modal").onclick = (e) => { if (e.target === $("#pick-modal")) togglePickModal(); };
-connect();
+startConnect();   // 160차 — 권한 상태 확인 후 연결(granted/미지원/로컬 서빙이면 즉시 connect = 종전과 동일)
 </script>
 </body>
 </html>
