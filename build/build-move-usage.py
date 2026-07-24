@@ -23,13 +23,13 @@ Champions Helper — 상대 기술 사용률(move-usage) 빌드.
   ★개별 HTML 페이지의 rank 셀은 지역폼 짝에서 값이 섞이는 소스 결함 전력 → API column_position 만 쓰고
   요약표(/pokemon-champions-*-usage/)와 교차검증(불일치 시 경고).
 
-출력 스키마(pokedb 버전과 완전 동일 — 헬퍼 exe·사이트 빌드 무변경):
-  { version, format, season, count, pokemon: { <master nameEn>: {
+출력 스키마(구버전과 키 호환 — dataDate 만 164차 신규 additive 필드, 소비처는 미지정 키 무시라 무영향):
+  { version, format, season, dataDate, count, pokemon: { <master nameEn>: {
       name, base, isForm, moves:[{en,ko,pct}], abils:[{en,ko,pct}], items:[{en,ko,pct}], rank } } }
   키 = master.json species nameEn (헬퍼 UsageKeyCandidates·사이트 usage_for 가 이 키로 조회).
 
 자동화(master.json/sprites 와 독립 — 기술 사용률만 따로 갱신):
-  .github/workflows/move-usage.yml 가 cron(24h — 소스가 매일 갱신)으로 이 스크립트를 실행 →
+  .github/workflows/move-usage.yml 가 cron(24h)으로 이 스크립트를 실행 → 매 실행 날짜별 최신 스냅샷 채택 →
   helper-data/move-usage.json + move-usage-version.json 을 커밋·push → GitHub Pages 재배포 →
   헬퍼가 켤 때 버전 확인·다운로드(즉시 반영). 개발자 수동 개입 0.
 
@@ -52,6 +52,11 @@ OUT_MOVE = "move-usage-double.json" if RULE == 1 else "move-usage.json"
 OUT_VER  = "move-usage-double-version.json" if RULE == 1 else "move-usage-version.json"
 SUMMARY_PAGE = "pokemon-champions-doubles-usage" if RULE == 1 else "pokemon-champions-singles-usage"
 TOP_N  = 12                 # 위력칩 4개 + 편집 드롭다운(5위~) 여유분
+# 164차 — 날짜별 daily 스냅샷 N일 요청(?days=N) 후 "최신 + rows 있는" 스냅샷 채택. 종전 "Current" 집계는
+#   깨진 값(메가종 메가스톤 과소 등 소스 계산오류)에 5~6일 정체하던 전력 → 항상 날짜박힌 최신으로.
+#   ★품질판정 안 함(rows 유무만 봄) — 값기반 판정은 평평종(도구 골고루→합 낮음이 정상)·신규종(변동성 큼)을
+#   오탐해 정상 데이터를 죽인다. 소스 glitch 날은 1일 노출 후 다음 스냅샷이 자동치유. N=7=저사용종 빈 최근일 여유창.
+DAYS   = 7
 UA     = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) PCH-move-usage/1.0"}
 DELAY  = 0.35               # 정중한 호출 간격(초)
 
@@ -210,6 +215,7 @@ def main():
 
     out, slug2key = {}, {}
     miss, miss_ab, miss_it, empty = {}, {}, {}, 0
+    snap_dates = {}   # 164차 — 채택한 daily 스냅샷 날짜 분포(dataDate 산출·로그용)
     for n, slug in enumerate(catalog, 1):
         # 종족 해석: SLUG2MASTER 테이블 → 없으면 정규화 직결(norm(slug) == norm(nameEn)).
         name_en = SLUG2MASTER.get(slug)
@@ -220,11 +226,19 @@ def main():
         name_en = sp["nameEn"]
 
         try:
-            data = fetch(f"{API}/api/battle/{FORMAT}/{slug}")
+            data = fetch(f"{API}/api/battle/{FORMAT}/{slug}?days={DAYS}")
         except Exception as e:  # noqa: BLE001 — 개별 종족 실패는 건너뜀
             print(f"[skip] {slug} {name_en}: {e}", file=sys.stderr)
             data = {}
-        rows = data.get("rows", [])
+        # daily-newest(164차): daily[] = 최신 날짜순 → rows 있는 첫(=최신) 스냅샷 채택(품질판정 없음).
+        #   daily 키 없으면 구 top-level rows 폴백(엔드포인트 응답형 호환).
+        snaps = data.get("daily") or []
+        picked = next((d for d in snaps if d.get("rows")), None)
+        if picked is None and data.get("rows"):
+            picked = {"rows": data["rows"], "date": None}
+        rows = (picked or {}).get("rows", [])
+        if picked and picked.get("date"):
+            snap_dates[picked["date"]] = snap_dates.get(picked["date"], 0) + 1
 
         # 기술 채용률(내림차순 rank). master 에 없는 이름은 miss 경고만.
         moves = []
@@ -334,8 +348,9 @@ def main():
 
     # 4) 출력 + 버전(epoch 정수, 단조증가 → 헬퍼가 정수 비교로 갱신 판단).
     version = int(time.time())
+    data_date = max(snap_dates, key=snap_dates.get) if snap_dates else None  # 최빈 스냅샷 날짜(≈최신)
     result = {"version": version, "format": FORMAT, "season": season,
-              "count": len(out), "pokemon": out}
+              "dataDate": data_date, "count": len(out), "pokemon": out}
     os.makedirs(HELPER, exist_ok=True)
     with open(os.path.join(HELPER, OUT_MOVE), "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, separators=(",", ":"))
@@ -345,6 +360,7 @@ def main():
     abil_n = sum(1 for v in out.values() if v.get("abils"))
     item_n = sum(1 for v in out.values() if v.get("items"))
     print(f"[done] pokemon: {len(out)}  version: {version}  season: {season!r}  기술없음: {empty}종  특성보유: {abil_n}종  도구보유: {item_n}종", file=sys.stderr)
+    print(f"[daily] 채택 스냅샷 날짜 분포: {dict(sorted(snap_dates.items()))}  → dataDate={data_date}", file=sys.stderr)
     if miss:
         print(f"[miss][WARN] master 에 없는 기술명: {sorted(miss)} — master.json moves 보강 필요", file=sys.stderr)
     if miss_ab:
