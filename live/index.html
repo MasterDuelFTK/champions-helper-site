@@ -173,7 +173,10 @@
 
   /* 스피드 칩 */
   .spline { display: flex; gap: 2px; margin-top: 2px; }
-  .spchip { font-size: 10px; font-weight: 700; color: #181818; padding: 0 4px; border-radius: 3px; min-width: 22px; text-align: center; }
+  /* 170차 — 추정/시뮬 테두리(파란·노란)를 얹어도 글씨 높이가 안 밀리도록 *모든* 칩에 투명 2px 테두리를 기본 부여.
+     (테두리를 한 칩에만 추가하면 그 칩만 박스가 2px 커져 글씨가 아래로 내려간다 — 사용자 지적.) */
+  .spchip { font-size: 10px; font-weight: 700; color: #181818; padding: 0 4px; border-radius: 3px; min-width: 22px; text-align: center;
+    border: 2px solid transparent; box-sizing: border-box; }
   .myspchip { font-size: 11px; font-weight: 700; color: #fff; background: var(--accent); padding: 1px 8px; border-radius: 3px; display: inline-block; }
   .fhdr { font-size: 9px; font-weight: 700; color: #b0b0b0; margin-top: 1px; }
 
@@ -238,7 +241,10 @@
   .btn.sim-reset:hover { background: #C84242; }
   .btn.sim-reset:active { background: #952626; }
   /* 지닌도구 드롭다운(헤더 클릭 펼침) */
-  .dropdown { position: relative; max-width: 200px; }
+  .dropdown { max-width: 200px; }
+  /* 170차 — 펼침 목록의 기준점. 안내문(.conf-note)을 포함한 .dropdown 기준이면 목록이 안내문 아래로 떨어져 뜬다
+     → 헤더만 감싸는 anchor를 기준으로 삼아 헤더 바로 아래에 붙인다(사용자 지적). */
+  .dd-anchor { position: relative; }
   .dd-header {
     width: 100%; display: flex; align-items: center; justify-content: space-between;
     font-size: 12px; font-weight: 700; color: var(--txt); background: #353a44;
@@ -280,6 +286,8 @@
   /* 「추정」(채용률 1위 자동값) = 흐리게 / 「확정」(사용자 지정) = 또렷 — 사용자 채택 시각 구분 */
   .dd-header.est, .ab-fixed.est { opacity: 0.62; font-style: italic; }
   .dd-header.conf { border-color: #4aa3ff; color: #cfe6ff; }
+  /* 170차 — 시뮬에서 직접 고른 값(노란테 = 위력칩 노란 테두리와 같은 의미) */
+  .dd-header.simset { border-color: #ffee00; color: #fff3a0; }
   .conf-note { font-size: 10px; color: var(--muted); line-height: 1.35; margin-top: 3px; white-space: normal; }
   .dd-pct { font-size: 10px; color: var(--muted); margin-left: 4px; }
 
@@ -300,6 +308,10 @@
     width: 140px; font-size: 11px; font-weight: 700; color: var(--txt);
     background: #2a2e36; border: 1px solid var(--accent); border-radius: 3px; padding: 1px 3px;
   }
+  /* 170차 — 특성 드롭다운 맨 아래 "직접 입력" 행(스킬스왑 등 전 특성 지정). 항목처럼 hover 강조는 안 준다. */
+  .dd-opt.dd-input { cursor: default; padding: 4px 6px; }
+  .dd-opt.dd-input:hover { background: transparent; }
+  .ab-input { width: 100%; box-sizing: border-box; }
   /* 122차 — 상단 6슬롯 이름 클릭 → 종족 교체(오인식 수동 정정). 내 시점(상대 파티)만. */
   .slot-name.editable { cursor: pointer; text-decoration: underline dotted rgba(255,255,255,0.4); text-underline-offset: 2px; }
   .slot-name.editable:hover { color: #ffd54f; }
@@ -430,7 +442,7 @@
 <body>
   <div id="bar">
     <span id="status">로컬 헬퍼 연결 대기…</span>
-    <span id="version">v0.160</span>
+    <span id="version">v0.170</span>
   </div>
   <!-- 160차 — LNA 권한 게이트(공개 도메인 → 로컬 헬퍼 연결에 크롬 권한 필요). 기본 숨김, 내용은 showLnaGate가 채움. -->
   <div id="lna-gate">
@@ -487,6 +499,7 @@
   </footer>
   <datalist id="oppMoveList"></datalist>   <!-- 113차 — 상대 기술 편집 드롭다운 후보(사용률 내림차순) -->
   <datalist id="oppSpeciesList"></datalist>   <!-- 122차 — 상단 6슬롯 종족 교체 자동완성 후보(/api/master/species, 메가폼 제외) -->
+  <datalist id="abilityList"></datalist>      <!-- 170차 — 특성 직접입력 자동완성(/api/master/abilities, 전 특성 1회 로드) -->
 
 <script>
 "use strict";
@@ -498,6 +511,12 @@ let oppAbilityOpen = false; // 82차 — 상대 특성 드롭다운 펼침 상�
 let confItemOpen = false;   // 147차 — 파란테(현재 상대) 확정 도구 드롭다운 펼침 상태
 let confAbilOpen = false;   // 147차 — 파란테 확정 특성 드롭다운 펼침 상태
 let confMyItemOpen = false; // 160차 — 내 확정 도구 드롭다운 펼침 상태
+let confMyAbilOpen = false; // 170차 — 내 확정 특성 드롭다운 펼침 상태
+let confNatOpen = false;    // 170차 — 상대 확정 성격 드롭다운 펼침 상태
+let simNatOpen = false;     // 170차 — 상대 시뮬 성격 드롭다운 펼침 상태
+let simSpreadOpen = false;  // 170차 — 상대 시뮬 노력치 드롭다운 펼침 상태
+let confSpreadOpen = false; // 170차 — 상대 확정 노력치 드롭다운 펼침 상태
+let mySimAbilOpen = false;  // 170차 — 내 시뮬 특성 드롭다운 펼침 상태
 let oppEditSlot = null;     // 113차 — 상대 시점 기술 편집 중인 슬롯(0~3, null=없음)
 let oppNameEditIdx = null;  // 122차 — 상단 6슬롯 종족 교체 편집 중인 슬롯(0~5, null=없음). 내 시점만.
 let showRealDamage = false; // 113차 — "실제 수치" 토글(% ↔ 실 데미지). 내/상대 위력 위력칩 공통. 하단 중앙 고정 버튼.
@@ -514,6 +533,9 @@ const MY_ITEM_GROUPS = [
   { label: "위력", items: ["생명의구슬", "달인의띠", "힘의머리띠", "박식안경", "구애머리띠", "구애안경", "전기구슬"] },
   { label: "스피드", items: ["구애스카프", "검은철구"] },
   { label: "타입강화 ×1.2", items: ["실크스카프", "목탄", "신비의물방울", "기적의씨", "자석", "부드러운모래", "용의이빨", "검은띠", "독바늘", "예리한부리", "휘어진스푼", "은빛가루", "딱딱한돌", "저주의부적", "검은안경", "금속코트", "녹지않는얼음", "요정의깃털"] },
+  // 170차(feedback) — 반감열매 18종. 그 타입 기술을 "효과 굉장"으로 맞을 때 받는 데미지 ×0.5(카리열매=노말은 굉장 조건 없음).
+  //   계산은 ItemRegistry.ResistBerries + DamageCalculator 단일 경로(내/상대 시점·시뮬·확정·채용률 추정 전부 자동).
+  { label: "반감열매 ×0.5", items: ["오카열매", "꼬시개열매", "초나열매", "린드열매", "플카열매", "로플열매", "으름열매", "슈캐열매", "바코열매", "야파열매", "리체열매", "루미열매", "수불열매", "하반열매", "마코열매", "바리비열매", "로셀열매", "카리열매"] },
 ];
 // 66차 가정 도구(107차 검은철구=스피드½ 추가) 중 방어 전용 — 구애스카프/검은철구는 스피드 그룹에 이미 있어 중복 제외.
 const OPP_ITEMS_DEF = ["돌격조끼", "진화의휘석"];
@@ -606,10 +628,12 @@ function renderSample(s) {
   b.style.background = LABEL_BG[s.color] || "#fff";
   if (s.guaranteedKo) b.style.fontWeight = "bold";
   if (s.simulated) b.style.border = "2px solid #FFEE00";          // 시뮬 노력치/성격 반영 (KO보다 우선)
+  else if (s.estimated) b.style.border = "2px solid #4AA3FF";     // 170차 — 추정·확정 노력치가 가리키는 칸(파란)
   else if (s.guaranteedKo) b.style.border = "2px solid #D22020";  // 확정 1타
   else if (s.canKo) b.style.border = "1.5px solid #E08000";       // 난수 1타
   else b.style.border = "1px solid rgba(0,0,0,0.375)";
-  b.title = (s.simulated ? s.bulkName + " (시뮬)" : s.bulkName) + " · " + txt;
+  b.title = (s.simulated ? s.bulkName + " (시뮬 노력치)"
+    : s.estimated ? s.bulkName + " (추정/확정 노력치)" : s.bulkName) + " · " + txt;
   return b;
 }
 
@@ -821,9 +845,20 @@ function fillOppMoveList(cands) {
 function spChip(v, bg, tip) { const c = el("span", "spchip", v); c.style.background = bg; c.title = tip + " · " + v; return c; }
 function speedLine(s) {
   const l = el("div", "spline");
-  l.appendChild(spChip(s.natureMax, "#FFC8DC", "최속 (성격+풀노력)"));
-  l.appendChild(spChip(s.max, "#ECECEC", "풀노력"));
-  l.appendChild(spChip(s.min, "#C8F0C0", "무보정·무노력"));
+  const chips = [
+    spChip(s.natureMax, "#FFC8DC", "최속 (성격+풀노력)"),
+    spChip(s.max, "#ECECEC", "풀노력"),
+    spChip(s.min, "#C8F0C0", "무보정·무노력"),
+  ];
+  // 170차(feedback) — 추정/시뮬 스피드 노력치·성격이 가리키는 칩에 테두리(노란=시뮬 / 파란=추정·확정).
+  //   무보정 칩은 추정 노력치·성격이 얹힌 값일 수 있다(성격은 무보정 칸에만 반영 — 사용자 지시).
+  const bi = { NatureMax: 0, Max: 1, Min: 2 }[s.border];
+  if (bi != null) {
+    // ★색만 바꾼다 — 테두리 자리(투명 2px)는 .spchip 기본값으로 모든 칩이 이미 갖고 있어 글씨가 안 밀린다.
+    chips[bi].style.borderColor = s.borderIsSim ? "#FFEE00" : "#4AA3FF";
+    if (s.estimateTip) chips[bi].title = s.estimateTip + " · " + chips[bi].title;
+  }
+  chips.forEach((c) => l.appendChild(c));
   return l;
 }
 // 113차 — 상대 시점 6슬롯(내 파티): 내 실제 스피드 1개 칩(추정 3단계 대신).
@@ -1043,44 +1078,63 @@ function adjRow(label, valueText, onMinus, onPlus, minusLabel, plusLabel, valueC
 // 74차 — 상대 시뮬 지닌도구 드롭다운(헤더 클릭 펼침/접힘). 항목 클릭 → POST + 접힘.
 // 147차 — 3층 규약(내 도구 시뮬 107차와 동일): null=미지정(확정/추정 도구를 그대로 따름) / "none"=도구 없음 / 그 외=지정.
 //   덕분에 파란테 → 노란테(시뮬)로 켜도 도구 가정이 이어져 위력이 튀지 않는다.
+//   170차(feedback) — 확정 패널과 똑같은 모양으로: 현재 적용값(시뮬 지정 > 확정 > 채용률 1위) + 채용률% 표시.
+//   종전엔 미지정이면 "확정/추정 도구 따름"이라고만 떠서 그 값이 뭔지 알 수 없었다. 시뮬 지정 시 노란테.
 function oppItemDropdown(m) {
   const wrap = el("div", "dropdown");
-  const cur = m.oppSimItemKo;
-  const selLabel = cur == null ? "확정/추정 도구 따름" : (cur === "none" ? "없음 (도구 없음)" : cur);
-  const header = el("button", "dd-header");
-  header.appendChild(el("span", "dd-label", selLabel));
+  const raw = m.oppSimItemKo;                 // 시뮬 지정값(null=미지정) — 목록 ✓ 표시용
+  const eff = m.oppSimItemEffKo;              // 실제 적용값
+  const isSet = !!m.oppSimItemSet;
+  const pct = m.oppSimItemPct || 0;
+  const choices = m.oppSimItemChoices || [];
+  const label = eff == null ? "도구 정보 없음" : (eff === "none" ? "없음 (도구 없음)" : eff);
+  const header = el("button", "dd-header " + (isSet ? "simset" : "est"));
+  header.appendChild(el("span", "dd-label", label));
+  if (!isSet && pct > 0) header.appendChild(el("span", "dd-pct", "추정 " + pct.toFixed(1) + "%"));
   header.appendChild(el("span", "dd-arrow", oppItemOpen ? "▲" : "▼"));
   header.onclick = () => { oppItemOpen = !oppItemOpen; if (lastModel) render(lastModel); };
-  wrap.appendChild(header);
+  const ddAnchor = el("div", "dd-anchor");
+  ddAnchor.appendChild(header);
+  wrap.appendChild(ddAnchor);
   if (oppItemOpen) {
     const list = el("div", "dd-list");
-    const addOpt = (label, itemKo, isCur) => {
-      const opt = el("div", "dd-opt" + (isCur ? " sel" : ""), label + (isCur ? "  ✓" : ""));
+    const addOpt = (label, itemKo, isCur, pctv) => {
+      const opt = el("div", "dd-opt" + (isCur ? " sel" : ""));
+      const nm = el("div", "ab-name", label + (isCur ? "  ✓" : ""));
+      if (pctv > 0) nm.appendChild(el("span", "dd-pct", pctv.toFixed(1) + "%"));
+      opt.appendChild(nm);
       opt.onclick = () => { oppItemOpen = false; sim("/api/sim/opp/item", { itemKo }); };
       list.appendChild(opt);
     };
-    addOpt("확정/추정 도구 따름", "", cur == null);
-    addOpt("없음 (도구 없음)", "none", cur === "none");
+    if (isSet) addOpt("시뮬 해제 (확정/추정 도구로)", "", false);
+    addOpt("없음 (도구 없음)", "none", raw === "none");
+    choices.forEach((c) => addOpt(c.ko, c.ko, raw === c.ko, c.pct));   // 채용률 목록(내림차순)
     // 149차 — 시점 무관 전체 목록(공격 도구 + 방어 도구). 114차의 시점별 분기(persp면 공격도구/아니면 방어도구 5종)는
     //   폐기 — 상대 도구는 시점 공유 단일 상태라 어느 탭에서 고르든 양 시점에 반영된다(OPP_ITEM_GROUPS 주석).
     OPP_ITEM_GROUPS.forEach((g) => {
       list.appendChild(el("div", "dd-grp", g.label));
-      g.items.forEach((it) => addOpt(it, it, cur === it));
+      g.items.forEach((it) => { if (!choices.some((c) => c.ko === it)) addOpt(it, it, raw === it); });
     });
-    wrap.appendChild(list);
+    ddAnchor.appendChild(list);
   }
+  wrap.appendChild(el("div", "conf-note", isSet ? "시뮬 지정 — 시뮬 끄면 사라짐" : "확정/추정 도구 따름 — 고르면 시뮬"));
   return wrap;
 }
-// 107차 — 내 시뮬 지닌도구 드롭다운(탁쳐떨구기/트릭 대응). "시뮬 해제"=빌더 도구 복귀, "없음"=도구 제거, 그 외=교체.
+// 107차 — 내 시뮬 지닌도구 드롭다운(탁쳐떨구기/트릭 대응). "시뮬 해제"=확정/빌더 도구 복귀, "없음"=도구 제거, 그 외=교체.
+//   170차(feedback) — 상대 패널과 동일하게 **지금 장착 중인 도구**(시뮬 > 확정 > 빌더 등록)를 헤더에 그대로 띄운다.
 function myItemDropdown(m) {
   const wrap = el("div", "dropdown");
-  const cur = m.mySimItemKo; // null=미시뮬(실제 도구), "none"=제거, else=도구명
-  const selLabel = cur == null ? "실제 도구" : (cur === "none" ? "없음 (제거)" : cur);
-  const header = el("button", "dd-header");
-  header.appendChild(el("span", "dd-label", selLabel));
+  const cur = m.mySimItemKo;          // 시뮬 지정값(✓ 표시용). null=미지정
+  const eff = m.mySimItemEffKo;       // 실제 적용 도구
+  const isSet = !!m.mySimItemSet;
+  const label = eff == null ? "없음 (도구 미등록)" : (eff === "none" ? "없음 (도구 없음)" : eff);
+  const header = el("button", "dd-header " + (isSet ? "simset" : "est"));
+  header.appendChild(el("span", "dd-label", label));
   header.appendChild(el("span", "dd-arrow", myItemOpen ? "▲" : "▼"));
   header.onclick = () => { myItemOpen = !myItemOpen; if (lastModel) render(lastModel); };
-  wrap.appendChild(header);
+  const ddAnchor = el("div", "dd-anchor");
+  ddAnchor.appendChild(header);
+  wrap.appendChild(ddAnchor);
   if (myItemOpen) {
     const list = el("div", "dd-list");
     const addOpt = (label, itemKo, isCur) => {
@@ -1088,55 +1142,92 @@ function myItemDropdown(m) {
       opt.onclick = () => { myItemOpen = false; sim("/api/sim/my/item", { itemKo }); };
       list.appendChild(opt);
     };
-    addOpt("시뮬 해제 (실제 도구)", "", cur == null);
+    if (isSet) addOpt("시뮬 해제 (확정/등록 도구로)", "", false);
     addOpt("없음 (도구 제거)", "none", cur === "none");
     MY_ITEM_GROUPS.forEach((g) => {
       list.appendChild(el("div", "dd-grp", g.label));
       g.items.forEach((it) => addOpt(it, it, cur === it));
     });
-    wrap.appendChild(list);
+    ddAnchor.appendChild(list);
   }
+  wrap.appendChild(el("div", "conf-note", isSet ? "시뮬 지정 — 시뮬 끄면 사라짐" : "확정/등록 도구 따름 — 고르면 시뮬"));
   return wrap;
 }
-// 82차 — 상대 시뮬 특성 드롭다운. 메가 폼 = 특성 1개 자동(고정 표시) / 비메가 = 후보 드롭다운(각 항목 이름+효과설명).
-//   항목 클릭 → POST /api/sim/opp/ability. "선택 안 함" = 미반영(정책대로). 헤더 아래 현재 선택 효과설명 표시.
+// 170차(feedback) — 전 특성 자동완성 목록(#abilityList) 1회 로드. 스킬스왑/트레이스로 아무 특성이나 지정할 수 있어야
+//   해서 종족 보유 특성 드롭다운만으론 부족 → "직접 입력" 칸의 후보로 전 특성을 깔아둔다(≈300개, 1회 fetch 후 캐시).
+let abilityListLoaded = false;
+function ensureAbilityList() {
+  if (abilityListLoaded) return;
+  abilityListLoaded = true;
+  fetch(PCH_HTTP + "/api/master/abilities")
+    .then((r) => r.json())
+    .then((list) => {
+      const dl = $("#abilityList");
+      if (!dl) return;
+      dl.innerHTML = (list || []).map((a) => `<option value="${a.ko}"></option>`).join("");
+    })
+    .catch(() => { abilityListLoaded = false; });   // 실패 시 다음 렌더에 재시도(드롭다운 선택은 그대로 동작)
+}
+// 170차(feedback) — 특성 드롭다운 "직접 입력" 행. 드롭다운 후보(추정/보유 특성) 아래에 붙어 전 특성을 입력받는다.
+//   Enter 또는 datalist 항목 선택(change) = 커밋. 상대 기술 편집(oppRow)과 같은 UX.
+function abilityInputRow(placeholder, onCommit) {
+  ensureAbilityList();
+  const row = el("div", "dd-opt dd-input");
+  const inp = el("input", "opp-move-input ab-input");
+  inp.setAttribute("list", "abilityList");
+  inp.placeholder = placeholder;
+  inp.onkeydown = (e) => {
+    e.stopPropagation();
+    if (e.key === "Enter") { e.preventDefault(); const v = inp.value.trim(); if (v) onCommit(v); }
+  };
+  inp.onchange = () => { const v = inp.value.trim(); if (v) onCommit(v); };   // datalist 항목 클릭 선택
+  inp.onclick = (e) => e.stopPropagation();
+  row.onclick = (e) => e.stopPropagation();
+  row.appendChild(inp);
+  return row;
+}
+// 82차 — 상대 시뮬 특성 드롭다운(후보 = 그 폼 보유 특성, 각 항목 이름+효과설명). 항목 클릭 → POST /api/sim/opp/ability.
+//   170차 — 메가 "자동 고정"(표시만) 폐기: 메가 특성도 스킬스왑으로 바뀌므로 메가도 지정 가능 + 직접 입력 행 추가.
+//   170차(feedback) — 확정 패널과 같은 모양: 현재 적용 특성(시뮬 > 확정 > 채용률 1위) + 채용률%·효과설명.
 function oppAbilityDropdown(m) {
   const choices = m.oppSimAbilityChoices || [];
   const wrap = el("div", "dropdown");
-  // 메가 등 자동 고정 — 드롭다운 대신 표시만
-  if (m.oppSimAbilityLocked) {
-    const sel = choices[0];
-    const box = el("div", "ab-fixed");
-    const nm = el("div", "ab-name", (sel ? sel.ko : (m.oppSimAbilityKo || "")) + "  (자동)");
-    // 83차 — 인라인 설명줄은 숨김(세로 스크롤 방지). 159차 — 대신 hover 툴팁으로 효과 노출(확정 패널 메가와 파리티).
-    if (sel && sel.desc) nm.title = sel.desc;
-    box.appendChild(nm);
-    wrap.appendChild(box);
-    return wrap;
-  }
-  const curKo = m.oppSimAbilityKo || null;
-  const header = el("button", "dd-header");
-  // 147차 — 미지정이면 확정/추정 특성이 그대로 계산에 쓰인다("선택 안 함"=미반영이던 종전 의미 변경).
-  header.appendChild(el("span", "dd-label", curKo || "확정/추정 특성 따름"));
+  const raw = m.oppSimAbilityKo || null;      // 시뮬 지정값(✓ 표시용)
+  const eff = m.oppSimAbilityEffKo || null;   // 실제 적용값
+  const isSet = !!m.oppSimAbilitySet;
+  const pct = m.oppSimAbilityPct || 0;
+  const post = (v) => { oppAbilityOpen = false; sim("/api/sim/opp/ability", { abilityKo: v }); };
+  const header = el("button", "dd-header " + (isSet ? "simset" : "est"));
+  if (m.oppSimAbilityEffDesc) header.title = m.oppSimAbilityEffDesc;
+  header.appendChild(el("span", "dd-label", eff || "특성 정보 없음"));
+  if (!isSet && pct > 0) header.appendChild(el("span", "dd-pct", "추정 " + pct.toFixed(1) + "%"));
   header.appendChild(el("span", "dd-arrow", oppAbilityOpen ? "▲" : "▼"));
   header.onclick = () => { oppAbilityOpen = !oppAbilityOpen; if (lastModel) render(lastModel); };
-  wrap.appendChild(header);
+  const ddAnchor = el("div", "dd-anchor");
+  ddAnchor.appendChild(header);
+  wrap.appendChild(ddAnchor);
   // 83차 — 접힌 상태(선택만)엔 효과설명 숨김(세로 스크롤 방지). 설명은 펼친 드롭다운 항목에서만.
   if (oppAbilityOpen) {
     const list = el("div", "dd-list");
-    const none = el("div", "dd-opt" + (!curKo ? " sel" : ""), "확정/추정 특성 따름" + (!curKo ? "  ✓" : ""));
-    none.onclick = () => { oppAbilityOpen = false; sim("/api/sim/opp/ability", { abilityKo: "" }); };
-    list.appendChild(none);
+    if (isSet) {
+      const none = el("div", "dd-opt", "시뮬 해제 (확정/추정 특성으로)");
+      none.onclick = () => post("");
+      list.appendChild(none);
+    }
     choices.forEach((c) => {
-      const cur = curKo === c.ko;
+      const cur = raw === c.ko;
       const opt = el("div", "dd-opt" + (cur ? " sel" : ""));
-      opt.appendChild(el("div", "ab-name", c.ko + (cur ? "  ✓" : "")));
+      const nm = el("div", "ab-name", c.ko + (cur ? "  ✓" : ""));
+      if (c.pct > 0) nm.appendChild(el("span", "dd-pct", c.pct.toFixed(1) + "%"));
+      opt.appendChild(nm);
       if (c.desc) opt.appendChild(el("div", "ab-desc", c.desc));
-      opt.onclick = () => { oppAbilityOpen = false; sim("/api/sim/opp/ability", { abilityKo: c.ko }); };
+      opt.onclick = () => post(c.ko);
       list.appendChild(opt);
     });
-    wrap.appendChild(list);
+    list.appendChild(abilityInputRow("직접 입력 (전체 특성)", post));
+    ddAnchor.appendChild(list);
   }
+  wrap.appendChild(el("div", "conf-note", isSet ? "시뮬 지정 — 시뮬 끄면 사라짐" : "확정/추정 특성 따름 — 고르면 시뮬"));
   return wrap;
 }
 function simHead(label, canMega, isMega, megaPath) {
@@ -1163,11 +1254,59 @@ function oppSimHead(label, forms, activeIndex) {
   });
   return h;
 }
+// 170차(feedback) — 내 시뮬 특성 드롭다운(상대 시뮬 특성 oppAbilityDropdown의 내 측 판).
+//   미지정 = "확정/등록 특성 따름"(3층 아래로) — 파란테 확정에서 노란테로 켜도 위력이 안 튄다(147차 규약과 동일).
+//   170차(feedback) — 헤더엔 **지금 적용 중인 특성**(시뮬 > 확정 > 빌더 등록)을 그대로 띄운다(상대 패널과 동일).
+function mySimAbilityDropdown(m) {
+  const wrap = el("div", "dropdown");
+  const curKo = m.mySimAbilityKo || null;      // 시뮬 지정값(✓ 표시용)
+  const eff = m.mySimAbilityEffKo || null;     // 실제 적용 특성
+  const isSet = !!m.mySimAbilitySet;
+  const choices = m.mySimAbilityChoices || [];
+  const post = (v) => { mySimAbilOpen = false; sim("/api/sim/my/ability", { abilityKo: v }); };
+  const header = el("button", "dd-header " + (isSet ? "simset" : "est"));
+  if (m.mySimAbilityEffDesc) header.title = m.mySimAbilityEffDesc;
+  header.appendChild(el("span", "dd-label", eff || "특성 없음"));
+  header.appendChild(el("span", "dd-arrow", mySimAbilOpen ? "▲" : "▼"));
+  header.onclick = () => { mySimAbilOpen = !mySimAbilOpen; if (lastModel) render(lastModel); };
+  const ddAnchor = el("div", "dd-anchor");
+  ddAnchor.appendChild(header);
+  wrap.appendChild(ddAnchor);
+  if (mySimAbilOpen) {
+    const list = el("div", "dd-list");
+    if (isSet) {
+      const none = el("div", "dd-opt", "시뮬 해제 (확정/등록 특성으로)");
+      none.onclick = () => post("");
+      list.appendChild(none);
+    }
+    choices.forEach((c) => {
+      const cur = curKo === c.ko;
+      const opt = el("div", "dd-opt" + (cur ? " sel" : ""));
+      opt.appendChild(el("div", "ab-name", c.ko + (cur ? "  ✓" : "")));
+      if (c.desc) opt.appendChild(el("div", "ab-desc", c.desc));
+      opt.onclick = () => post(c.ko);
+      list.appendChild(opt);
+    });
+    list.appendChild(abilityInputRow("직접 입력 (전체 특성)", post));
+    ddAnchor.appendChild(list);
+  }
+  wrap.appendChild(el("div", "conf-note", isSet ? "시뮬 지정 — 시뮬 끄면 사라짐" : "확정/등록 특성 따름 — 고르면 시뮬"));
+  return wrap;
+}
 function mySimPanel(m) {
   const p = el("div", "sim-panel");
   p.appendChild(simHead("내 시뮬: " + (m.myName || ""), m.simCanMega, m.simMega, "/api/sim/my/mega"));
-  p.appendChild(el("div", "sim-sub", "지닌도구"));
-  p.appendChild(myItemDropdown(m));
+  // 170차 — 지닌도구 + 특성 수평 2칸(상대 시뮬 패널과 동일 레이아웃, 세로 스크롤 방지).
+  const cols = el("div", "sim-cols");
+  const itemCol = el("div", "sim-col");
+  itemCol.appendChild(el("div", "sim-sub", "지닌도구"));
+  itemCol.appendChild(myItemDropdown(m));
+  cols.appendChild(itemCol);
+  const abCol = el("div", "sim-col");
+  abCol.appendChild(el("div", "sim-sub", "특성"));
+  abCol.appendChild(mySimAbilityDropdown(m));
+  cols.appendChild(abCol);
+  p.appendChild(cols);
   // 127차 — 상태이상 옆 빈 공간에 "기타 배수"(총대장 등 수동 보정) 수평 배치.
   p.appendChild(statusMultRow(m, "my"));
   p.appendChild(el("div", "sim-sub", "랭크"));
@@ -1179,6 +1318,54 @@ function mySimPanel(m) {
   });
   return p;
 }
+// 170차(feedback) — 상대 시뮬 성격·노력치 드롭다운. 확정 패널(confDropdown)의 시뮬판:
+//   미지정이면 추정/확정값을 흐리게(+채용률%) 그대로 보여주고, 고르면 노란 또렷(시뮬 지정).
+function oppSimBuildDropdown(m, kind) {
+  const isNat = kind === "nature";
+  const wrap = el("div", "dropdown");
+  const cur = isNat ? m.oppSimNatureKo : m.oppSimSpreadText;
+  const isSet = !!(isNat ? m.oppSimNatureSet : m.oppSimSpreadSet);
+  const pct = (isNat ? m.oppSimNaturePct : m.oppSimSpreadPct) || 0;
+  const choices = (isNat ? m.oppSimNatureChoices : m.oppSimSpreadChoices) || [];
+  const open = isNat ? simNatOpen : simSpreadOpen;
+  const post = (v) => {
+    simNatOpen = simSpreadOpen = false;
+    if (isNat) sim("/api/sim/opp/nature-set", { natureKo: v });
+    else sim("/api/sim/opp/spread-set", { ev: v });
+  };
+  const header = el("button", "dd-header " + (isSet ? "simset" : "est"));
+  if (!isNat) header.title = "노력치 (HABCDS = HP/공/방/특공/특방/스피드) — 이 배분이 가리키는 위력칩에 테두리";
+  header.appendChild(el("span", "dd-label" + (isNat ? "" : " ev"), cur || (isNat ? "성격 정보 없음" : "노력치 정보 없음")));
+  if (!isSet && pct > 0) header.appendChild(el("span", "dd-pct", "추정 " + pct.toFixed(1) + "%"));
+  header.appendChild(el("span", "dd-arrow", open ? "▲" : "▼"));
+  header.onclick = () => {
+    const was = open; simNatOpen = simSpreadOpen = false;
+    if (!was) { if (isNat) simNatOpen = true; else simSpreadOpen = true; }
+    if (lastModel) render(lastModel);
+  };
+  const ddAnchor = el("div", "dd-anchor");
+  ddAnchor.appendChild(header);
+  wrap.appendChild(ddAnchor);
+  if (open) {
+    const list = el("div", "dd-list");
+    list.dataset.maxItems = "5";   // 확정 패널과 동일 — 5개만 보이고 나머지는 목록 안에서 스크롤
+    const addOpt = (labelText, val, isCur, desc, pctv) => {
+      const opt = el("div", "dd-opt" + (isCur ? " sel" : ""));
+      const nm = el("div", "ab-name", labelText + (isCur ? "  ✓" : ""));
+      if (pctv > 0) nm.appendChild(el("span", "dd-pct", pctv.toFixed(1) + "%"));
+      opt.appendChild(nm);
+      if (desc) opt.appendChild(el("div", "ab-desc", desc));
+      opt.onclick = () => post(val);
+      list.appendChild(opt);
+    };
+    if (isSet) addOpt("시뮬 해제 (추정/확정값으로)", isNat ? "" : null, false);
+    if (isNat) choices.forEach((c) => addOpt(c.ko, c.ko, isSet && cur === c.ko, c.desc, c.pct));
+    else choices.forEach((c) => addOpt(c.text, c.ev, isSet && cur === c.text, null, c.pct));
+    ddAnchor.appendChild(list);
+  }
+  wrap.appendChild(el("div", "conf-note", isSet ? "시뮬 지정 — 시뮬 끄면 사라짐" : "추정/확정값 따름 — 고르면 시뮬"));
+  return wrap;
+}
 function oppSimPanel(m) {
   const p = el("div", "sim-panel");
   // 149차 — 지닌도구는 시점 무관 전체 목록(114차의 시점별 분기 폐기, oppItemDropdown 주석). 랭크/노력치/성격도 시점 무관 전체 유지(114차).
@@ -1189,38 +1376,27 @@ function oppSimPanel(m) {
   itemCol.appendChild(el("div", "sim-sub", "지닌도구"));
   itemCol.appendChild(oppItemDropdown(m));
   cols.appendChild(itemCol);
-  // 82차 — 특성 (메가=자동 고정 / 비메가=후보 드롭다운, 효과설명 표시). 후보 있을 때만 둘째 칸.
-  if ((m.oppSimAbilityChoices && m.oppSimAbilityChoices.length) || m.oppSimAbilityLocked) {
-    const abCol = el("div", "sim-col");
-    abCol.appendChild(el("div", "sim-sub", "특성"));
-    abCol.appendChild(oppAbilityDropdown(m));
-    cols.appendChild(abCol);
-  }
+  // 82차 — 특성 드롭다운(효과설명 표시). 170차 — 확정 패널과 같은 4칸 구성이라 항상 표시(후보 없어도 직접입력 가능).
+  const abCol = el("div", "sim-col");
+  abCol.appendChild(el("div", "sim-sub", "특성"));
+  abCol.appendChild(oppAbilityDropdown(m));
+  cols.appendChild(abCol);
   p.appendChild(cols);
   // 98차(feedback#3) — 상태이상 시뮬(hex/베노쇼크/가시천벌 등 자동 위력 + 마비 스피드½).
   // 127차 — 상태이상 옆 빈 공간에 "기타 배수"(상대 총대장 등 수동 보정) 수평 배치.
   p.appendChild(statusMultRow(m, "opp"));
-  // 노력치 — feedback#3: 내 위력 계산엔 상대 HP/방어/특방만 영향(공/특공/스피드는 내→상대 데미지 무관) → 그 3개만 표시.
-  p.appendChild(el("div", "sim-sub", "노력치 (±4 · 스탯≤32 · 합≤66)"));
-  [0, 2, 4].forEach((i) => {   // EV_KO 인덱스: 0=HP, 2=방어, 4=특방
-    const name = EV_KO[i];
-    const v = (m.oppSimEvs && m.oppSimEvs[i]) || 0;
-    p.appendChild(adjRow(name, "" + v,
-      () => sim("/api/sim/opp/ev", { stat: i, delta: -4 }),
-      () => sim("/api/sim/opp/ev", { stat: i, delta: 4 })));
-  });
-  // 성격 화살표 — feedback#3: 방어/특방만(공/특공/스피드 성격 보정 제거).
-  p.appendChild(el("div", "sim-sub", "성격 화살표 (실수치 ×)"));
-  [1, 3].forEach((i) => {      // STAT_KO 인덱스: 1=방어, 3=특방
-    const name = STAT_KO[i];
-    const mult = (m.oppSimNatureMult && m.oppSimNatureMult[i]) || 1.0;
-    const up = mult > 1.001, down = mult < 0.999;
-    const txt = up ? "×1.1" : (down ? "×0.9" : "×1.0");
-    const color = up ? "#FF7A7A" : (down ? "#7AB0FF" : null);   // 보정 ↑=붉은 / ↓=파랑
-    p.appendChild(adjRow(name, txt,
-      () => sim("/api/sim/opp/nature", { stat: i, dir: -1 }),
-      () => sim("/api/sim/opp/nature", { stat: i, dir: 1 }), "▼", "▲", color));
-  });
+  // 170차(feedback) — 노력치 6행 + 성격 5행 stepper를 폐기하고 **확정 패널과 똑같은 드롭다운 2칸**으로 교체(사용자 지시).
+  //   시뮬창 = 추정/확정창 + 랭크. 지정 안 하면 추정/확정값이 그대로 뜨므로 시뮬을 켜도 추정 정보가 안 사라진다.
+  const evCols = el("div", "sim-cols");
+  const natCol = el("div", "sim-col");
+  natCol.appendChild(el("div", "sim-sub", "성격"));
+  natCol.appendChild(oppSimBuildDropdown(m, "nature"));
+  evCols.appendChild(natCol);
+  const evCol = el("div", "sim-col");
+  evCol.appendChild(el("div", "sim-sub", "노력치"));
+  evCol.appendChild(oppSimBuildDropdown(m, "spread"));
+  evCols.appendChild(evCol);
+  p.appendChild(evCols);
   // 랭크 — 전체 스탯(공/방/특공/특방/스피드) 업/다운.
   p.appendChild(el("div", "sim-sub", "랭크"));
   STAT_KO.forEach((name, i) => {
@@ -1234,42 +1410,59 @@ function oppSimPanel(m) {
 // 147차(feedback) — 파란테(현재 나온 상대) 확정 패널의 드롭다운. kind="ability"|"item".
 //   ★시뮬이 아니다: 여기서 고른 값은 "확정 지식" → 그 판이 끝날 때까지 그 종족에 영속(교체·재등장해도 유지,
 //   "모든 시뮬 취소"로도 안 풀림). 안 고르면 채용률 1위 「추정」(흐리게)이 그대로 위력 계산에 들어간다.
+//   170차 — kind="nature"|"spread" 추가(새 데이터 파이프라인의 성격·노력치 채용률).
+//   ★노력치는 직접 배분 없음 — 채용률 목록에서 고르기만(사용자 사양). 표기는 "H2 C32 S32" 한 줄 고정.
 function confDropdown(m, kind) {
-  const isAb = kind === "ability";
+  const isAb = kind === "ability", isItem = kind === "item", isNat = kind === "nature", isSpread = kind === "spread";
   const wrap = el("div", "dropdown");
-  const locked = isAb ? m.oppConfirmAbilityLocked : m.oppConfirmItemLocked;
-  const curKo = isAb ? m.oppConfirmAbilityKo : m.oppConfirmItemKo;
-  // 메가 = 특성 폼 고정 / 도구는 메가스톤(효과 없음) → 표시만.
-  if (locked) {
+  // 170차 — 특성 lock 폐기(메가 특성도 스킬스왑으로 바뀐다 → 편집 가능). 도구만 메가=메가스톤이라 표시만.
+  if (isItem && m.oppConfirmItemLocked) {
     const box = el("div", "ab-fixed");
-    const nm = el("div", "ab-name", isAb ? (curKo || "?") + "  (메가 고정)" : "메가스톤  (도구 효과 없음)");
-    box.appendChild(nm);
-    // 159차 — 메가 고정 특성은 드롭다운이 없어 이름만 떴다. 효과 설명을 이름 아래 + hover 툴팁으로 노출.
-    const mdesc = isAb ? m.oppConfirmAbilityDesc : null;
-    if (mdesc) { nm.title = mdesc; box.appendChild(el("div", "ab-desc", mdesc)); }
+    box.appendChild(el("div", "ab-name", "메가스톤  (도구 효과 없음)"));
     wrap.appendChild(box);
     return wrap;
   }
-  const confirmed = isAb ? m.oppConfirmAbilityConfirmed : m.oppConfirmItemConfirmed;
-  const pct = (isAb ? m.oppConfirmAbilityPct : m.oppConfirmItemPct) || 0;
-  const choices = (isAb ? m.oppConfirmAbilityChoices : m.oppConfirmItemChoices) || [];
-  const open = isAb ? confAbilOpen : confItemOpen;
+  const curKo = isAb ? m.oppConfirmAbilityKo : isItem ? m.oppConfirmItemKo
+    : isNat ? m.oppConfirmNatureKo : m.oppConfirmSpreadText;
+  const confirmed = !!(isAb ? m.oppConfirmAbilityConfirmed : isItem ? m.oppConfirmItemConfirmed
+    : isNat ? m.oppConfirmNatureConfirmed : m.oppConfirmSpreadConfirmed);
+  const pct = (isAb ? m.oppConfirmAbilityPct : isItem ? m.oppConfirmItemPct
+    : isNat ? m.oppConfirmNaturePct : m.oppConfirmSpreadPct) || 0;
+  const choices = (isAb ? m.oppConfirmAbilityChoices : isItem ? m.oppConfirmItemChoices
+    : isNat ? m.oppConfirmNatureChoices : m.oppConfirmSpreadChoices) || [];
+  const open = isAb ? confAbilOpen : isItem ? confItemOpen : isNat ? confNatOpen : confSpreadOpen;
+  const closeAll = () => { confAbilOpen = confItemOpen = confNatOpen = confSpreadOpen = false; };
   const post = (v) => {
-    if (isAb) { confAbilOpen = false; sim("/api/sim/opp/confirm/ability", { abilityKo: v }); }
-    else { confItemOpen = false; sim("/api/sim/opp/confirm/item", { itemKo: v }); }
+    closeAll();
+    if (isAb) sim("/api/sim/opp/confirm/ability", { abilityKo: v });
+    else if (isItem) sim("/api/sim/opp/confirm/item", { itemKo: v });
+    else if (isNat) sim("/api/sim/opp/confirm/nature", { natureKo: v });
+    else sim("/api/sim/opp/confirm/spread", { ev: v });   // v = 6요소 배열 또는 null(해제)
   };
-  const label = curKo == null ? (isAb ? "특성 정보 없음" : "도구 정보 없음")
+  const label = curKo == null
+    ? (isAb ? "특성 정보 없음" : isItem ? "도구 정보 없음" : isNat ? "성격 정보 없음" : "노력치 정보 없음")
     : (curKo === "none" ? "없음 (도구 없음)" : curKo);
   const header = el("button", "dd-header " + (confirmed ? "conf" : "est"));
   // 159차 — 접힌 헤더에서도 현재 특성 효과를 hover로 볼 수 있게(드롭다운 열면 옵션 desc가 이미 뜸).
   if (isAb && m.oppConfirmAbilityDesc) header.title = m.oppConfirmAbilityDesc;
-  header.appendChild(el("span", "dd-label", label));
+  if (isSpread) header.title = "노력치 (HABCDS = HP/공/방/특공/특방/스피드) — 위력칩에서 이 배분이 가리키는 칸에 파란 테두리";
+  // 170차 — 노력치는 "H1 A32 B1 C1 D1 S32"처럼 6칸이 다 뜰 수 있다 → 전용 클래스로 더 작게(8px까지) 줄여 한 줄 유지.
+  header.appendChild(el("span", "dd-label" + (isSpread ? " ev" : ""), label));
   if (!confirmed && pct > 0) header.appendChild(el("span", "dd-pct", "추정 " + pct.toFixed(1) + "%"));
   header.appendChild(el("span", "dd-arrow", open ? "▲" : "▼"));
-  header.onclick = () => { if (isAb) confAbilOpen = !confAbilOpen; else confItemOpen = !confItemOpen; if (lastModel) render(lastModel); };
-  wrap.appendChild(header);
+  header.onclick = () => {
+    const was = open; closeAll();
+    if (!was) { if (isAb) confAbilOpen = true; else if (isItem) confItemOpen = true; else if (isNat) confNatOpen = true; else confSpreadOpen = true; }
+    if (lastModel) render(lastModel);
+  };
+  const ddAnchor = el("div", "dd-anchor");
+  ddAnchor.appendChild(header);
+  wrap.appendChild(ddAnchor);
   if (open) {
     const list = el("div", "dd-list");
+    // 170차 — 한 번에 보이는 항목 수 제한 + 나머지는 목록 안에서 스크롤(사용자 지시).
+    //   성격·노력치 모두 5개(확정 상태면 맨 위 "확정 해제" 행이 2줄로 접혀 더 길어지므로 노력치도 5개 — 사용자 지시).
+    if (isNat || isSpread) list.dataset.maxItems = "5";
     const addOpt = (labelText, val, isCur, desc, pctv) => {
       const opt = el("div", "dd-opt" + (isCur ? " sel" : ""));
       const nm = el("div", "ab-name", labelText + (isCur ? "  ✓" : ""));
@@ -1279,18 +1472,22 @@ function confDropdown(m, kind) {
       opt.onclick = () => post(val);
       list.appendChild(opt);
     };
-    if (confirmed) addOpt("확정 해제 (채용률 추정으로)", "", false);
-    if (!isAb) addOpt("없음 (도구 없음 확정)", "none", confirmed && curKo === "none");
-    choices.forEach((c) => addOpt(c.ko, c.ko, confirmed && curKo === c.ko, c.desc, c.pct));
+    if (confirmed) addOpt("확정 해제 (채용률 추정으로)", isSpread ? null : "", false);
+    if (isItem) addOpt("없음 (도구 없음 확정)", "none", confirmed && curKo === "none");
+    if (isSpread) choices.forEach((c) => addOpt(c.text, c.ev, confirmed && curKo === c.text, null, c.pct));
+    else choices.forEach((c) => addOpt(c.ko, c.ko, confirmed && curKo === c.ko, c.desc, c.pct));
+    // 170차(feedback) — 특성은 가짓수가 많아 드롭다운으로 다 못 담는다 → 추정/보유 특성 아래에 직접 입력 행.
+    //   스킬스왑으로 상대가 엉뚱한 특성을 가져가는 상황(메가 포함) 대응.
+    if (isAb) list.appendChild(abilityInputRow("직접 입력 (전체 특성)", post));
     // 채용률 목록에 없는 도구도 확정할 수 있게 수동 그룹(공격 도구 + 방어 도구)을 뒤에 붙인다. 149차 — 상대 시뮬
     //   드롭다운과 같은 단일 소스(OPP_ITEM_GROUPS)로 통일.
-    if (!isAb) {
+    if (isItem) {
       OPP_ITEM_GROUPS.forEach((g) => {
         list.appendChild(el("div", "dd-grp", g.label));
         g.items.forEach((it) => addOpt(it, it, confirmed && curKo === it));
       });
     }
-    wrap.appendChild(list);
+    ddAnchor.appendChild(list);
   }
   wrap.appendChild(el("div", "conf-note", confirmed ? "확정 — 이 판 끝까지 유지" : "채용률 1위 추정 — 고르면 확정"));
   return wrap;
@@ -1308,7 +1505,9 @@ function myConfDropdown(m) {
   header.appendChild(el("span", "dd-label", label));
   header.appendChild(el("span", "dd-arrow", confMyItemOpen ? "▲" : "▼"));
   header.onclick = () => { confMyItemOpen = !confMyItemOpen; if (lastModel) render(lastModel); };
-  wrap.appendChild(header);
+  const ddAnchor = el("div", "dd-anchor");
+  ddAnchor.appendChild(header);
+  wrap.appendChild(ddAnchor);
   if (confMyItemOpen) {
     const post = (v) => { confMyItemOpen = false; sim("/api/sim/my/confirm/item", { itemKo: v }); };
     const list = el("div", "dd-list");
@@ -1325,12 +1524,48 @@ function myConfDropdown(m) {
       list.appendChild(el("div", "dd-grp", g.label));
       g.items.forEach((it) => addOpt(it, it, confirmed && curKo === it));
     });
-    wrap.appendChild(list);
+    ddAnchor.appendChild(list);
   }
   wrap.appendChild(el("div", "conf-note", confirmed ? "확정 — 이 판 끝까지 유지" : "빌더 등록 도구 — 바뀌었으면 지정"));
   return wrap;
 }
-// 160차 — 내 파란테(현재 나온 내 포켓몬) 패널. 도구=드롭다운(확정) / 특성=표시 전용(내 빌드에 이미 확정돼 있음).
+// 170차(feedback) — 내 확정 특성 드롭다운(내 확정 도구 myConfDropdown의 특성판, 상대 확정 특성과 대칭).
+//   왜 필요한가: 스킬스왑·트레이스·심안으로 내 특성이 실제로 바뀌면 종전엔 반영할 방법이 아예 없었다(표시 전용이었음).
+//   후보 = 빌더 등록 특성 + 그 폼 보유 특성(메가면 폼 고정 특성) / 그 밖의 전 특성은 직접 입력.
+function myConfAbilityDropdown(m) {
+  const wrap = el("div", "dropdown");
+  const confirmed = !!m.myConfirmAbilityConfirmed;
+  const curKo = m.myConfirmAbilityKo;
+  const builder = m.myConfirmBuilderAbilityKo;
+  const choices = m.myConfirmAbilityChoices || [];
+  const post = (v) => { confMyAbilOpen = false; sim("/api/sim/my/confirm/ability", { abilityKo: v }); };
+  const header = el("button", "dd-header " + (confirmed ? "conf" : "est"));
+  if (m.myConfirmAbilityDesc) header.title = m.myConfirmAbilityDesc;
+  header.appendChild(el("span", "dd-label", curKo || "—"));
+  header.appendChild(el("span", "dd-arrow", confMyAbilOpen ? "▲" : "▼"));
+  header.onclick = () => { confMyAbilOpen = !confMyAbilOpen; if (lastModel) render(lastModel); };
+  const ddAnchor = el("div", "dd-anchor");
+  ddAnchor.appendChild(header);
+  wrap.appendChild(ddAnchor);
+  if (confMyAbilOpen) {
+    const list = el("div", "dd-list");
+    const addOpt = (labelText, val, isCur, desc) => {
+      const opt = el("div", "dd-opt" + (isCur ? " sel" : ""));
+      opt.appendChild(el("div", "ab-name", labelText + (isCur ? "  ✓" : "")));
+      if (desc) opt.appendChild(el("div", "ab-desc", desc));
+      opt.onclick = () => post(val);
+      list.appendChild(opt);
+    };
+    if (confirmed) addOpt("확정 해제 (등록 특성 " + (builder || "없음") + "으로)", "", false);
+    choices.forEach((c) => addOpt(c.ko, c.ko, confirmed && curKo === c.ko, c.desc));
+    list.appendChild(abilityInputRow("직접 입력 (전체 특성)", post));
+    ddAnchor.appendChild(list);
+  }
+  wrap.appendChild(el("div", "conf-note", confirmed ? "확정 — 이 판 끝까지 유지" : "빌더 등록 특성 — 바뀌었으면 지정"));
+  return wrap;
+}
+// 160차 — 내 파란테(현재 나온 내 포켓몬) 패널. 도구·특성 둘 다 드롭다운(확정).
+//   170차 — 특성이 표시 전용이던 것을 편집 가능으로(스킬스왑 대응, 사용자 지시).
 //   내 시뮬(노란테) 중이면 mySimPanel이 대신 뜬다(상대 쪽 규약과 동일).
 function myConfirmPanel(m) {
   const p = el("div", "sim-panel confirm");
@@ -1344,13 +1579,7 @@ function myConfirmPanel(m) {
   cols.appendChild(itemCol);
   const abCol = el("div", "sim-col");
   abCol.appendChild(el("div", "sim-sub", "특성"));
-  // 특성은 편집 대상이 아니라 표시 전용 — 드롭다운과 같은 폭·높이의 고정 박스로 대칭만 맞춘다.
-  const box = el("div", "ab-fixed");
-  const nm = el("div", "ab-name", m.myConfirmAbilityKo || "—");
-  if (m.myConfirmAbilityDesc) nm.title = m.myConfirmAbilityDesc;
-  box.appendChild(nm);
-  if (m.myConfirmAbilityDesc) box.appendChild(el("div", "ab-desc", m.myConfirmAbilityDesc));
-  abCol.appendChild(box);
+  abCol.appendChild(myConfAbilityDropdown(m));
   cols.appendChild(abCol);
   p.appendChild(cols);
   return p;
@@ -1361,16 +1590,16 @@ function oppConfirmPanel(m) {
   const h = el("div", "sim-head");
   h.appendChild(el("span", "sim-head-name", "현재 상대: " + (m.oppConfirmName || "")));
   p.appendChild(h);
-  const cols = el("div", "sim-cols");
-  const itemCol = el("div", "sim-col");
-  itemCol.appendChild(el("div", "sim-sub", "지닌도구"));
-  itemCol.appendChild(confDropdown(m, "item"));
-  cols.appendChild(itemCol);
-  const abCol = el("div", "sim-col");
-  abCol.appendChild(el("div", "sim-sub", "특성"));
-  abCol.appendChild(confDropdown(m, "ability"));
-  cols.appendChild(abCol);
-  p.appendChild(cols);
+  // 170차 — 4칸(도구·특성·성격·노력치)을 2줄 × 2칸으로. 한 줄에 4개를 넣으면 노력치 표기가 잘려 한 줄 규칙이 깨진다.
+  const mk = (label, kind) => { const c = el("div", "sim-col"); c.appendChild(el("div", "sim-sub", label)); c.appendChild(confDropdown(m, kind)); return c; };
+  const row1 = el("div", "sim-cols");
+  row1.appendChild(mk("지닌도구", "item"));
+  row1.appendChild(mk("특성", "ability"));
+  p.appendChild(row1);
+  const row2 = el("div", "sim-cols");
+  row2.appendChild(mk("성격", "nature"));
+  row2.appendChild(mk("노력치", "spread"));
+  p.appendChild(row2);
   return p;
 }
 function renderPartiesBlock(m) {
@@ -1378,7 +1607,11 @@ function renderPartiesBlock(m) {
   const mine = el("div", "pcol");
   const mh = el("div", "section-title", "내 파티");
   if (m.simActive) mh.appendChild(el("span", "sim-tag", "시뮬 중"));
-  else if (m.myConfirmActive && m.myConfirmItemConfirmed) mh.appendChild(el("span", "conf-tag", "도구 확정됨")); // 160차
+  // 160차 — 도구 확정 배지. 170차 — 특성 확정도 같은 배지에 합침(둘 다면 "도구·특성 확정됨").
+  else if (m.myConfirmActive && (m.myConfirmItemConfirmed || m.myConfirmAbilityConfirmed))
+    mh.appendChild(el("span", "conf-tag",
+      (m.myConfirmItemConfirmed && m.myConfirmAbilityConfirmed) ? "도구·특성 확정됨"
+        : (m.myConfirmItemConfirmed ? "도구 확정됨" : "특성 확정됨")));
   mine.appendChild(mh);
   mine.appendChild(renderParty(m.myParty, "my"));
   // 160차 — 내 시뮬(노란테)이면 시뮬 패널, 아니면 파란테(현재 내 포켓몬) 확정 패널(상대 쪽과 동일 규약).
@@ -1390,7 +1623,8 @@ function renderPartiesBlock(m) {
   //   포켓몬·날씨·벽·타입 시뮬 중 하나라도 활성일 때만 표시. 누르면 전부 해제 → 현재 실제 필드로.
   const anySim = m.simActive || m.oppSimActive || m.simWeatherActive
     || m.simOppScreenActive || !!m.simMyType || !!m.simOppType || m.movePowerActive || m.critOverrideActive
-    || m.simMyTailwindActive || m.simOppTailwindActive || !!m.simMyStatusKey || !!m.simOppStatusKey;
+    || m.simMyTailwindActive || m.simOppTailwindActive || !!m.simMyStatusKey || !!m.simOppStatusKey
+    || !!m.mySimAbilityKo;   // 170차 — 내 특성 시뮬(패널 밖에서도 걸릴 수 있어 취소 버튼 노출 조건에 포함)
   // 113차 — 중앙 열: "상대 시점" 토글(항상) + 그 아래 "모든 시뮬 취소"(시뮬 활성 시).
   const mid = el("div", "pcol center");
   mid.appendChild(el("div", "section-title", " "));
@@ -1625,6 +1859,7 @@ function render(m) {
   applyRegion("#matchup", [renderMatchup(m)]);
   applyRegion("#parties", [...renderPartiesBlock(m).childNodes]);
   fitDropdownLabels();   // 160차 — DOM 반영 후 긴 이름 한 줄 맞춤(측정 필요 → 렌더 마지막)
+  fitDropdownLists();    // 170차 — 펼친 목록이 화면 밖으로 넘쳐 *페이지가 스크롤되는 것* 방지(측정 필요 → 렌더 마지막)
 }
 
 // 160차(feedback) — 드롭다운 헤더의 긴 이름이 두 줄로 접히던 문제.
@@ -1641,8 +1876,37 @@ function fitOneLine(node, maxPx, minPx) {
     node.style.fontSize = px + "px";
   }
 }
+// 170차(feedback) — 펼친 드롭다운 목록 높이 관리. 두 가지를 동시에 만족시킨다:
+//   ① 항목은 자르지 않는다(전부 후보에 있음) → 넘치는 만큼은 **목록 안에서 스크롤**(내 도구 드롭다운과 동일).
+//   ② 목록이 화면 아래로 넘치면 *문서 높이가 늘어나 페이지 스크롤바가 생기므로*(absolute도 문서 스크롤 영역에 포함)
+//      화면 안쪽으로 잘라낸다. 아래가 너무 좁으면 위로 펼친다.
+//   data-max-items = "한 번에 보일 항목 수"(성격 5개 — 항목당 2줄이라 사용자 지시). 없으면 CSS max-height만 적용.
+function fitDropdownLists() {
+  const margin = 10;
+  document.querySelectorAll(".dd-list").forEach((n) => {
+    n.style.maxHeight = "";           // 이전 렌더의 계산값 초기화 후 재측정
+    n.style.top = ""; n.style.bottom = "";
+    const kids = n.children;
+    let want = n.getBoundingClientRect().height;            // 기본 = 전체 높이(CSS max-height 반영된 값)
+    const cap = parseInt(n.dataset.maxItems || "", 10);
+    if (cap > 0 && kids.length > cap)                       // 상한 번째 항목 시작점 = 그 개수만 보이는 높이
+      want = Math.min(want, kids[cap].offsetTop - kids[0].offsetTop);
+    const r = n.getBoundingClientRect();
+    const parentH = n.parentElement ? n.parentElement.getBoundingClientRect().height : 0;
+    const below = window.innerHeight - r.top - margin;      // 아래로 쓸 수 있는 높이
+    const above = r.top - parentH - margin;                 // 위로 쓸 수 있는 높이
+    if (below < Math.min(want, 160) && above > below) {     // 아래가 좁고 위가 더 넓으면 위로 펼침
+      n.style.top = "auto"; n.style.bottom = "100%";
+      n.style.maxHeight = Math.max(60, Math.floor(Math.min(want, above))) + "px";
+    } else {
+      n.style.maxHeight = Math.max(60, Math.floor(Math.min(want, below))) + "px";
+    }
+  });
+}
 function fitDropdownLabels() {
-  document.querySelectorAll(".dd-label").forEach((n) => fitOneLine(n, 12, 9));
+  // 170차 — 노력치 라벨(.dd-label.ev)은 6칸이 다 뜰 수 있어 8px까지 허용(한 줄 유지가 우선, 사용자 지시).
+  document.querySelectorAll(".dd-label.ev").forEach((n) => fitOneLine(n, 12, 8));
+  document.querySelectorAll(".dd-label:not(.ev)").forEach((n) => fitOneLine(n, 12, 9));
   document.querySelectorAll(".ab-fixed .ab-name").forEach((n) => fitOneLine(n, 12, 9));
 }
 
