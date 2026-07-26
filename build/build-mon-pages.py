@@ -533,11 +533,28 @@ PAGE = """<!DOCTYPE html>
 (function () {{
   var tabs = document.querySelector(".fmt-tabs");
   if (!tabs) return;
+
+  function show(fmt, push) {{
+    tabs.querySelectorAll("button").forEach(function (x) {{ x.classList.toggle("active", x.dataset.fmt === fmt); }});
+    document.querySelectorAll(".fmt-pane").forEach(function (p) {{ p.hidden = p.dataset.fmt !== fmt; }});
+    /* URL 에도 남겨 새로고침·공유·뒤로가기에서 같은 탭이 유지되게 한다(canonical 은 쿼리 없는 URL 그대로). */
+    if (push && window.history && history.replaceState) {{
+      history.replaceState(null, "", fmt === "double" ? "?fmt=double" : location.pathname);
+    }}
+  }}
+
+  /* 배틀데이터 더블 순위에서 들어오면 ?fmt=double 이 붙는다 → 더블 탭부터 연다. */
+  var init = "single";
+  try {{
+    if (new URLSearchParams(location.search).get("fmt") === "double") init = "double";
+  }} catch (e) {{
+    if (location.search.indexOf("fmt=double") !== -1) init = "double";
+  }}
+  if (init === "double") show("double", false);
+
   tabs.addEventListener("click", function (ev) {{
     var b = ev.target.closest("button[data-fmt]");
-    if (!b) return;
-    tabs.querySelectorAll("button").forEach(function (x) {{ x.classList.toggle("active", x === b); }});
-    document.querySelectorAll(".fmt-pane").forEach(function (p) {{ p.hidden = p.dataset.fmt !== b.dataset.fmt; }});
+    if (b) show(b.dataset.fmt, true);
   }});
 }})();
 </script>
@@ -881,7 +898,7 @@ def _bd_search_key(e, u):
         words += [x.get("en", "") for x in (u.get(field) or [])]
     return " ".join(w for w in words if w).lower()
 
-def _bd_row(e, u, rank):
+def _bd_row(e, u, rank, fmt="single"):
     top = u["moves"][:3]
     mv = ", ".join(
         f'{esc(m["ko"])} <b>{m["pct"]:g}%</b>' if isinstance(m.get("pct"), (int, float))
@@ -891,7 +908,9 @@ def _bd_row(e, u, rank):
     ab_html = (f'<span class="bd-ab">{esc(ab[0]["ko"])} {ab[0]["pct"]:g}%</span>'
                if ab and isinstance(ab[0].get("pct"), (int, float)) else "")
     rk = f'<span class="bd-rank">{rank}</span>' if rank else '<span class="bd-rank">–</span>'
-    return (f'<a class="bd-row" data-s="{esc(_bd_search_key(e, u))}" href="/pokedex/{slug(e["en"])}/">{rk}'
+    # 169차 — 더블 순위에서 들어가면 상세도 더블 탭부터 보이게 포맷을 쿼리로 넘긴다(canonical 은 쿼리 없는 URL 유지).
+    q = "?fmt=double" if fmt == "double" else ""
+    return (f'<a class="bd-row" data-s="{esc(_bd_search_key(e, u))}" href="/pokedex/{slug(e["en"])}/{q}">{rk}'
             f'<img src="/sprites/{esc(e["sprite"])}" alt="{esc(e["ko"])}" width="42" height="42" loading="lazy">'
             f'<span class="bd-nm">{esc(e["ko"])}</span>'
             f'{ab_html}'
@@ -932,10 +951,10 @@ def build_battle_data_page(usage_map, season, fmt_label, subdir, canon_url, acti
         print(f"  !! {fmt_label} 배틀데이터 빈 순위: {holes}")
     parts = [bd_toggle(active_tab),
              f'<h2 class="bd-h">실전 사용 순위 <span class="c">({len(ranked)}종 · 채용률 높은 순)</span></h2>',
-             '<div class="bd-list">' + "".join(_bd_row(e, u, dr) for e, u, dr in ranked) + '</div>']
+             '<div class="bd-list">' + "".join(_bd_row(e, u, dr, active_tab) for e, u, dr in ranked) + '</div>']
     if unranked:
         parts += [f'<h2 class="bd-h">순위권 밖 등장 포켓몬 <span class="c">({len(unranked)}종 · 도감 순)</span></h2>',
-                  '<div class="bd-list">' + "".join(_bd_row(e, u, None) for e, u, _ in unranked) + '</div>']
+                  '<div class="bd-list">' + "".join(_bd_row(e, u, None, active_tab) for e, u, _ in unranked) + '</div>']
     # 169차 — 갱신 시각. 싱글/더블 각 파일의 version(산출 시각)을 그 페이지에 그대로 쓴다.
     upd = _fmt_updated(USAGE_VERSION if active_tab == "single" else USAGE_D_VERSION)
     updated_line = (f'마지막 갱신 <b>{upd} KST</b>'

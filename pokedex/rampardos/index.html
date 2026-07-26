@@ -112,11 +112,28 @@
 (function () {
   var tabs = document.querySelector(".fmt-tabs");
   if (!tabs) return;
+
+  function show(fmt, push) {
+    tabs.querySelectorAll("button").forEach(function (x) { x.classList.toggle("active", x.dataset.fmt === fmt); });
+    document.querySelectorAll(".fmt-pane").forEach(function (p) { p.hidden = p.dataset.fmt !== fmt; });
+    /* URL 에도 남겨 새로고침·공유·뒤로가기에서 같은 탭이 유지되게 한다(canonical 은 쿼리 없는 URL 그대로). */
+    if (push && window.history && history.replaceState) {
+      history.replaceState(null, "", fmt === "double" ? "?fmt=double" : location.pathname);
+    }
+  }
+
+  /* 배틀데이터 더블 순위에서 들어오면 ?fmt=double 이 붙는다 → 더블 탭부터 연다. */
+  var init = "single";
+  try {
+    if (new URLSearchParams(location.search).get("fmt") === "double") init = "double";
+  } catch (e) {
+    if (location.search.indexOf("fmt=double") !== -1) init = "double";
+  }
+  if (init === "double") show("double", false);
+
   tabs.addEventListener("click", function (ev) {
     var b = ev.target.closest("button[data-fmt]");
-    if (!b) return;
-    tabs.querySelectorAll("button").forEach(function (x) { x.classList.toggle("active", x === b); });
-    document.querySelectorAll(".fmt-pane").forEach(function (p) { p.hidden = p.dataset.fmt !== b.dataset.fmt; });
+    if (b) show(b.dataset.fmt, true);
   });
 })();
 </script>
