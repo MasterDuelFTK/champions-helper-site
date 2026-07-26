@@ -94,3 +94,15 @@ footer { border-top: 1px solid var(--line); padding: 26px 0 40px; margin-top: 24
 .foot-links { font-size: 13px; margin: 0 0 12px; }
 .foot-links a { color: var(--muted); }
 .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; }
+
+/* 169차 — 실전 통계 싱글/더블 탭 + 팀조합·매치업 칩(아이콘) */
+.fmt-tabs { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin: 16px 0 0; }
+.fmt-tabs button { padding: 8px 24px; font: inherit; font-weight: 800; font-size: 14px; color: var(--muted);
+  background: var(--panel); border: 0; cursor: pointer; }
+.fmt-tabs button.active { background: var(--accent); color: #fff; }
+.fmt-tabs button:hover { color: var(--txt); }
+.fmt-tabs button.active:hover { color: #fff; }
+.mon-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--panel2);
+  border: 1px solid var(--line); border-radius: 9px; padding: 4px 11px 4px 5px;
+  font-size: 12.5px; font-weight: 700; color: var(--txt); }
+.mon-chip:hover { border-color: var(--accent); text-decoration: none; color: var(--txt); }

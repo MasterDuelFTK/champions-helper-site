@@ -270,16 +270,19 @@ def spread_usage_section(en, usage_map=None, season="", fmt="싱글"):
             '<div class="use-list">' + "".join(rows) + '</div>'
             f'<p class="attrib">{ATTRIB}{season_txt}</p></section>')
 
+# nameEn → sprite 파일명. 팀조합/매치업 칩에 아이콘을 붙인다(이름만 있으면 어떤 폼인지 알아보기 어렵다).
+SPRITE_BY_EN = {_norm(e["en"]): e["sprite"] for e in DEX if e.get("sprite")}
+
 def _mon_links(lst):
     out = []
     for m in lst[:10]:
         en, ko = m.get("name"), (m.get("ko") or m.get("name"))
         if not en:
             continue
-        out.append(f'<a href="/pokedex/{slug(en)}/" class="mchip" '
-                   'style="background:var(--panel2);border:1px solid var(--line);color:var(--txt);'
-                   'padding:5px 11px;border-radius:9px;font-size:12.5px">'
-                   f'{esc(ko)}</a>')
+        sp = SPRITE_BY_EN.get(_norm(en))
+        img = (f'<img src="/sprites/{esc(sp)}" alt="" width="28" height="28" loading="lazy" '
+               'style="image-rendering:pixelated;vertical-align:middle">') if sp else ''
+        out.append(f'<a href="/pokedex/{slug(en)}/" class="mon-chip">{img}<span>{esc(ko)}</span></a>')
     return "".join(out)
 
 def synergy_section(en, usage_map=None, season="", fmt="싱글"):
@@ -306,6 +309,34 @@ def synergy_section(en, usage_map=None, season="", fmt="싱글"):
             '그리고 승패가 갈렸을 때 자주 마주친 상대입니다. 파티를 짤 때와 상대 파티를 읽을 때 참고하세요.</p>'
             + "".join(blocks) +
             f'<p class="attrib">{ATTRIB}{season_txt}</p></section>')
+
+def usage_block(en):
+    """169차 — 실전 통계 전체를 싱글/더블 탭으로 묶는다.
+
+    종전엔 싱글 6섹션 + 더블 6섹션이 상세페이지에 통째로 쌓여 페이지가 지나치게 길었다.
+    헬퍼 로컬 뷰어(/usage)와 동일하게 한 번에 한 포맷만 보이고 탭으로 전환한다.
+    ★JS 없이도(크롤러 포함) 두 포맷 모두 DOM 에 있으므로 색인·접근성 손실은 없다.
+    """
+    def pane(usage_map, season, fmt):
+        return (usage_section(en, usage_map, season, fmt)
+                + ability_usage_section(en, usage_map, season, fmt)
+                + item_usage_section(en, usage_map, season, fmt)
+                + nature_usage_section(en, usage_map, season, fmt)
+                + spread_usage_section(en, usage_map, season, fmt)
+                + synergy_section(en, usage_map, season, fmt))
+
+    single = pane(USAGE, USAGE_SEASON, "싱글")
+    double = pane(USAGE_D, USAGE_D_SEASON, "더블")
+    if not single and not double:
+        return ""
+    if not (single and double):                       # 한쪽뿐이면 탭 없이 그대로
+        return single or double
+    return ('<div class="fmt-tabs" role="tablist">'
+            '<button class="active" data-fmt="single" type="button">싱글</button>'
+            '<button data-fmt="double" type="button">더블</button>'
+            '</div>'
+            f'<div class="fmt-pane" data-fmt="single">{single}</div>'
+            f'<div class="fmt-pane" data-fmt="double" hidden>{double}</div>')
 
 def abil_cards(abils):
     return "".join(
@@ -480,6 +511,20 @@ PAGE = """<!DOCTYPE html>
     <span>{next}</span>
   </div>
 </main>
+<script>
+/* 169차 — 실전 통계 싱글/더블 탭. JS 가 없으면 두 포맷이 모두 보일 뿐이라 기능 손실은 없다(색인도 동일).
+   ★이 템플릿은 str.format() 으로 렌더되므로 중괄호는 반드시 {{ }} 로 이스케이프한다. */
+(function () {{
+  var tabs = document.querySelector(".fmt-tabs");
+  if (!tabs) return;
+  tabs.addEventListener("click", function (ev) {{
+    var b = ev.target.closest("button[data-fmt]");
+    if (!b) return;
+    tabs.querySelectorAll("button").forEach(function (x) {{ x.classList.toggle("active", x === b); }});
+    document.querySelectorAll(".fmt-pane").forEach(function (p) {{ p.hidden = p.dataset.fmt !== b.dataset.fmt; }});
+  }});
+}})();
+</script>
 
 <footer>
   <div class="wrap">
@@ -557,20 +602,7 @@ def build_pages():
             stats=stat_bars(e["stats"]),
             matchup=matchup_block(e["types"]),
             abils=abil_cards(e["abil"]),
-            # 169차 — 소스를 공식 순위데이터로 교체하며 성격/노력치/팀조합·매치업 섹션 추가.
-            #   순서 = 기술 → 특성 → 도구 → 성격 → 노력치 → 팀조합·매치업 (싱글 전부, 이어서 더블 전부).
-            usage=usage_section(e["en"], USAGE, USAGE_SEASON, "싱글")
-                  + ability_usage_section(e["en"], USAGE, USAGE_SEASON, "싱글")
-                  + item_usage_section(e["en"], USAGE, USAGE_SEASON, "싱글")
-                  + nature_usage_section(e["en"], USAGE, USAGE_SEASON, "싱글")
-                  + spread_usage_section(e["en"], USAGE, USAGE_SEASON, "싱글")
-                  + synergy_section(e["en"], USAGE, USAGE_SEASON, "싱글")
-                  + usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블")
-                  + ability_usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블")
-                  + item_usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블")
-                  + nature_usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블")
-                  + spread_usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블")
-                  + synergy_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블"),
+            usage=usage_block(e["en"]),
             mega=mega_section(e),
             prose=commentary(e),
             prev=pager_link(preve, "prev"),
