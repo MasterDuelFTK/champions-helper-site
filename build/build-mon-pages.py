@@ -740,7 +740,9 @@ BD_PAGE = """<!DOCTYPE html>
   .bd-search::placeholder {{ color: var(--muted); }}
   .bd-search-cnt {{ color: var(--muted); font-size: 13px; white-space: nowrap; }}
   .bd-empty {{ color: var(--muted); font-size: 14px; padding: 22px 2px; margin: 0; }}
-  .bd-h[hidden], .bd-list[hidden] {{ display: none; }}
+  /* ★ [hidden] 은 UA 기본 display:none 인데 .bd-row(flex)/.bd-list(grid) 처럼 display 를 명시한
+     저자 스타일이 그걸 덮어써서 숨겨지지 않는다 → 셀렉터별로 명시적으로 눌러 준다. */
+  .bd-row[hidden], .bd-h[hidden], .bd-list[hidden] {{ display: none !important; }}
 </style>
 </head>
 <body>
