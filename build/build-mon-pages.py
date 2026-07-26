@@ -21,33 +21,49 @@ def _norm(s):
 # 실전 사용률(선택) — helper-data/move-usage.json 이 있으면 상세페이지 + 배틀데이터 페이지에 반영.
 #   championsbattledata.com API 유래(154차 소스 재교체 — pokedb 가 사용자 IP 차단, 출처표기 필수).
 #   key = 정규화된 master nameEn.
-USAGE, USAGE_SEASON, USAGE_SOURCE = {}, "", ""
+USAGE, USAGE_SEASON, USAGE_SOURCE, USAGE_VERSION = {}, "", "", None
 try:
     with open(os.path.join(SITE, "helper-data", "move-usage.json"), encoding="utf-8") as f:
         _u = json.load(f)
     USAGE_SEASON = _u.get("season", "")
     USAGE_SOURCE = _u.get("source", "")     # 169차 — "official-ranking" 이면 공식 데이터
+    USAGE_VERSION = _u.get("version")       # 169차 — 산출 시각(unix). 갱신 시각 표기에 사용.
     USAGE = {_norm(k): v for k, v in _u.get("pokemon", {}).items()}
 except FileNotFoundError:
     print("  (move-usage.json 없음 — 사용률 섹션 생략)")
 
 # 131차(더블배틀) — 더블 사용률(move-usage-double.json, PCH_MOVE_RULE=1). 있으면 도감 상세 "더블" 섹션 +
 #   /battle-data/doubles/ 페이지 생성. 싱글과 완전 별개 메타(기술/포켓몬 사용률 다름). 없으면 조용히 생략(싱글만).
-USAGE_D, USAGE_D_SEASON = {}, ""
+USAGE_D, USAGE_D_SEASON, USAGE_D_VERSION = {}, "", None
 try:
     with open(os.path.join(SITE, "helper-data", "move-usage-double.json"), encoding="utf-8") as f:
         _ud = json.load(f)
     USAGE_D_SEASON = _ud.get("season", "")
+    USAGE_D_VERSION = _ud.get("version")
     USAGE_D = {_norm(k): v for k, v in _ud.get("pokemon", {}).items()}
 except FileNotFoundError:
     print("  (move-usage-double.json 없음 — 더블 섹션 생략)")
 
-# 169차 — 출처 표기는 데이터의 source 필드로 자동 전환. 소스를 되돌려도 표기가 어긋나지 않는다.
+# 169차 — 갱신 시각 표기. move-usage.json 의 version = 산출 시각(unix, UTC 기준 생성).
+#   cron 은 12시간 간격이지만 GitHub Actions 스케줄은 정각을 보장하지 않으므로(큐 지연)
+#   "예정 시각"이 아니라 실제 생성 시각을 KST 로 보여준다.
+KST = datetime.timezone(datetime.timedelta(hours=9))
+
+def _fmt_updated(ts):
+    if not isinstance(ts, (int, float)) or ts <= 0:
+        return ""
+    return datetime.datetime.fromtimestamp(ts, datetime.timezone.utc).astimezone(KST).strftime("%Y-%m-%d %H:%M")
+
+USAGE_UPDATED = _fmt_updated(USAGE_VERSION)
+
+# 출처 표기는 데이터의 source 필드로 자동 전환. 소스를 되돌려도 표기가 어긋나지 않는다.
 #   official-ranking = 게임 공식 랭크 배틀 순위 데이터 / 그 외 = 기존 championsbattledata 경유분.
 ATTRIB = ('데이터 출처: 포켓몬 챔피언스 공식 랭크 배틀 순위 데이터'
           if USAGE_SOURCE == "official-ranking" else
           'Battle data provided by <a href="https://championsbattledata.com/" '
           'target="_blank" rel="noopener">Pok&eacute;mon Champions Battle Data</a>')
+if USAGE_UPDATED:
+    ATTRIB += f' · 마지막 갱신 {USAGE_UPDATED} KST'
 
 # 순위 = move-usage.json 의 rank(소스 column_position, 1~235 완전) 그대로 사용.
 #   (구 DENSE 재부여는 폼 미수록으로 구멍이 있던 시절의 임시조치 — 폼 도감 수록으로 폐기.)
@@ -740,6 +756,10 @@ BD_PAGE = """<!DOCTYPE html>
   .bd-search::placeholder {{ color: var(--muted); }}
   .bd-search-cnt {{ color: var(--muted); font-size: 13px; white-space: nowrap; }}
   .bd-empty {{ color: var(--muted); font-size: 14px; padding: 22px 2px; margin: 0; }}
+  /* 169차 — 갱신 시각(실제 산출 시각). cron 은 12시간 간격이나 러너 큐 지연이 있어 분 단위는 매번 다르다. */
+  .bd-updated {{ margin: 8px 0 0; font-size: 13px; color: var(--txt); }}
+  .bd-updated b {{ color: var(--accent2); font-weight: 800; }}
+  .bd-updated .cycle {{ color: var(--muted); font-weight: 500; margin-left: 6px; }}
   /* ★ [hidden] 은 UA 기본 display:none 인데 .bd-row(flex)/.bd-list(grid) 처럼 display 를 명시한
      저자 스타일이 그걸 덮어써서 숨겨지지 않는다 → 셀렉터별로 명시적으로 눌러 준다. */
   .bd-row[hidden], .bd-h[hidden], .bd-list[hidden] {{ display: none !important; }}
@@ -776,7 +796,8 @@ BD_PAGE = """<!DOCTYPE html>
   </div>
 
   <section class="card">
-    <p class="attrib" style="margin:0">{attrib} · 시즌 {season} · {fmt_label} 배틀 · 데이터는 시즌 통계에 따라 주기적으로 갱신됩니다.</p>
+    <p class="attrib" style="margin:0">{attrib} · 시즌 {season} · {fmt_label} 배틀</p>
+    <p class="bd-updated">{updated_line}</p>
   </section>
 
   <div class="bd-search-wrap">
@@ -915,7 +936,12 @@ def build_battle_data_page(usage_map, season, fmt_label, subdir, canon_url, acti
     if unranked:
         parts += [f'<h2 class="bd-h">순위권 밖 등장 포켓몬 <span class="c">({len(unranked)}종 · 도감 순)</span></h2>',
                   '<div class="bd-list">' + "".join(_bd_row(e, u, None) for e, u, _ in unranked) + '</div>']
-    page = BD_PAGE.format(season=esc(season or "현재 시즌"), attrib=ATTRIB,
+    # 169차 — 갱신 시각. 싱글/더블 각 파일의 version(산출 시각)을 그 페이지에 그대로 쓴다.
+    upd = _fmt_updated(USAGE_VERSION if active_tab == "single" else USAGE_D_VERSION)
+    updated_line = (f'마지막 갱신 <b>{upd} KST</b>'
+                    f'<span class="cycle">· 12시간마다 자동 갱신</span>') if upd else \
+                   '<span class="cycle">데이터는 주기적으로 자동 갱신됩니다.</span>'
+    page = BD_PAGE.format(season=esc(season or "현재 시즌"), attrib=ATTRIB, updated_line=updated_line,
                           body="\n  ".join(parts), fmt_label=fmt_label, canon_url=canon_url)
     d = os.path.join(SITE, subdir)
     os.makedirs(d, exist_ok=True)
