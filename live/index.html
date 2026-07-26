@@ -442,7 +442,7 @@
 <body>
   <div id="bar">
     <span id="status">로컬 헬퍼 연결 대기…</span>
-    <span id="version">v0.170</span>
+    <span id="version">v0.171</span>
   </div>
   <!-- 160차 — LNA 권한 게이트(공개 도메인 → 로컬 헬퍼 연결에 크롬 권한 필요). 기본 숨김, 내용은 showLnaGate가 채움. -->
   <div id="lna-gate">
@@ -1230,7 +1230,7 @@ function oppAbilityDropdown(m) {
   wrap.appendChild(el("div", "conf-note", isSet ? "시뮬 지정 — 시뮬 끄면 사라짐" : "확정/추정 특성 따름 — 고르면 시뮬"));
   return wrap;
 }
-function simHead(label, canMega, isMega, megaPath) {
+function simHead(label, canMega, isMega, megaPath, canPalafin, isPalafin) {
   const h = el("div", "sim-head");
   h.appendChild(el("span", "sim-head-name", label));
   // 시뮬 종료는 sprite(노란테) 재클릭으로 — 헤더 버튼은 메가진화(메가 가능 시만). 토글.
@@ -1239,11 +1239,18 @@ function simHead(label, canMega, isMega, megaPath) {
     mb.onclick = () => sim(megaPath);
     h.appendChild(mb);
   }
+  // 171차 — 돌핀맨 전용 "마이티폼" 버튼(메가진화 버튼과 같은 자리·같은 수동 토글). 종족값만 마이티폼,
+  //   도구·특성·성격·노력치는 원본 돌핀맨 상속. 변신 전에도 미리 시뮬 가능.
+  if (canPalafin) {
+    const pb = el("button", "btn mega" + (isPalafin ? " on" : ""), isPalafin ? "마이티폼 해제" : "마이티폼");
+    pb.onclick = () => sim("/api/sim/my/palafin");
+    h.appendChild(pb);
+  }
   return h;
 }
 // 81차 — 상대 시뮬 헤더: 메가폼 개수만큼 버튼(단일="메가진화", 듀얼=리자몽/라이츄 "메가진화X"/"메가진화Y").
 //   forms = 폼 라벨 배열, activeIndex = 현재 활성 폼(-1=메가 안 함). 활성 버튼 재클릭 = 해제(서버 토글).
-function oppSimHead(label, forms, activeIndex) {
+function oppSimHead(label, forms, activeIndex, canPalafin, isPalafin) {
   const h = el("div", "sim-head");
   h.appendChild(el("span", "sim-head-name", label));
   (forms || []).forEach((name, i) => {
@@ -1252,6 +1259,12 @@ function oppSimHead(label, forms, activeIndex) {
     mb.onclick = () => sim("/api/sim/opp/mega", { form: i });
     h.appendChild(mb);
   });
+  // 171차 — 상대 돌핀맨 "마이티폼" 버튼(내 측 simHead와 대칭).
+  if (canPalafin) {
+    const pb = el("button", "btn mega" + (isPalafin ? " on" : ""), isPalafin ? "마이티폼 해제" : "마이티폼");
+    pb.onclick = () => sim("/api/sim/opp/palafin");
+    h.appendChild(pb);
+  }
   return h;
 }
 // 170차(feedback) — 내 시뮬 특성 드롭다운(상대 시뮬 특성 oppAbilityDropdown의 내 측 판).
@@ -1295,7 +1308,8 @@ function mySimAbilityDropdown(m) {
 }
 function mySimPanel(m) {
   const p = el("div", "sim-panel");
-  p.appendChild(simHead("내 시뮬: " + (m.myName || ""), m.simCanMega, m.simMega, "/api/sim/my/mega"));
+  p.appendChild(simHead("내 시뮬: " + (m.myName || ""), m.simCanMega, m.simMega, "/api/sim/my/mega",
+                        m.simCanPalafin, m.simPalafin)); // 171차 — 돌핀맨 마이티폼 버튼
   // 170차 — 지닌도구 + 특성 수평 2칸(상대 시뮬 패널과 동일 레이아웃, 세로 스크롤 방지).
   const cols = el("div", "sim-cols");
   const itemCol = el("div", "sim-col");
@@ -1369,7 +1383,8 @@ function oppSimBuildDropdown(m, kind) {
 function oppSimPanel(m) {
   const p = el("div", "sim-panel");
   // 149차 — 지닌도구는 시점 무관 전체 목록(114차의 시점별 분기 폐기, oppItemDropdown 주석). 랭크/노력치/성격도 시점 무관 전체 유지(114차).
-  p.appendChild(oppSimHead("상대 시뮬: " + (m.oppName || ""), m.oppSimMegaForms, m.oppSimMegaIndex));
+  p.appendChild(oppSimHead("상대 시뮬: " + (m.oppName || ""), m.oppSimMegaForms, m.oppSimMegaIndex,
+                           m.oppSimCanPalafin, m.oppSimPalafin)); // 171차 — 돌핀맨 마이티폼 버튼
   // 83차 — 지닌도구 + 특성을 수평 2칸으로(세로 스크롤 제거). 각 드롭다운 펼침은 absolute라 옆칸 안 밀림.
   const cols = el("div", "sim-cols");
   const itemCol = el("div", "sim-col");
