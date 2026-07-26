@@ -732,6 +732,15 @@ BD_PAGE = """<!DOCTYPE html>
   .bd-toggle a.active {{ background: var(--accent); color: #fff; }}
   .bd-toggle a:hover {{ text-decoration: none; color: var(--txt); }}
   .bd-toggle a.active:hover {{ color: #fff; }}
+  /* 169차 — 검색(클라이언트 필터). 목록이 235종이라 이름/기술/도구로 즉시 좁힌다. */
+  .bd-search-wrap {{ display: flex; align-items: center; gap: 10px; margin: 16px 0 0; flex-wrap: wrap; }}
+  .bd-search {{ flex: 1; min-width: 260px; background: var(--panel); color: var(--txt);
+    border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font: inherit; font-size: 14px; }}
+  .bd-search:focus {{ outline: none; border-color: var(--accent); }}
+  .bd-search::placeholder {{ color: var(--muted); }}
+  .bd-search-cnt {{ color: var(--muted); font-size: 13px; white-space: nowrap; }}
+  .bd-empty {{ color: var(--muted); font-size: 14px; padding: 22px 2px; margin: 0; }}
+  .bd-h[hidden], .bd-list[hidden] {{ display: none; }}
 </style>
 </head>
 <body>
@@ -768,6 +777,13 @@ BD_PAGE = """<!DOCTYPE html>
     <p class="attrib" style="margin:0">{attrib} · 시즌 {season} · {fmt_label} 배틀 · 데이터는 시즌 통계에 따라 주기적으로 갱신됩니다.</p>
   </section>
 
+  <div class="bd-search-wrap">
+    <input id="bdq" class="bd-search" type="search" autocomplete="off"
+           placeholder="포켓몬 · 기술 · 특성 · 지닌도구 검색 (예: 한카리아스, 지진, 기합의띠)" aria-label="배틀데이터 검색">
+    <span class="bd-search-cnt" id="bdcnt"></span>
+  </div>
+  <p class="bd-empty" id="bdempty" hidden>검색 결과가 없습니다. 다른 이름이나 기술명으로 찾아보세요.</p>
+
   {body}
 
   <section class="card" style="margin-top:20px">
@@ -781,6 +797,43 @@ BD_PAGE = """<!DOCTYPE html>
     </div>
   </section>
 </main>
+
+<script>
+/* 169차 — 배틀데이터 검색. 235종이 이미 DOM 에 있으므로 클라이언트 필터로 충분(요청 0, 색인 영향 없음).
+   검색 키(data-s)에는 목록에 안 보이는 기술/특성/도구까지 들어 있어 '기합의띠' 같은 질의도 잡힌다.
+   ★이 템플릿은 str.format() 으로 렌더되므로 중괄호는 {{ }} 로 이스케이프한다. */
+(function () {{
+  var q = document.getElementById("bdq");
+  if (!q) return;
+  var rows = [].slice.call(document.querySelectorAll(".bd-row"));
+  var lists = [].slice.call(document.querySelectorAll(".bd-list"));
+  var heads = [].slice.call(document.querySelectorAll(".bd-h"));
+  var cnt = document.getElementById("bdcnt");
+  var empty = document.getElementById("bdempty");
+  var total = rows.length;
+
+  function apply() {{
+    var v = q.value.trim().toLowerCase();
+    var hit = 0;
+    rows.forEach(function (r) {{
+      var ok = !v || (r.dataset.s || "").indexOf(v) !== -1;
+      r.hidden = !ok;
+      if (ok) hit++;
+    }});
+    /* 섹션(순위권/순위권 밖)은 남은 항목이 없으면 헤더까지 접는다 */
+    lists.forEach(function (list, i) {{
+      var any = [].slice.call(list.querySelectorAll(".bd-row")).some(function (r) {{ return !r.hidden; }});
+      list.hidden = !any;
+      if (heads[i]) heads[i].hidden = !any;
+    }});
+    cnt.textContent = v ? (hit + " / " + total + "종") : (total + "종");
+    empty.hidden = hit !== 0;
+  }}
+
+  q.addEventListener("input", apply);
+  apply();
+}})();
+</script>
 
 <footer>
   <div class="wrap">
@@ -797,6 +850,14 @@ BD_PAGE = """<!DOCTYPE html>
 </html>
 """
 
+def _bd_search_key(e, u):
+    """169차 — 검색 키. 목록에 안 보이는 기술/특성/도구까지 포함해 '기합의띠' 같은 질의로도 찾게 한다."""
+    words = [e.get("ko", ""), e.get("en", "")]
+    for field in ("moves", "abils", "items"):
+        words += [x.get("ko", "") for x in (u.get(field) or [])]
+        words += [x.get("en", "") for x in (u.get(field) or [])]
+    return " ".join(w for w in words if w).lower()
+
 def _bd_row(e, u, rank):
     top = u["moves"][:3]
     mv = ", ".join(
@@ -807,7 +868,7 @@ def _bd_row(e, u, rank):
     ab_html = (f'<span class="bd-ab">{esc(ab[0]["ko"])} {ab[0]["pct"]:g}%</span>'
                if ab and isinstance(ab[0].get("pct"), (int, float)) else "")
     rk = f'<span class="bd-rank">{rank}</span>' if rank else '<span class="bd-rank">–</span>'
-    return (f'<a class="bd-row" href="/pokedex/{slug(e["en"])}/">{rk}'
+    return (f'<a class="bd-row" data-s="{esc(_bd_search_key(e, u))}" href="/pokedex/{slug(e["en"])}/">{rk}'
             f'<img src="/sprites/{esc(e["sprite"])}" alt="{esc(e["ko"])}" width="42" height="42" loading="lazy">'
             f'<span class="bd-nm">{esc(e["ko"])}</span>'
             f'{ab_html}'
