@@ -8,10 +8,12 @@ name: Build move-usage
 #   pokedb 시절의 pch-relay/secrets 는 미사용 — 만약 언젠가 403 이 나면 그 구조를 upstream 만 바꿔 재사용).
 #   push 대상: dev(작업 브랜치) + dev:main(GitHub Pages 재배포) — 사이트 운영 규칙과 동일.
 
+# ★169차 — 자동 실행 중단(cron 제거). usage 소스를 게임 공식 랭크 순위 데이터로 교체했다.
+#   새 파이프라인 = 비공개 repo(pch-usage-pipeline)의 windows runner cron 이 helper-data/move-usage{,-double}.json 을
+#   직접 갱신하고 도감/배틀데이터 페이지까지 재생성한다. 이 workflow 가 계속 돌면 공식 데이터를
+#   championsbattledata 판으로 덮어쓰므로 cron 을 뺐다. 파일은 롤백 경로로 남겨둔다(수동 실행하면 구 소스 복귀).
 on:
-  schedule:
-    - cron: "0 12 * * *"   # 매일 12:00 UTC (24시간 주기 — 소스 일일 갱신이 ~10:30 UTC 관측, 그 후 수집)
-  workflow_dispatch: {}      # 수동 실행도 허용(테스트/즉시 갱신)
+  workflow_dispatch: {}      # 수동 실행 전용(구 소스 롤백용)
 
 permissions:
   contents: write

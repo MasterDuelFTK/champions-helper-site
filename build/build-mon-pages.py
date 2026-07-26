@@ -21,11 +21,12 @@ def _norm(s):
 # 실전 사용률(선택) — helper-data/move-usage.json 이 있으면 상세페이지 + 배틀데이터 페이지에 반영.
 #   championsbattledata.com API 유래(154차 소스 재교체 — pokedb 가 사용자 IP 차단, 출처표기 필수).
 #   key = 정규화된 master nameEn.
-USAGE, USAGE_SEASON = {}, ""
+USAGE, USAGE_SEASON, USAGE_SOURCE = {}, "", ""
 try:
     with open(os.path.join(SITE, "helper-data", "move-usage.json"), encoding="utf-8") as f:
         _u = json.load(f)
     USAGE_SEASON = _u.get("season", "")
+    USAGE_SOURCE = _u.get("source", "")     # 169차 — "official-ranking" 이면 공식 데이터
     USAGE = {_norm(k): v for k, v in _u.get("pokemon", {}).items()}
 except FileNotFoundError:
     print("  (move-usage.json 없음 — 사용률 섹션 생략)")
@@ -41,7 +42,11 @@ try:
 except FileNotFoundError:
     print("  (move-usage-double.json 없음 — 더블 섹션 생략)")
 
-ATTRIB = ('Battle data provided by <a href="https://championsbattledata.com/" '
+# 169차 — 출처 표기는 데이터의 source 필드로 자동 전환. 소스를 되돌려도 표기가 어긋나지 않는다.
+#   official-ranking = 게임 공식 랭크 배틀 순위 데이터 / 그 외 = 기존 championsbattledata 경유분.
+ATTRIB = ('데이터 출처: 포켓몬 챔피언스 공식 랭크 배틀 순위 데이터'
+          if USAGE_SOURCE == "official-ranking" else
+          'Battle data provided by <a href="https://championsbattledata.com/" '
           'target="_blank" rel="noopener">Pok&eacute;mon Champions Battle Data</a>')
 
 # 순위 = move-usage.json 의 rank(소스 column_position, 1~235 완전) 그대로 사용.
@@ -206,6 +211,100 @@ def item_usage_section(en, usage_map=None, season="", fmt="싱글"):
             f'<p class="matchup-note" style="margin:0 0 12px">실제 랭크 배틀({fmt})에서 이 포켓몬이 지닌 도구의 채용률입니다. '
             '상대가 구애 도구·기합의띠·열매 등 무엇을 들고 있을지 예측하는 데 참고하세요.</p>'
             '<div class="use-list">' + "".join(rows) + '</div>'
+            f'<p class="attrib">{ATTRIB}{season_txt}</p></section>')
+
+# ── 169차 신규 — usage 소스를 공식 순위데이터로 교체하며 함께 들어온 항목들 ─────────
+#   move-usage.json 의 natures / spreads / teammates / winVs / loseVs 를 쓴다.
+#   구 데이터(해당 키 없음)에서는 전부 조용히 생략 → 소스를 되돌려도 안전.
+STAT_ABBR = {"hp": "H", "atk": "A", "def": "B", "spa": "C", "spd": "D", "spe": "S"}
+
+def nature_usage_section(en, usage_map=None, season="", fmt="싱글"):
+    """자주 쓰는 성격 — 스탯 보정(↑/↓)까지 표기. 상대 실수치 추정에 직결."""
+    u = (USAGE if usage_map is None else usage_map).get(_norm(en))
+    if not u or not u.get("natures"):
+        return ""
+    rows = []
+    for n in u["natures"][:8]:
+        pct = n.get("pct")
+        w = min(100, pct) if isinstance(pct, (int, float)) else 0
+        ptxt = f"{pct:g}%" if isinstance(pct, (int, float)) else "-"
+        up, down = n.get("up"), n.get("down")
+        mod = (f' <span style="color:var(--muted);font-weight:500">'
+               f'{STAT_ABBR.get(up, up)}↑{STAT_ABBR.get(down, down)}↓</span>') if up and down else \
+              ' <span style="color:var(--muted);font-weight:500">무보정</span>'
+        rows.append(f'<div class="use-row"><span class="use-nm">{esc(n["ko"])}{mod}</span>'
+                    f'<div class="bar"><i style="width:{w:.0f}%;background:#D685AD"></i></div>'
+                    f'<span class="use-pct">{ptxt}</span></div>')
+    season_txt = f' · 시즌 {esc(season)} {fmt} 배틀' if season else ''
+    return (f'<section class="card"><h2>자주 쓰는 성격 <span class="sub">{fmt} 채용률</span></h2>'
+            f'<p class="matchup-note" style="margin:0 0 12px">실제 랭크 배틀({fmt})에서 이 포켓몬이 채용한 성격의 비율입니다. '
+            '성격은 스탯에 ×1.1 / ×0.9 보정을 주므로, 상대의 실제 수치(특히 스피드)를 추정할 때 참고하세요.</p>'
+            '<div class="use-list">' + "".join(rows) + '</div>'
+            f'<p class="attrib">{ATTRIB}{season_txt}</p></section>')
+
+def spread_usage_section(en, usage_map=None, season="", fmt="싱글"):
+    """노력치 배분 순위 — 챔피언스는 스탯당 최대 32 / 합 66."""
+    u = (USAGE if usage_map is None else usage_map).get(_norm(en))
+    if not u or not u.get("spreads"):
+        return ""
+    order = ["H", "A", "B", "C", "D", "S"]
+    rows = []
+    for s in u["spreads"][:10]:
+        ev = s.get("ev") or []
+        if len(ev) != 6:
+            continue
+        label = " ".join(f"{order[i]}{v}" for i, v in enumerate(ev) if v) or "노력치 없음"
+        pct = s.get("pct")
+        w = min(100, pct) if isinstance(pct, (int, float)) else 0
+        ptxt = f"{pct:g}%" if isinstance(pct, (int, float)) else "-"
+        rows.append(f'<div class="use-row"><span class="use-nm" style="font-family:Consolas,monospace">{esc(label)}</span>'
+                    f'<div class="bar"><i style="width:{w:.0f}%;background:#96D9D6"></i></div>'
+                    f'<span class="use-pct">{ptxt}</span></div>')
+    if not rows:
+        return ""
+    season_txt = f' · 시즌 {esc(season)} {fmt} 배틀' if season else ''
+    return (f'<section class="card"><h2>노력치 배분 순위 <span class="sub">{fmt} 채용률</span></h2>'
+            f'<p class="matchup-note" style="margin:0 0 12px">실제 랭크 배틀({fmt})에서 많이 쓰인 노력치 배분입니다. '
+            '챔피언스의 노력치는 스탯당 최대 32, 합계 66입니다. '
+            'H=HP · A=공격 · B=방어 · C=특공 · D=특방 · S=스피드.</p>'
+            '<div class="use-list">' + "".join(rows) + '</div>'
+            f'<p class="attrib">{ATTRIB}{season_txt}</p></section>')
+
+def _mon_links(lst):
+    out = []
+    for m in lst[:10]:
+        en, ko = m.get("name"), (m.get("ko") or m.get("name"))
+        if not en:
+            continue
+        out.append(f'<a href="/pokedex/{slug(en)}/" class="mchip" '
+                   'style="background:var(--panel2);border:1px solid var(--line);color:var(--txt);'
+                   'padding:5px 11px;border-radius:9px;font-size:12.5px">'
+                   f'{esc(ko)}</a>')
+    return "".join(out)
+
+def synergy_section(en, usage_map=None, season="", fmt="싱글"):
+    """팀 조합 · 매치업 — 같이 쓰인 포켓몬 / 이길 때·질 때 자주 만난 상대."""
+    u = (USAGE if usage_map is None else usage_map).get(_norm(en))
+    if not u:
+        return ""
+    team, win, lose = u.get("teammates") or [], u.get("winVs") or [], u.get("loseVs") or []
+    if not (team or win or lose):
+        return ""
+    blocks = []
+    if team:
+        blocks.append('<div class="matchup-grp"><div class="h">자주 같이 쓰는 포켓몬</div>'
+                      f'<div class="mrow">{_mon_links(team)}</div></div>')
+    if win:
+        blocks.append('<div class="matchup-grp resist"><div class="h">이길 때 자주 만난 상대</div>'
+                      f'<div class="mrow">{_mon_links(win)}</div></div>')
+    if lose:
+        blocks.append('<div class="matchup-grp weak"><div class="h">질 때 자주 만난 상대</div>'
+                      f'<div class="mrow">{_mon_links(lose)}</div></div>')
+    season_txt = f' · 시즌 {esc(season)} {fmt} 배틀' if season else ''
+    return (f'<section class="card"><h2>팀 조합 · 매치업 <span class="sub">{fmt} 통계</span></h2>'
+            f'<p class="matchup-note" style="margin:0 0 12px">실제 랭크 배틀({fmt})에서 이 포켓몬과 함께 편성된 포켓몬, '
+            '그리고 승패가 갈렸을 때 자주 마주친 상대입니다. 파티를 짤 때와 상대 파티를 읽을 때 참고하세요.</p>'
+            + "".join(blocks) +
             f'<p class="attrib">{ATTRIB}{season_txt}</p></section>')
 
 def abil_cards(abils):
@@ -458,12 +557,20 @@ def build_pages():
             stats=stat_bars(e["stats"]),
             matchup=matchup_block(e["types"]),
             abils=abil_cards(e["abil"]),
+            # 169차 — 소스를 공식 순위데이터로 교체하며 성격/노력치/팀조합·매치업 섹션 추가.
+            #   순서 = 기술 → 특성 → 도구 → 성격 → 노력치 → 팀조합·매치업 (싱글 전부, 이어서 더블 전부).
             usage=usage_section(e["en"], USAGE, USAGE_SEASON, "싱글")
                   + ability_usage_section(e["en"], USAGE, USAGE_SEASON, "싱글")
                   + item_usage_section(e["en"], USAGE, USAGE_SEASON, "싱글")
+                  + nature_usage_section(e["en"], USAGE, USAGE_SEASON, "싱글")
+                  + spread_usage_section(e["en"], USAGE, USAGE_SEASON, "싱글")
+                  + synergy_section(e["en"], USAGE, USAGE_SEASON, "싱글")
                   + usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블")
                   + ability_usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블")
-                  + item_usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블"),
+                  + item_usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블")
+                  + nature_usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블")
+                  + spread_usage_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블")
+                  + synergy_section(e["en"], USAGE_D, USAGE_D_SEASON, "더블"),
             mega=mega_section(e),
             prose=commentary(e),
             prev=pager_link(preve, "prev"),
