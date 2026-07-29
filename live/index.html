@@ -51,11 +51,18 @@
     padding: 5px 10px; background: var(--panel2); border-bottom: 1px solid var(--line);
     flex: 0 0 auto; flex-wrap: wrap;
   }
-  #status { font-size: 12px; color: var(--muted); }
+  /* 174차 — 좌(상태)/우(버전)를 같은 flex 비율로 두고 가운데 버튼을 정중앙 고정. */
+  #status { font-size: 12px; color: var(--muted); flex: 1 1 0; min-width: 0; }
   #status.ok { color: #6fd08a; }
   #status.warn { color: #e0b000; }
   /* 98차 — /live 버전 표시(최상단 바 우측, 게임 요소 없는 구간). wwwroot↔사이트 동기화 추적용. */
-  #version { font-size: 11px; color: var(--muted); margin-left: auto; opacity: 0.65; }
+  #version { font-size: 11px; color: var(--muted); flex: 1 1 0; text-align: right; opacity: 0.65; }
+  /* 174차 — 배틀 상태 초기화(배틀 종료 멘트 미인식으로 다음 판 엔트리 인식이 안 될 때의 수동 탈출구). */
+  #battle-reset {
+    flex: 0 0 auto; font-size: 11px; padding: 2px 10px; border-radius: 6px;
+    border: 1px solid var(--line); background: var(--panel); color: var(--muted); cursor: pointer;
+  }
+  #battle-reset:hover { color: var(--txt); border-color: var(--accent); }
   /* 매치업 타이틀 바(152차): [내 필드칩(좌)] [필드+날씨 드롭다운(정중앙)] [상대 필드칩(우)] — "매치업" 글자 삭제 */
   .mu-title-bar { display: flex; align-items: center; gap: 8px; margin: 0 0 2px 2px; }
   .field-chips { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
@@ -442,7 +449,8 @@
 <body>
   <div id="bar">
     <span id="status">로컬 헬퍼 연결 대기…</span>
-    <span id="version">v0.171</span>
+    <button id="battle-reset" title="게임이 끝났는데 다음 판 엔트리 화면에서 상대 파티를 인식하지 못할 때 누르세요. 배틀 진행 상태를 풀어 다음 엔트리 화면을 다시 인식합니다.">배틀 상태 초기화</button>
+    <span id="version">v0.174</span>
   </div>
   <!-- 160차 — LNA 권한 게이트(공개 도메인 → 로컬 헬퍼 연결에 크롬 권한 필요). 기본 숨김, 내용은 showLnaGate가 채움. -->
   <div id="lna-gate">
@@ -2236,6 +2244,12 @@ function selectPickCell(mi, oj, td) {
   ((e.duel && e.duel.reasons) || []).forEach((r) => det.appendChild(el("div", "pick-reason", "· " + r)));
   det.style.display = "block";
 }
+// 174차 — 배틀 상태 초기화. 배틀 종료 멘트("승부에서 …")를 OCR이 놓치면 배틀 진행 상태가 고착돼
+//   다음 판 엔트리 화면을 인식하지 못한다. 그때 누르면 오버레이 재시작 없이 풀린다(전적은 올라가지 않음).
+$("#battle-reset").onclick = () => {
+  sim("/api/sim/battle/reset");
+  setStatus("배틀 상태 초기화 — 다음 엔트리 화면에서 상대 파티를 다시 인식합니다", "warn");
+};
 $("#pick-toggle").onclick = togglePickModal;
 $("#pick-close").onclick = togglePickModal;
 $("#pick-refresh").onclick = fetchPickInfo;
