@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>성격 선택의 실제 — 최속이 정답이 아닌 경우 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스 상위 50종의 1위 성격을 집계하면 스피드 상승 성격은 28%뿐입니다. 고집·조심·대담이 왜 더 많이 선택되는지, 성격 보정이 실수치에 얼마나 영향을 주는지 계산과 함께 정리합니다." />
+<link rel="canonical" href="https://champions-helper.com/guide/nature-meta/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/nature-meta/" />
+<meta property="og:title" content="성격 선택의 실제 — 최속이 정답이 아닌 경우" />
+<meta property="og:description" content="상위 50종의 성격 채용 집계 — 스피드 상승은 28%뿐." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="성격 선택의 실제 — 최속이 정답이 아닌 경우" />
+<meta name="twitter:description" content="상위 50종의 성격 채용 집계 — 스피드 상승은 28%뿐." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "성격 선택의 실제 — 최속이 정답이 아닌 경우",
+  "description": "상위 50종의 성격 채용 집계 — 스피드 상승은 28%뿐.",
+  "inLanguage": "ko",
+  "datePublished": "2026-08-03",
+  "dateModified": "2026-08-03",
+  "url": "https://champions-helper.com/guide/nature-meta/",
+  "author": { "@type": "Organization", "name": "Champions Helper" },
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .article { max-width: 920px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 28px; font-weight: 800; margin: 0 0 10px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 20px; font-weight: 800; margin: 34px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 800; margin: 22px 0 8px; }
+  .article p { margin: 0 0 14px; }
+  .article strong { color: #fff; }
+  .article ul { margin: 0 0 14px; padding-left: 22px; }
+  .article li { margin-bottom: 6px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+  th { background: var(--panel2); }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: center; }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+  .formula { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 16px; margin: 8px 0 16px; font-family: Consolas, monospace; font-size: 13.5px; overflow-x: auto; }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 28px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .foot-links { font-size: 13px; margin: 0 0 12px; }
+  .foot-links a { color: var(--muted); }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 920px; margin: 0 auto; }
+</style>
+  <link rel="stylesheet" href="/site-header.css" />
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/">배틀데이터</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/board/">게시판</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 성격 선택의 실제</div>
+    <h1>성격 선택의 실제 — 최속이 정답이 아닌 경우</h1>
+    <p class="lead">"일단 최속"은 오래된 상식입니다. 그런데 포켓몬 챔피언스 상위 50종의 실제 1위 성격을 세어 보면 <strong>스피드를 올리는 성격은 28%에 불과합니다</strong>. 나머지 72%는 스피드를 포기했습니다. 왜 그런지 데이터와 계산으로 따라가 봅니다.</p>
+
+    <h2>상위 50종의 1위 성격 집계</h2>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>성격</th><th>종 수</th><th>올림 / 내림</th><th>성격이 노리는 것</th></tr></thead>
+      <tbody>
+        <tr><td><strong>고집</strong></td><td class="num">12종</td><td>공격 ↑ / 특공 ↓</td><td>물리 화력</td></tr>
+        <tr><td>조심</td><td class="num">9종</td><td>특공 ↑ / 공격 ↓</td><td>특수 화력</td></tr>
+        <tr><td>대담</td><td class="num">9종</td><td>방어 ↑ / 공격 ↓</td><td>물리 내구</td></tr>
+        <tr><td>명랑</td><td class="num">7종</td><td>스피드 ↑ / 특공 ↓</td><td>물리 + 선공</td></tr>
+        <tr><td>겁쟁이</td><td class="num">7종</td><td>스피드 ↑ / 공격 ↓</td><td>특수 + 선공</td></tr>
+        <tr><td>장난꾸러기</td><td class="num">3종</td><td>방어 ↑ / 특공 ↓</td><td>물리 내구</td></tr>
+        <tr><td>차분 · 무사태평 · 신중</td><td class="num">각 1종</td><td>특방 계열</td><td>특수 내구</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p><strong>스피드 상승 성격(명랑 + 겁쟁이) = 14종 / 50종 = 28%.</strong> 화력 성격(고집 + 조심)이 21종으로 가장 많고, 내구 성격(대담 + 장난꾸러기 + 특방 계열)이 15종으로 그 다음입니다.</p>
+
+    <h2>왜 최속을 포기하나 — 숫자로 보기</h2>
+    <p>성격 보정은 <strong>노력치까지 더한 값 전체에 ×1.1 또는 ×0.9</strong>가 곱해집니다.</p>
+    <div class="formula">실수치 = floor( ( floor((2×종족값+31)×50÷100) + 5 + 노력치 ) × 성격보정 )</div>
+    <p>종족값 100짜리 능력치를 예로 들면, 무보정은 136, 노력치 32를 다 주면 168, 여기에 성격 ×1.1까지 얹으면 184입니다.</p>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>조건</th><th>실수치</th><th>무보정 대비</th></tr></thead>
+      <tbody>
+        <tr><td>노력치 0 · 성격 무보정</td><td class="num">136</td><td class="num">—</td></tr>
+        <tr><td>노력치 32 · 성격 무보정</td><td class="num">168</td><td class="num">+32</td></tr>
+        <tr><td>노력치 32 · 성격 ↑</td><td class="num">184</td><td class="num">+48</td></tr>
+        <tr><td>노력치 0 · 성격 ↑</td><td class="num">149</td><td class="num">+13</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>여기서 핵심은 <strong>노력치 32(+32)가 성격 보정(+16)보다 두 배 크다</strong>는 점입니다. 본가에서는 노력치 252가 실수치를 63 올려 성격 보정과 비슷한 급이었지만, 챔피언스는 노력치 상한이 32라 이 균형이 완전히 다릅니다.</p>
+    <p>그래서 판단이 이렇게 됩니다. <strong>어차피 노력치 32를 넣어도 상대보다 느리다면, 성격까지 스피드에 태워도 여전히 느립니다.</strong> 그럴 바에는 성격을 화력이나 내구에 돌리는 편이 확실한 이득입니다.</p>
+
+    <h2>실제 배분과 겹쳐 보기</h2>
+    <p><a href="/guide/ev-reality/">노력치 배분 분석</a>에서 봤듯 상위 50종의 96%가 32급 능력치를 두 개 가집니다. 성격은 그중 하나에 얹는 것이 표준입니다.</p>
+    <ul>
+      <li><strong>공격 32 + 스피드 32 + 명랑</strong> — 한카리아스·마스카나·메타그로스형. 선공을 확실히 잡아야 하는 에이스.</li>
+      <li><strong>공격 32 + 스피드 32 + 고집</strong> — 스피드는 노력치로만 챙기고 성격은 화력에. 상대 스피드 라인을 넘길 자신이 없을 때.</li>
+      <li><strong>HP 32 + 방어 32 + 대담</strong> — 하마돈·아머까오형. 스피드는 완전히 포기.</li>
+      <li><strong>HP 32 + 특공 32 + 조심</strong> — 누리레느형. 맞으면서 때리는 구조.</li>
+    </ul>
+    <p>대담이 9종이나 되는 것은 <a href="/guide/what-kills-you/">패배 기록 분석</a>과 맞물립니다. 격침의 상당수가 물리 기술(지진 19.3%, 인파이트 5.9%, 플레어드라이브 3.4%, 불릿펀치 3.4%)이므로, 물리 내구에 성격을 태우는 선택이 실전에서 자주 보상받습니다.</p>
+
+    <h2>내림 스탯을 고르는 기준</h2>
+    <p>성격은 하나를 올리면 반드시 하나를 내립니다. ×0.9는 생각보다 큽니다 — 실수치 136짜리 능력치라면 13이 깎입니다.</p>
+    <ul>
+      <li><strong>물리 어태커는 특공을 내린다</strong>(고집·명랑). 특수기를 안 쓰니 손해가 0입니다. 12종이 고집인 이유입니다.</li>
+      <li><strong>특수 어태커는 공격을 내린다</strong>(조심·겁쟁이). 단 <strong>속임수</strong>를 조심해야 합니다. 이 기술은 <strong>상대의 공격 수치</strong>로 데미지를 계산하므로, 공격을 내린 특수 어태커는 속임수에 오히려 덜 아픕니다. 유리한 쪽입니다.</li>
+      <li><strong>내구형은 안 쓰는 공격 계열을 내린다</strong>(대담은 공격, 장난꾸러기는 특공).</li>
+      <li><strong>바디프레스 사용자는 공격을 내려도 손해가 없습니다</strong> — 이 기술은 방어 수치로 계산합니다. 아머까오가 대표적입니다.</li>
+    </ul>
+
+    <h2>상대 성격을 추정하는 법</h2>
+    <p>성격은 보이지 않지만 상위권은 선택이 좁아 추정이 가능합니다. 공식 데이터에는 종별 성격 채용률이 들어 있어, 예컨대 한카리아스는 명랑 54.4% / 고집 26.7% / 장난꾸러기 14.7%로 갈립니다.</p>
+    <ul>
+      <li>상대가 <strong>먼저 움직였다</strong> → 스피드 상승 성격이거나 구애스카프입니다. 어느 쪽이든 이후 계산이 크게 달라집니다.</li>
+      <li>상대의 공격이 <strong>예상보다 아팠다</strong> → 화력 성격입니다. 그러면 대체로 스피드는 무보정입니다.</li>
+      <li>상대가 <strong>확정 1타를 버텼다</strong> → 내구 성격이거나 HP 투자형입니다.</li>
+    </ul>
+    <p><a href="/">데스크탑 앱</a>은 채용률 1위 성격·노력치를 기본 가정으로 잡고, 그 가정이 반영된 데미지 범위를 위력 칩 테두리로 표시합니다. 실전 중에 위 추정을 머릿속으로 할 필요가 없습니다.</p>
+
+    <div class="related">
+      <h3>함께 읽기</h3>
+      <a href="/guide/ev-reality/">노력치 66의 현실 →</a>
+      <a href="/guide/speed-guide/">스피드 실전 가이드 →</a>
+      <a href="/guide/ev-nature/">노력치·성격 배분 가이드 →</a>
+    </div>
+    <p class="note">본문 수치는 <strong>시즌 M-4 · 2026-08-02 집계분</strong> 기준입니다. 원본 데이터는 12시간마다 자동 갱신되므로
+      최신 순위·채용률은 <a href="/battle-data/">배틀데이터</a>와 <a href="/pokedex/">도감</a>에서 확인할 수 있습니다.
+      집계 방법과 출처는 <a href="/about/">사이트 소개</a>에 정리해 두었습니다.</p>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="/about/">사이트 소개</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

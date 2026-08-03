@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>싱글과 더블은 다른 게임 — 순위 격차 데이터 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스 싱글·더블 사용률 순위를 나란히 놓으면 같은 포켓몬의 평가가 100계단 넘게 갈립니다. 키키링 176위→8위, 하마돈 4위→130위. 무엇이 이 격차를 만드는지 분석합니다." />
+<link rel="canonical" href="https://champions-helper.com/guide/singles-vs-doubles/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/singles-vs-doubles/" />
+<meta property="og:title" content="싱글과 더블은 다른 게임 — 순위 격차 데이터" />
+<meta property="og:description" content="싱글·더블 사용률 순위 격차와 그 원인 분석." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="싱글과 더블은 다른 게임 — 순위 격차 데이터" />
+<meta name="twitter:description" content="싱글·더블 사용률 순위 격차와 그 원인 분석." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "싱글과 더블은 다른 게임 — 순위 격차 데이터",
+  "description": "싱글·더블 사용률 순위 격차와 그 원인 분석.",
+  "inLanguage": "ko",
+  "datePublished": "2026-08-03",
+  "dateModified": "2026-08-03",
+  "url": "https://champions-helper.com/guide/singles-vs-doubles/",
+  "author": { "@type": "Organization", "name": "Champions Helper" },
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .article { max-width: 920px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 28px; font-weight: 800; margin: 0 0 10px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 20px; font-weight: 800; margin: 34px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 800; margin: 22px 0 8px; }
+  .article p { margin: 0 0 14px; }
+  .article strong { color: #fff; }
+  .article ul { margin: 0 0 14px; padding-left: 22px; }
+  .article li { margin-bottom: 6px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+  th { background: var(--panel2); }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: center; }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+  .formula { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 16px; margin: 8px 0 16px; font-family: Consolas, monospace; font-size: 13.5px; overflow-x: auto; }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 28px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .foot-links { font-size: 13px; margin: 0 0 12px; }
+  .foot-links a { color: var(--muted); }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 920px; margin: 0 auto; }
+</style>
+  <link rel="stylesheet" href="/site-header.css" />
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/">배틀데이터</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/board/">게시판</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 싱글과 더블은 다른 게임</div>
+    <h1>싱글과 더블은 다른 게임 — 순위 격차 데이터</h1>
+    <p class="lead">싱글에서 잘 쓰던 파티를 더블에 그대로 들고 가면 대개 잘 안 됩니다. 감각적으로는 다들 아는 이야기인데, 공식 랭크 데이터의 싱글·더블 순위를 나란히 놓으면 그 격차가 얼마나 큰지 숫자로 드러납니다. <strong>같은 포켓몬이 100계단 넘게 움직입니다.</strong></p>
+
+    <h2>더블에서 급등하는 포켓몬</h2>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>포켓몬</th><th>싱글 순위</th><th>더블 순위</th><th>변동</th></tr></thead>
+      <tbody>
+        <tr><td>키키링</td><td class="num">176위</td><td class="num"><strong>8위</strong></td><td class="num">+168</td></tr>
+        <tr><td>하랑우탄</td><td class="num">227위</td><td class="num">59위</td><td class="num">+168</td></tr>
+        <tr><td>폭타</td><td class="num">192위</td><td class="num">58위</td><td class="num">+134</td></tr>
+        <tr><td>달코퀸</td><td class="num">153위</td><td class="num">42위</td><td class="num">+111</td></tr>
+        <tr><td>코터스</td><td class="num">122위</td><td class="num">22위</td><td class="num">+100</td></tr>
+        <tr><td>왕구리</td><td class="num">140위</td><td class="num">45위</td><td class="num">+95</td></tr>
+        <tr><td>프테라</td><td class="num">106위</td><td class="num">14위</td><td class="num">+92</td></tr>
+        <tr><td>파이어로</td><td class="num">117위</td><td class="num">34위</td><td class="num">+83</td></tr>
+        <tr><td>어흥염</td><td class="num">84위</td><td class="num"><strong>3위</strong></td><td class="num">+81</td></tr>
+        <tr><td>그우린차</td><td class="num">71위</td><td class="num"><strong>4위</strong></td><td class="num">+67</td></tr>
+        <tr><td>밀로틱</td><td class="num">63위</td><td class="num">17위</td><td class="num">+46</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>싱글에서만 강한 포켓몬</h2>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>포켓몬</th><th>싱글 순위</th><th>더블 순위</th><th>변동</th></tr></thead>
+      <tbody>
+        <tr><td>하마돈</td><td class="num"><strong>4위</strong></td><td class="num">130위</td><td class="num">-126</td></tr>
+        <tr><td>라우드본</td><td class="num">30위</td><td class="num">123위</td><td class="num">-93</td></tr>
+        <tr><td>킬가르도</td><td class="num">17위</td><td class="num">91위</td><td class="num">-74</td></tr>
+        <tr><td>블래키</td><td class="num">33위</td><td class="num">105위</td><td class="num">-72</td></tr>
+        <tr><td>아쿠스타</td><td class="num">24위</td><td class="num">92위</td><td class="num">-68</td></tr>
+        <tr><td>이어롭</td><td class="num">35위</td><td class="num">101위</td><td class="num">-66</td></tr>
+        <tr><td>따라큐</td><td class="num"><strong>2위</strong></td><td class="num">63위</td><td class="num">-61</td></tr>
+        <tr><td>갸라도스</td><td class="num">8위</td><td class="num">67위</td><td class="num">-59</td></tr>
+        <tr><td>찌리배리</td><td class="num">28위</td><td class="num">86위</td><td class="num">-58</td></tr>
+        <tr><td>개굴닌자</td><td class="num">13위</td><td class="num">68위</td><td class="num">-55</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>격차를 만드는 세 가지 축</h2>
+
+    <h3>① 광역기 — 한 번에 둘을 때린다</h3>
+    <p>더블에서 급등한 포켓몬 대부분이 <strong>광역기를 가진 종</strong>입니다. 폭타·코터스는 분화·열풍 계열, 프테라는 스톤샤워를 씁니다. 상대 두 마리를 동시에 때리면 실질 화력이 그대로 두 배가 됩니다.</p>
+    <p>다만 광역기는 데미지에 <strong>×0.75 보정</strong>이 붙습니다. 싱글 기준으로 확정 1타였던 계산이 더블에서는 확정이 아니게 되는 경우가 자주 생깁니다. 더블 계산에서 가장 흔한 실수가 이 보정을 빼먹는 것입니다.</p>
+
+    <h3>② 서포트 — 싱글에는 존재하지 않는 역할</h3>
+    <p>어흥염이 싱글 84위에서 <strong>더블 3위</strong>로 뛴 것이 대표적입니다. 위협으로 상대 두 마리의 공격을 동시에 떨어뜨리고, 속이기로 한 마리의 행동을 막습니다. 싱글에서는 위협이 한 마리에게만 걸리고 속이기는 한 턴 벌기에 그치지만, 더블에서는 <strong>두 배로 작동</strong>합니다.</p>
+    <p>키키링(176→8위)과 그우린차(71→4위)도 같은 계열입니다. 혼자서는 상대를 못 이기지만 파트너를 이기게 만드는 포켓몬들이고, 이런 역할은 싱글에 아예 존재하지 않습니다.</p>
+
+    <h3>③ 장기전 구조의 소멸</h3>
+    <p>반대로 하마돈이 4위에서 130위로 떨어진 이유가 여기 있습니다. 하마돈의 강점은 <strong>버티면서 하품으로 상대를 재우고 지진으로 조금씩 깎는</strong> 장기전입니다. 그런데 더블은 상대가 둘이라 한 마리를 재워도 다른 한 마리가 계속 때립니다. 턴당 받는 공격이 두 배가 되면 "버티면서 이긴다"는 전제 자체가 무너집니다.</p>
+    <p>블래키·라우드본·이어롭이 함께 떨어진 것도 같은 이유입니다. 게다가 하마돈의 지진은 더블에서 <strong>내 파트너까지 때립니다</strong>. 싱글 최강급 기술이 더블에서는 파트너를 가려 뽑아야 하는 부담이 됩니다.</p>
+
+    <h3>따라큐 2위 → 63위, 조금 다른 이야기</h3>
+    <p>따라큐의 하락(-61)은 다른 이유입니다. 탈 특성은 <strong>공격을 딱 한 번 무효화</strong>합니다. 싱글에서는 한 턴을 확실히 버는 강력한 능력이지만, 더블에서는 같은 턴에 두 번 맞으므로 첫 공격에 탈이 벗겨지고 두 번째 공격이 그대로 들어옵니다. <strong>"한 번 무효"의 값어치가 절반이 되는</strong> 구조입니다.</p>
+    <p>같은 이유로 기합의띠도 더블에서 값어치가 떨어집니다. 한 번 버텨도 파트너 쪽 공격에 마무리당하기 때문입니다.</p>
+
+    <h2>파티를 옮길 때 점검할 것</h2>
+    <ul>
+      <li><strong>지진 보유자</strong> — 더블에서는 파트너도 때립니다. 비행 타입이나 부유 파트너와 함께 쓰거나, 기술을 바꿔야 합니다.</li>
+      <li><strong>내구·장기전 포켓몬</strong> — 턴당 피해가 두 배가 되므로 대체로 그대로는 안 굴러갑니다.</li>
+      <li><strong>서포트 요원 확보</strong> — 위협·속이기·순풍·트릭룸 요원이 하나도 없으면 더블에서는 대체로 불리합니다.</li>
+      <li><strong>광역기 계산</strong> — ×0.75 보정을 넣고 다시 계산해야 합니다.</li>
+    </ul>
+    <p><a href="/battle-data/doubles/">더블 배틀데이터</a>에서 더블 전용 순위·채용률을 따로 볼 수 있고, <a href="/pokedex/">도감 상세 페이지</a>도 싱글과 더블 통계를 나란히 싣고 있습니다. <a href="/">데스크탑 앱</a>은 더블 모드를 감지하면 광역기 보정과 4마리 선출 추천으로 자동 전환합니다.</p>
+
+    <div class="related">
+      <h3>함께 읽기</h3>
+      <a href="/guide/meta-doubles/">더블 메타 분석 →</a>
+      <a href="/guide/matchup-map/">상성 지도 →</a>
+      <a href="/guide/team-cores/">실제로 함께 쓰이는 코어 →</a>
+    </div>
+    <p class="note">본문 수치는 <strong>시즌 M-4 · 2026-08-02 집계분</strong> 기준입니다. 원본 데이터는 12시간마다 자동 갱신되므로
+      최신 순위·채용률은 <a href="/battle-data/">배틀데이터</a>와 <a href="/pokedex/">도감</a>에서 확인할 수 있습니다.
+      집계 방법과 출처는 <a href="/about/">사이트 소개</a>에 정리해 두었습니다.</p>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="/about/">사이트 소개</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

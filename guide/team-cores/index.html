@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>실제로 함께 쓰이는 코어 — 팀 조합 데이터로 본 파티 구성 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스 공식 랭크 데이터의 팀 조합 기록을 분석해, 상위권이 실제로 어떤 포켓몬을 함께 쓰는지 정리했습니다. 한카리아스·따라큐 중심의 코어 구조와 그 이유." />
+<link rel="canonical" href="https://champions-helper.com/guide/team-cores/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/team-cores/" />
+<meta property="og:title" content="실제로 함께 쓰이는 코어 — 팀 조합 데이터로 본 파티 구성" />
+<meta property="og:description" content="공식 팀 조합 기록으로 본 실제 파티 코어 구조." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="실제로 함께 쓰이는 코어 — 팀 조합 데이터로 본 파티 구성" />
+<meta name="twitter:description" content="공식 팀 조합 기록으로 본 실제 파티 코어 구조." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "실제로 함께 쓰이는 코어 — 팀 조합 데이터로 본 파티 구성",
+  "description": "공식 팀 조합 기록으로 본 실제 파티 코어 구조.",
+  "inLanguage": "ko",
+  "datePublished": "2026-08-03",
+  "dateModified": "2026-08-03",
+  "url": "https://champions-helper.com/guide/team-cores/",
+  "author": { "@type": "Organization", "name": "Champions Helper" },
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .article { max-width: 920px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 28px; font-weight: 800; margin: 0 0 10px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 20px; font-weight: 800; margin: 34px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 800; margin: 22px 0 8px; }
+  .article p { margin: 0 0 14px; }
+  .article strong { color: #fff; }
+  .article ul { margin: 0 0 14px; padding-left: 22px; }
+  .article li { margin-bottom: 6px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+  th { background: var(--panel2); }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: center; }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+  .formula { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 16px; margin: 8px 0 16px; font-family: Consolas, monospace; font-size: 13.5px; overflow-x: auto; }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 28px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .foot-links { font-size: 13px; margin: 0 0 12px; }
+  .foot-links a { color: var(--muted); }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 920px; margin: 0 auto; }
+</style>
+  <link rel="stylesheet" href="/site-header.css" />
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/">배틀데이터</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/board/">게시판</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 실제로 함께 쓰이는 코어</div>
+    <h1>실제로 함께 쓰이는 코어 — 팀 조합 데이터로 본 파티 구성</h1>
+    <p class="lead">"이 포켓몬과 저 포켓몬은 궁합이 좋다"는 말은 대체로 감각에 기댑니다. 공식 랭크 데이터에는 각 포켓몬이 <strong>실제로 어떤 포켓몬과 같은 파티에 편성됐는지</strong>가 기록돼 있습니다. 상위권이 실제로 무엇을 함께 쓰는지 보면, 파티 구성의 실전 논리가 드러납니다.</p>
+
+    <h2>상위권 코어의 실제 모습</h2>
+    <p>싱글 사용률 상위 30종을 대상으로, 서로의 팀 조합 목록에 <strong>양방향으로</strong> 등장하는 쌍을 뽑았습니다. 한쪽만 상대를 지목한 게 아니라 서로가 서로를 지목한 조합이라, 우연이 아닌 실제 코어로 볼 수 있습니다.</p>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>중심 포켓몬</th><th>함께 쓰이는 상위권</th></tr></thead>
+      <tbody>
+        <tr><td><a href="/pokedex/garchomp/"><strong>한카리아스</strong></a> (1위)</td><td>따라큐 · 누리레느 · 마스카나 · 메타그로스 · 브리두라스 · 갸라도스 · 마폭시 · 리자몽 · 번치코 · 핫삼</td></tr>
+        <tr><td><a href="/pokedex/mimikyu/"><strong>따라큐</strong></a> (2위)</td><td>한카리아스 · 메타그로스 · 하마돈 · 브리두라스 · 누리레느 · 마스카나 · 리자몽 · 갸라도스 · 마폭시 · 개굴닌자</td></tr>
+        <tr><td><a href="/pokedex/meowscarada/">마스카나</a> (3위)</td><td>한카리아스 · 따라큐 · 하마돈 · 누리레느 · 메타그로스</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>한카리아스와 따라큐가 <strong>거의 모든 상위권과 짝을 이룹니다</strong>. 상위 30종 중 열 종씩과 양방향으로 엮여 있습니다. 이건 "이 둘이 특정 포켓몬과 궁합이 좋다"가 아니라 <strong>"이 둘은 아무 파티에나 들어간다"</strong>는 뜻에 가깝습니다.</p>
+
+    <h2>범용 코어와 전용 코어</h2>
+
+    <h3>범용형 — 파티를 안 가린다</h3>
+    <p>한카리아스가 이 자리에 있는 이유는 명확합니다. 땅·드래곤 타입에 지진 채용률 99.3%, 스텔스록 46.8%. <a href="/guide/what-kills-you/">격침 1위 기술</a>을 자속으로 쓰면서 설치기까지 겸합니다. 공격 성능과 지원 성능을 한 자리에서 해결하니 어떤 구성에도 들어갑니다.</p>
+    <p>따라큐는 다른 방향의 범용성입니다. 탈 특성이 <strong>어떤 공격이든 한 번은 무효화</strong>하므로, 상대가 누구든 최소 한 턴은 확보됩니다. 상성 계산이 필요 없는 안정성이라 파티를 가리지 않습니다.</p>
+    <p>이런 포켓몬을 파티에 넣는 것은 안전하지만, <strong>상대도 대비하고 있다</strong>는 점을 잊으면 안 됩니다. 사용률 1·2위라는 건 모든 상대가 이 둘의 대책을 들고 온다는 뜻입니다.</p>
+
+    <h3>전용형 — 특정 구조에서만 작동</h3>
+    <p>반대로 하마돈은 따라큐·마스카나와는 자주 묶이는데 한카리아스와는 덜 묶입니다. 둘 다 땅 타입이라 <strong>약점을 공유</strong>하기 때문입니다. 물·풀·얼음 한 방향에 두 마리가 함께 무너지는 구성은 상위권에서 자연스럽게 걸러집니다.</p>
+    <p>이것이 팀 조합 데이터에서 읽어야 할 첫 번째 규칙입니다. <strong>강한 포켓몬 둘을 나열하는 게 아니라, 약점이 겹치지 않는 둘을 고르는 것</strong>입니다.</p>
+
+    <h2>코어가 실제로 하는 일</h2>
+
+    <h3>① 약점 상호 보완</h3>
+    <p>한카리아스(땅·드래곤)의 약점은 얼음·페어리·드래곤입니다. 자주 짝을 이루는 핫삼(벌레·강철)은 얼음을 반감하고 페어리에 강합니다. 반대로 핫삼의 약점인 불꽃은 한카리아스가 땅으로 받아냅니다. 전형적인 상호 보완 구조입니다.</p>
+    <p>누리레느(물·페어리)와의 조합도 같습니다. 누리레느는 한카리아스가 약한 얼음과 드래곤을 모두 반감합니다.</p>
+
+    <h3>② 역할 분담</h3>
+    <p>한카리아스 + 메타그로스처럼 <strong>물리 어태커 둘</strong>이 묶이는 경우도 많습니다. 이건 보완이 아니라 압박의 중첩입니다. 상대가 물리 벽을 하나만 준비했다면 둘 중 하나는 반드시 통과합니다.</p>
+    <p>반면 한카리아스 + 브리두라스는 물리와 특수를 나눠 가집니다. 상대가 어느 쪽 벽을 내밀어도 다른 쪽이 답이 됩니다.</p>
+
+    <h3>③ 설치와 마무리</h3>
+    <p>한카리아스의 스텔스록 채용률 46.8%는 이 포켓몬이 <strong>설치 담당</strong>도 겸한다는 뜻입니다. 설치기가 깔리면 상대가 교체할 때마다 체력이 깎이고, <a href="/guide/item-meta/">기합의띠</a>의 발동 조건(HP 풀)도 깨집니다.</p>
+    <p>따라큐·핫삼처럼 <a href="/guide/finishers/">우선도 기술로 마무리하는 포켓몬</a>과 조합하면 이 효과가 배가됩니다. 설치기로 깎고, 주력기로 밀고, 우선도로 끝내는 3단 구성이 상위권 파티의 기본 골격입니다.</p>
+
+    <h2>파티를 짤 때 쓰는 순서</h2>
+    <ol>
+      <li><strong>에이스를 먼저 정합니다.</strong> 승리 조건이 될 포켓몬 하나를 고릅니다.</li>
+      <li><strong>그 에이스의 약점 3개를 적습니다.</strong> 그중 둘 이상을 반감하거나 무효화하는 포켓몬을 두 번째로 넣습니다.</li>
+      <li><strong>땅 대책을 확인합니다.</strong> 격침의 19.9%가 땅입니다. 파티에 땅 약점이 셋 이상이면 재구성합니다.</li>
+      <li><strong>물리·특수 균형을 맞춥니다.</strong> 한쪽으로 몰리면 벽 하나에 막힙니다.</li>
+      <li><strong>설치기와 우선도 기술 보유자를 각각 하나씩</strong> 확보합니다.</li>
+    </ol>
+    <p><a href="/builder/">파티 빌더</a>는 이 점검을 자동으로 해 줍니다. 슬롯을 채우는 대로 겹치는 약점·부족한 커버리지를 진단 태그로 표시하고, 남은 자리에 넣을 후보를 근거 문장과 함께 추천합니다. 포켓몬별 실제 팀 조합 기록은 <a href="/pokedex/">도감 상세 페이지</a>의 "팀 조합 · 매치업" 항목에서 종별로 확인할 수 있습니다.</p>
+
+    <div class="related">
+      <h3>함께 읽기</h3>
+      <a href="/guide/matchup-map/">상성 지도 →</a>
+      <a href="/guide/what-kills-you/">무엇에 죽는가 — 패배 기록 분석 →</a>
+      <a href="/guide/team-building/">파티 구성 기본 가이드 →</a>
+    </div>
+    <p class="note">본문 수치는 <strong>시즌 M-4 · 2026-08-02 집계분</strong> 기준입니다. 원본 데이터는 12시간마다 자동 갱신되므로
+      최신 순위·채용률은 <a href="/battle-data/">배틀데이터</a>와 <a href="/pokedex/">도감</a>에서 확인할 수 있습니다.
+      집계 방법과 출처는 <a href="/about/">사이트 소개</a>에 정리해 두었습니다.</p>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="/about/">사이트 소개</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>무엇에 죽는가 — 랭크배틀 패배 기록으로 본 진짜 위협 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스 랭크배틀에서 상위 50종이 실제로 어떤 기술에 쓰러졌는지 집계했습니다. 지진 19.3%, 땅 타입 19.9% — 채용률 순위가 아니라 패배 기록이 말하는 진짜 위협을 정리합니다." />
+<link rel="canonical" href="https://champions-helper.com/guide/what-kills-you/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/what-kills-you/" />
+<meta property="og:title" content="무엇에 죽는가 — 랭크배틀 패배 기록으로 본 진짜 위협" />
+<meta property="og:description" content="상위 50종이 실제로 쓰러진 기술 전수 집계. 채용률이 아닌 패배 기록 기준." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="무엇에 죽는가 — 랭크배틀 패배 기록으로 본 진짜 위협" />
+<meta name="twitter:description" content="상위 50종이 실제로 쓰러진 기술 전수 집계. 채용률이 아닌 패배 기록 기준." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "무엇에 죽는가 — 랭크배틀 패배 기록으로 본 진짜 위협",
+  "description": "상위 50종이 실제로 쓰러진 기술 전수 집계. 채용률이 아닌 패배 기록 기준.",
+  "inLanguage": "ko",
+  "datePublished": "2026-08-03",
+  "dateModified": "2026-08-03",
+  "url": "https://champions-helper.com/guide/what-kills-you/",
+  "author": { "@type": "Organization", "name": "Champions Helper" },
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .article { max-width: 920px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 28px; font-weight: 800; margin: 0 0 10px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 20px; font-weight: 800; margin: 34px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 800; margin: 22px 0 8px; }
+  .article p { margin: 0 0 14px; }
+  .article strong { color: #fff; }
+  .article ul { margin: 0 0 14px; padding-left: 22px; }
+  .article li { margin-bottom: 6px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+  th { background: var(--panel2); }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: center; }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+  .formula { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 16px; margin: 8px 0 16px; font-family: Consolas, monospace; font-size: 13.5px; overflow-x: auto; }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 28px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .foot-links { font-size: 13px; margin: 0 0 12px; }
+  .foot-links a { color: var(--muted); }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 920px; margin: 0 auto; }
+</style>
+  <link rel="stylesheet" href="/site-header.css" />
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/">배틀데이터</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/board/">게시판</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 무엇에 죽는가</div>
+    <h1>무엇에 죽는가 — 랭크배틀 패배 기록으로 본 진짜 위협</h1>
+    <p class="lead">파티를 짤 때 우리는 보통 채용률 순위를 봅니다. 하지만 채용률이 높은 기술과 실제로 내 포켓몬을 쓰러뜨리는 기술은 같지 않습니다. 이 글은 공식 랭크배틀 데이터에서 <strong>상위 50종이 실제로 어떤 기술에 쓰러졌는지</strong>만 뽑아 집계한 것입니다.</p>
+
+    <h2>왜 채용률이 아니라 패배 기록인가</h2>
+    <p>채용률은 "몇 명이 이 기술을 넣었나"입니다. 넣어놓고 한 번도 안 쓴 기술도, 매 판 게임을 끝낸 기술도 똑같이 1로 셉니다. 그래서 채용률만 보면 <strong>안 쓰이는 보험 기술</strong>과 <strong>실제 결정타</strong>가 구분되지 않습니다.</p>
+    <p>포켓몬 챔피언스 공식 랭크 데이터에는 각 포켓몬이 <strong>쓰러졌을 때 맞은 기술</strong>의 분포가 따로 들어 있습니다. 아래는 싱글 사용률 상위 50종에 대해 그 분포를 전부 더한 결과입니다. "이 메타에서 포켓몬을 실제로 죽이고 있는 것이 무엇인가"에 대한 직접적인 답입니다.</p>
+
+    <h2>포켓몬을 가장 많이 쓰러뜨린 기술 20</h2>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>순위</th><th>기술</th><th>전체 격침 중 비중</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td><strong>지진</strong></td><td class="num"><strong>19.3%</strong></td></tr>
+        <tr><td class="num">2</td><td>화염방사</td><td class="num">6.4%</td></tr>
+        <tr><td class="num">3</td><td>인파이트</td><td class="num">5.9%</td></tr>
+        <tr><td class="num">4</td><td>야습</td><td class="num">4.3%</td></tr>
+        <tr><td class="num">5</td><td>문포스</td><td class="num">3.9%</td></tr>
+        <tr><td class="num">6</td><td>섀도볼</td><td class="num">3.8%</td></tr>
+        <tr><td class="num">7</td><td>용성군</td><td class="num">3.6%</td></tr>
+        <tr><td class="num">8</td><td>플레어드라이브</td><td class="num">3.4%</td></tr>
+        <tr><td class="num">9</td><td>불릿펀치</td><td class="num">3.4%</td></tr>
+        <tr><td class="num">10</td><td>악의파동</td><td class="num">3.3%</td></tr>
+        <tr><td class="num">11</td><td>치근거리기</td><td class="num">2.9%</td></tr>
+        <tr><td class="num">12</td><td>트릭플라워</td><td class="num">2.7%</td></tr>
+        <tr><td class="num">13</td><td>10만볼트</td><td class="num">2.5%</td></tr>
+        <tr><td class="num">14</td><td>기습</td><td class="num">2.1%</td></tr>
+        <tr><td class="num">15</td><td>오물웨이브</td><td class="num">2.0%</td></tr>
+        <tr><td class="num">16</td><td>트리플악셀</td><td class="num">2.0%</td></tr>
+        <tr><td class="num">17</td><td>러스터캐논</td><td class="num">2.0%</td></tr>
+        <tr><td class="num">18</td><td>바디프레스</td><td class="num">2.0%</td></tr>
+        <tr><td class="num">19</td><td>아이언헤드</td><td class="num">1.5%</td></tr>
+        <tr><td class="num">20</td><td>탁쳐서떨구기</td><td class="num">1.5%</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p><strong>지진 하나가 전체 격침의 19.3%</strong>입니다. 2위 화염방사(6.4%)의 세 배이고, 2위부터 5위까지를 다 합쳐야 겨우 넘어섭니다. 이 숫자는 "땅 대책은 있으면 좋다"가 아니라 <strong>"땅 대책 없이는 파티가 성립하지 않는다"</strong>에 가깝습니다.</p>
+
+    <h2>타입별로 보면 더 분명합니다</h2>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>타입</th><th>격침 비중</th><th>주된 기술</th></tr></thead>
+      <tbody>
+        <tr><td><strong>땅</strong></td><td class="num"><strong>19.9%</strong></td><td>지진</td></tr>
+        <tr><td>불꽃</td><td class="num">9.9%</td><td>화염방사 · 플레어드라이브</td></tr>
+        <tr><td>고스트</td><td class="num">9.5%</td><td>야습 · 섀도볼</td></tr>
+        <tr><td>격투</td><td class="num">9.1%</td><td>인파이트 · 바디프레스</td></tr>
+        <tr><td>페어리</td><td class="num">7.2%</td><td>문포스 · 치근거리기</td></tr>
+        <tr><td>강철</td><td class="num">7.0%</td><td>불릿펀치 · 러스터캐논 · 아이언헤드</td></tr>
+        <tr><td>악</td><td class="num">6.9%</td><td>악의파동 · 기습 · 탁쳐서떨구기</td></tr>
+        <tr><td>풀</td><td class="num">5.2%</td><td>트릭플라워</td></tr>
+        <tr><td>드래곤</td><td class="num">4.7%</td><td>용성군</td></tr>
+        <tr><td>전기</td><td class="num">4.6%</td><td>10만볼트</td></tr>
+        <tr><td>물</td><td class="num">4.5%</td><td>—</td></tr>
+        <tr><td>얼음</td><td class="num">3.7%</td><td>트리플악셀</td></tr>
+        <tr><td>독</td><td class="num">2.3%</td><td>오물웨이브</td></tr>
+        <tr><td>에스퍼</td><td class="num">2.1%</td><td>—</td></tr>
+        <tr><td>비행 · 바위 · 노말 · 벌레</td><td class="num">3.4% (합)</td><td>—</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>땅 19.9% — 지진이 메타를 지배하는 구조적 이유</h3>
+    <p>지진은 위력 100에 명중 100, 부가 조건이 없고, 무엇보다 <strong>땅을 반감하는 타입이 풀·벌레·비행뿐</strong>입니다. 반면 땅에 약한 타입은 불꽃·전기·독·바위·강철로 다섯이나 되고, 이 다섯은 전부 현재 메타 상위권에 몰려 있습니다. 상위 50종에 강철·불꽃 타입이 얼마나 많은지 <a href="/battle-data/">배틀데이터</a>에서 확인해 보면, 지진이 왜 이 숫자를 찍는지 바로 보입니다.</p>
+    <p>실전적으로는 두 가지 결론이 나옵니다. 첫째, <strong>땅에 약한 포켓몬을 3마리 이상 넣으면 파티가 지진 한 방향으로 무너집니다</strong>. 둘째, 비행 타입이나 부유 특성 하나쯤은 파티에 있는 편이 안전합니다. 다만 여기엔 함정이 있는데, 상대가 <strong>검은철구</strong>를 들려주거나 <strong>틀깨기</strong> 계열 특성을 들고 오면 부유 면역이 통째로 무시됩니다.</p>
+
+    <h3>야습 4.3% — 우선도 기술이 이 순위에 있다는 것</h3>
+    <p>4위 야습은 위력 40짜리 우선도 +1 기술입니다. 위력만 보면 이 표에 있을 이유가 없는데도 문포스·섀도볼보다 높습니다. 이유는 명확합니다. <strong>우선도 기술은 "체력이 깎인 상대를 마무리할 때"만 쓰이기 때문</strong>입니다. 채용률에서는 낮게 보이던 기술이 격침 기준에서는 튀어 오르는 전형적인 사례입니다.</p>
+    <p>9위 불릿펀치(3.4%), 14위 기습(2.1%)도 같은 구조입니다. 셋을 합치면 <strong>9.8%</strong>로 화염방사 하나보다 큽니다. "체력 30% 남았으니 한 턴 더 버틸 수 있다"는 계산이 실전에서 자주 틀리는 이유가 여기 있습니다. 남은 체력이 우선도 기술 사거리 안인지 아닌지는 <a href="/calc/">데미지 계산기</a>에서 미리 재 두는 편이 확실합니다.</p>
+
+    <h3>얼음 3.7% — 생각보다 낮은 이유</h3>
+    <p>드래곤·비행·땅·풀을 한꺼번에 찌르는 얼음은 이론상 최고의 공격 타입이지만 실제 격침 비중은 3.7%에 그칩니다. 얼음 기술의 위력이 대체로 낮고(트리플악셀은 1타 위력 20의 연타기), 얼음 타입 자체가 내구가 약해 필드에 오래 못 있기 때문입니다. <strong>"얼음이 유효한 상대"와 "얼음을 실제로 꽂을 수 있는 상황"은 다릅니다.</strong></p>
+
+    <h2>이 표를 파티 구성에 쓰는 법</h2>
+    <ul>
+      <li><strong>땅 → 불꽃 → 고스트 → 격투</strong> 순으로 대책을 점검합니다. 이 넷이 격침의 48.4%입니다.</li>
+      <li>같은 타입 약점을 3마리 이상 공유하면 그 타입 한 방향으로 파티가 무너집니다. 특히 땅은 치명적입니다.</li>
+      <li>내구형 포켓몬을 넣을 때는 우선도 기술 사거리를 반드시 확인합니다. 야습·불릿펀치·기습만으로 격침의 약 10%입니다.</li>
+      <li>표의 상위 기술은 대부분 <strong>자속 보정을 받는 주력기</strong>입니다. 상대 파티를 봤을 때 이 기술들의 사용자가 누구인지 먼저 찾는 습관이 선출 판단을 크게 줄여 줍니다.</li>
+    </ul>
+    <p>상대 파티 6마리를 보고 어떤 기술이 날아올지 미리 재 두는 작업은 <a href="/">Champions Helper 데스크탑 앱</a>이 자동으로 해 줍니다. 상대 포켓몬별 최고 화력 기술과 내 포켓몬이 몇 방을 버티는지를 매 턴 계산해 표시합니다.</p>
+
+    <div class="related">
+      <h3>함께 읽기</h3>
+      <a href="/guide/finishers/">실제로 경기를 끝내는 기술 →</a>
+      <a href="/guide/matchup-map/">상성 지도 — 유리·불리 매치업 →</a>
+      <a href="/guide/item-meta/">지닌도구 메타 →</a>
+    </div>
+    <p class="note">본문 수치는 <strong>시즌 M-4 · 2026-08-02 집계분</strong> 기준입니다. 원본 데이터는 12시간마다 자동 갱신되므로
+      최신 순위·채용률은 <a href="/battle-data/">배틀데이터</a>와 <a href="/pokedex/">도감</a>에서 확인할 수 있습니다.
+      집계 방법과 출처는 <a href="/about/">사이트 소개</a>에 정리해 두었습니다.</p>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="/about/">사이트 소개</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

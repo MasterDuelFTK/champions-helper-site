@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>채용률이 알려주지 않는 것 — 실제로 경기를 끝내는 기술 | Champions Helper</title>
+<meta name="description" content="채용률 상위 기술이 곧 결정타는 아닙니다. 포켓몬 챔피언스 공식 데이터에서 승리를 확정한 마지막 기술 분포를 채용률과 대조해, 실제 결정력이 높은 기술과 낮은 기술을 가려냅니다." />
+<link rel="canonical" href="https://champions-helper.com/guide/finishers/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/finishers/" />
+<meta property="og:title" content="채용률이 알려주지 않는 것 — 실제로 경기를 끝내는 기술" />
+<meta property="og:description" content="승리를 확정한 마지막 기술 분포를 채용률과 대조한 분석." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="채용률이 알려주지 않는 것 — 실제로 경기를 끝내는 기술" />
+<meta name="twitter:description" content="승리를 확정한 마지막 기술 분포를 채용률과 대조한 분석." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "채용률이 알려주지 않는 것 — 실제로 경기를 끝내는 기술",
+  "description": "승리를 확정한 마지막 기술 분포를 채용률과 대조한 분석.",
+  "inLanguage": "ko",
+  "datePublished": "2026-08-03",
+  "dateModified": "2026-08-03",
+  "url": "https://champions-helper.com/guide/finishers/",
+  "author": { "@type": "Organization", "name": "Champions Helper" },
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .article { max-width: 920px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 28px; font-weight: 800; margin: 0 0 10px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 20px; font-weight: 800; margin: 34px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 800; margin: 22px 0 8px; }
+  .article p { margin: 0 0 14px; }
+  .article strong { color: #fff; }
+  .article ul { margin: 0 0 14px; padding-left: 22px; }
+  .article li { margin-bottom: 6px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+  th { background: var(--panel2); }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: center; }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+  .formula { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 16px; margin: 8px 0 16px; font-family: Consolas, monospace; font-size: 13.5px; overflow-x: auto; }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 28px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .foot-links { font-size: 13px; margin: 0 0 12px; }
+  .foot-links a { color: var(--muted); }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 920px; margin: 0 auto; }
+</style>
+  <link rel="stylesheet" href="/site-header.css" />
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/">배틀데이터</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/board/">게시판</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 실제로 경기를 끝내는 기술</div>
+    <h1>채용률이 알려주지 않는 것 — 실제로 경기를 끝내는 기술</h1>
+    <p class="lead">"이 기술 채용률 90%"라는 말은 그 기술이 강하다는 뜻일까요, 아니면 그냥 넣을 게 그것뿐이라는 뜻일까요. 공식 랭크 데이터에는 <strong>승리를 확정지은 마지막 기술</strong>이 따로 기록돼 있습니다. 이 둘을 나란히 놓으면 채용률만으로는 안 보이던 것이 드러납니다.</p>
+
+    <h2>비교 방법</h2>
+    <p>포켓몬 챔피언스 공식 데이터는 각 포켓몬에 대해 두 가지 분포를 함께 제공합니다.</p>
+    <ul>
+      <li><strong>채용률</strong> — 그 기술을 배운 개체의 비율</li>
+      <li><strong>결정타 분포</strong> — 그 포켓몬이 승리를 확정지었을 때 마지막에 쓴 기술의 비율</li>
+    </ul>
+    <p>여기서 주의할 점이 하나 있습니다. 결정타 분포는 정의상 <strong>공격기만 등장</strong>합니다. 칼춤·날개쉬기·킹실드 같은 변화기는 경기를 끝내는 기술이 아니므로 언제나 0입니다. 따라서 이 둘을 그대로 빼면 "변화기는 쓸모없다"는 엉뚱한 결론이 나옵니다. 아래 표는 <strong>공격기끼리만</strong> 비중을 정규화해 비교한 것입니다.</p>
+
+    <h2>채용률에 비해 결정타가 적은 기술</h2>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>포켓몬</th><th>기술</th><th>공격기 중 채용 비중</th><th>결정타 비중</th><th>차이</th></tr></thead>
+      <tbody>
+        <tr><td>더시마사리</td><td>엉겨붙기</td><td class="num">78.5%</td><td class="num">36.6%</td><td class="num">-41.9</td></tr>
+        <tr><td>엘풍</td><td>죽기살기</td><td class="num">32.6%</td><td class="num">0.0%</td><td class="num">-32.6</td></tr>
+        <tr><td>아머까오</td><td>유턴</td><td class="num">32.3%</td><td class="num">10.1%</td><td class="num">-22.1</td></tr>
+        <tr><td>패리퍼</td><td>유턴</td><td class="num">25.3%</td><td class="num">6.0%</td><td class="num">-19.3</td></tr>
+        <tr><td>삼삼드래</td><td>유턴</td><td class="num">19.7%</td><td class="num">3.7%</td><td class="num">-16.0</td></tr>
+        <tr><td>로토무(워시)</td><td>볼트체인지</td><td class="num">35.4%</td><td class="num">20.3%</td><td class="num">-15.1</td></tr>
+        <tr><td>라이츄</td><td>풀묶기</td><td class="num">22.3%</td><td class="num">7.6%</td><td class="num">-14.7</td></tr>
+        <tr><td>대쓰여너</td><td>퀵턴</td><td class="num">19.7%</td><td class="num">5.4%</td><td class="num">-14.3</td></tr>
+        <tr><td>대짱이</td><td>퀵턴</td><td class="num">19.8%</td><td class="num">6.2%</td><td class="num">-13.6</td></tr>
+        <tr><td>찌리배리</td><td>볼트체인지</td><td class="num">51.1%</td><td class="num">38.1%</td><td class="num">-13.1</td></tr>
+        <tr><td>몰드류</td><td>스톤샤워</td><td class="num">20.3%</td><td class="num">7.8%</td><td class="num">-12.5</td></tr>
+        <tr><td>이어롭</td><td>속이기</td><td class="num">20.8%</td><td class="num">8.5%</td><td class="num">-12.3</td></tr>
+        <tr><td>대도각참</td><td>아이언헤드</td><td class="num">28.5%</td><td class="num">17.5%</td><td class="num">-10.9</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>목록의 성격이 뚜렷합니다. <strong>유턴·볼트체인지·퀵턴</strong>이 반복해서 나옵니다. 당연한 결과입니다. 교체기는 애초에 상대를 쓰러뜨리려고 쓰는 기술이 아니라 <strong>유리한 상황으로 갈아타려고</strong> 쓰는 기술이니까요. 이 표에서 교체기가 하위권이라는 사실은 "교체기가 약하다"는 뜻이 아니라, <strong>결정타 분포로는 교체기의 값어치를 잴 수 없다</strong>는 뜻으로 읽어야 합니다.</p>
+    <p>엘풍의 죽기살기가 정확히 0.0%인 것도 같은 이유입니다. 자신이 쓰러지면서 상대 능력을 떨어뜨리는 기술이니 구조적으로 결정타가 될 수 없습니다.</p>
+    <p>정작 눈여겨볼 것은 <strong>대도각참의 아이언헤드</strong>입니다. 채용 비중 28.5%인데 결정타는 17.5%입니다. 교체기도 자폭기도 아닌 순수 공격기가 10포인트 넘게 밀린다는 건, 이 기술이 <strong>마무리보다는 견제·중간 딜링 역할</strong>을 하고 있다는 신호입니다.</p>
+
+    <h2>채용률보다 훨씬 자주 끝내는 기술</h2>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>포켓몬</th><th>기술</th><th>공격기 중 채용 비중</th><th>결정타 비중</th><th>차이</th></tr></thead>
+      <tbody>
+        <tr><td>대쓰여너</td><td>성묘</td><td class="num">26.5%</td><td class="num">62.1%</td><td class="num">+35.7</td></tr>
+        <tr><td>몰드류</td><td>지진</td><td class="num">29.0%</td><td class="num">62.2%</td><td class="num">+33.2</td></tr>
+        <tr><td>핫삼</td><td>불릿펀치</td><td class="num">38.1%</td><td class="num">67.1%</td><td class="num">+29.1</td></tr>
+        <tr><td>엘풍</td><td>문포스</td><td class="num">62.6%</td><td class="num">91.6%</td><td class="num">+29.0</td></tr>
+        <tr><td>삼삼드래</td><td>악의파동</td><td class="num">26.5%</td><td class="num">53.7%</td><td class="num">+27.1</td></tr>
+        <tr><td>라이츄</td><td>전자포</td><td class="num">29.7%</td><td class="num">55.6%</td><td class="num">+26.0</td></tr>
+        <tr><td>님피아</td><td>하이퍼보이스</td><td class="num">58.8%</td><td class="num">81.5%</td><td class="num">+22.7</td></tr>
+        <tr><td>타부자고</td><td>섀도볼</td><td class="num">38.2%</td><td class="num">60.2%</td><td class="num">+22.0</td></tr>
+        <tr><td>한카리아스</td><td>지진</td><td class="num">37.7%</td><td class="num">57.1%</td><td class="num">+19.3</td></tr>
+        <tr><td>아머까오</td><td>바디프레스</td><td class="num">36.9%</td><td class="num">55.4%</td><td class="num">+18.5</td></tr>
+        <tr><td>찌리배리</td><td>파라볼라차지</td><td class="num">44.3%</td><td class="num">59.7%</td><td class="num">+15.5</td></tr>
+        <tr><td>드래펄트</td><td>드래곤애로</td><td class="num">18.4%</td><td class="num">31.4%</td><td class="num">+13.0</td></tr>
+        <tr><td>누리레느</td><td>문포스</td><td class="num">32.9%</td><td class="num">44.1%</td><td class="num">+11.1</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>패턴 1 — 자속 고위력기가 결국 이긴다</h3>
+    <p>대쓰여너의 성묘, 몰드류·한카리아스의 지진, 삼삼드래의 악의파동, 님피아의 하이퍼보이스. 전부 <strong>자속 보정을 받는 주력기</strong>입니다. 서브 기술은 특정 상대를 찌르려고 넣지만, 실제로 경기를 끝내는 것은 대부분 가장 무거운 자속기였습니다.</p>
+    <p>파티를 짤 때 서브 기술 칸을 두고 오래 고민하게 되는데, 이 데이터는 <strong>주력기 화력을 확실히 확보한 다음에 서브를 고민하는 순서</strong>가 맞다고 말합니다.</p>
+
+    <h3>패턴 2 — 우선도 기술은 채용률보다 훨씬 값어치가 크다</h3>
+    <p>핫삼의 불릿펀치가 +29.1로 세 번째입니다. 위력 40짜리 기술이 핫삼 승리의 67.1%를 마무리했습니다. 드래펄트의 드래곤애로(+13.0)도 우선도 기술입니다. <a href="/guide/what-kills-you/">패배 기록 분석</a>에서 야습·불릿펀치·기습이 격침의 약 10%를 차지했던 것과 정확히 같은 현상을 반대편에서 본 셈입니다.</p>
+    <p><strong>우선도 기술은 채용률이 낮아도 실전 기여가 큽니다.</strong> 반대로 말하면, 내 포켓몬이 체력 30% 이하로 내려간 순간부터는 상대 파티의 우선도 기술 보유자를 반드시 세어 봐야 합니다.</p>
+
+    <h3>패턴 3 — 아머까오의 바디프레스</h3>
+    <p>아머까오는 유턴이 -22.1로 최하위권, 바디프레스가 +18.5로 상위권입니다. 같은 포켓몬 안에서 <strong>역할이 명확히 갈린</strong> 사례입니다. 유턴으로 판을 돌리고, 마무리는 바디프레스로 합니다. 바디프레스는 공격이 아니라 <strong>방어 수치</strong>로 데미지를 계산하는 기술이라, 내구에 투자한 아머까오일수록 화력이 올라갑니다. 노력치를 방어에 넣는 것이 수비와 공격을 동시에 챙기는 선택이 됩니다.</p>
+
+    <h2>정리 — 채용률과 결정타를 같이 보는 습관</h2>
+    <ul>
+      <li>채용률이 높고 결정타가 낮다 → <strong>역할 기술</strong>(교체·견제·상태이상 유발)일 가능성이 큽니다. 약한 게 아닙니다.</li>
+      <li>채용률이 낮고 결정타가 높다 → <strong>실전 기여가 과소평가된 기술</strong>입니다. 우선도 기술이 대표적입니다.</li>
+      <li>둘 다 높다 → 그 포켓몬의 정체성입니다. 상대할 때 가장 먼저 대비해야 합니다.</li>
+    </ul>
+    <p>포켓몬별 채용률과 결정타 분포는 <a href="/pokedex/">도감 상세 페이지</a>에서 종별로 볼 수 있습니다.</p>
+
+    <div class="related">
+      <h3>함께 읽기</h3>
+      <a href="/guide/what-kills-you/">무엇에 죽는가 — 패배 기록 분석 →</a>
+      <a href="/guide/ev-reality/">노력치 66의 현실 →</a>
+      <a href="/guide/meta-singles/">싱글 메타 분석 →</a>
+    </div>
+    <p class="note">본문 수치는 <strong>시즌 M-4 · 2026-08-02 집계분</strong> 기준입니다. 원본 데이터는 12시간마다 자동 갱신되므로
+      최신 순위·채용률은 <a href="/battle-data/">배틀데이터</a>와 <a href="/pokedex/">도감</a>에서 확인할 수 있습니다.
+      집계 방법과 출처는 <a href="/about/">사이트 소개</a>에 정리해 두었습니다.</p>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="/about/">사이트 소개</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

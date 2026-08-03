@@ -72,6 +72,16 @@
   .foot-links { font-size: 13px; margin: 0 0 12px; }
   .foot-links a { color: var(--muted); }
   .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 920px; margin: 0 auto; }
+
+  /* 183차 보강 — 표/공식 스타일(다른 가이드와 동일 규칙) */
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  .tablewrap table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 480px; }
+  .tablewrap th, .tablewrap td { padding: 9px 12px; border-bottom: 1px solid var(--line); text-align: left; }
+  .tablewrap th { background: var(--panel2); font-weight: 700; }
+  .tablewrap tr:last-child td { border-bottom: 0; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .formula { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 14px; margin: 12px 0 16px; font-size: 14px; overflow-x: auto; }
 </style>
   <link rel="stylesheet" href="/site-header.css" />
 </head>
@@ -113,6 +123,48 @@
     <h2>메가진화 활용 팁</h2>
     <p>메가진화는 배틀당 한 번만 가능하므로 <strong>언제 어느 포켓몬을 메가진화시킬지</strong>가 중요합니다. 종족값이 오르는 것뿐 아니라 타입·특성 변화로 약점과 상성이 바뀌는 점을 활용하면 좋습니다. 예를 들어 메가리자몽X는 불꽃·드래곤이 되어 비행 약점이 사라지고, 메가갸라도스는 물·악이 되어 격투 약점이 생기는 대신 다른 상성이 유리해집니다.</p>
     <p>메가진화 전후의 데미지 변화는 <a href="/calc/">데미지 계산기</a>에서 메가폼을 선택해 비교할 수 있고, 종족값·스프라이트는 <a href="/pokedex/">도감</a>에서 확인할 수 있습니다.</p>
+
+    
+    <h2>메가진화의 규칙 — 판당 딱 한 번</h2>
+    <p>포켓몬 챔피언스에서 메가진화는 <strong>한 배틀에 한 번</strong>만 가능합니다. 파티에 메가진화 가능한 포켓몬을 여럿 넣어도 실제로 메가가 되는 것은 그중 하나뿐입니다. 이 제약이 파티 구성과 실전 판단 양쪽에 생각보다 큰 영향을 줍니다.</p>
+    <ul>
+      <li><strong>메가스톤은 도구 슬롯을 씁니다.</strong> 메가 후보를 둘 넣으면 한 마리는 결국 메가가 못 되는데도 도구 칸을 메가스톤에 낭비하게 됩니다. 기합의띠나 구애스카프를 들 수 있었던 자리입니다.</li>
+      <li><strong>메가진화한 턴에도 기술을 씁니다.</strong> 메가진화 자체는 턴을 소비하지 않습니다.</li>
+      <li><strong>스피드는 메가진화 직후부터 적용됩니다.</strong> 메가로 스피드가 오르는 포켓몬은 메가진화한 그 턴부터 새 스피드로 행동 순서를 겨룹니다.</li>
+      <li><strong>특성은 메가 폼에 고정됩니다.</strong> 메가 전 특성이 무엇이었든 메가 이후에는 그 폼의 특성 하나로 정해집니다.</li>
+    </ul>
+
+    <h2>메가 이후에 달라지는 것</h2>
+    <p>메가진화는 단순히 종족값이 오르는 것이 아닙니다. 세 가지가 동시에 바뀔 수 있고, 각각이 계산을 완전히 다르게 만듭니다.</p>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>바뀌는 것</th><th>실전 영향</th><th>예시</th></tr></thead>
+      <tbody>
+        <tr><td>종족값</td><td>합계가 보통 100 오릅니다. 화력·내구·스피드 중 어디에 붙는지가 역할을 결정합니다.</td><td>리자몽 534 → 634</td></tr>
+        <tr><td>타입</td><td><strong>약점과 반감이 통째로 바뀝니다.</strong> 메가 전 상성으로 계산하면 크게 틀립니다.</td><td>메가리자몽X = 불꽃·드래곤 (비행이 사라짐 → 땅이 약점이 됨)</td></tr>
+        <tr><td>특성</td><td>메가 전 특성 채용률은 의미가 없어집니다.</td><td>맹화/선파워 → 단단한발톱(X) 또는 가뭄(Y)</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="note">특히 <strong>타입이 바뀌는 메가</strong>를 상대할 때 주의해야 합니다. 메가리자몽X는 비행이 사라져 지진에 맞게 되고, 반대로 메가갸라도스는 비행이 악으로 바뀌면서 전기 4배 약점이 사라집니다. 메가진화 로그가 뜨는 순간 상성표를 다시 그려야 합니다.</p>
+
+    <h2>메가를 언제 쓸 것인가</h2>
+    <p>메가진화는 되돌릴 수 없고 판당 한 번뿐이라 타이밍이 곧 실력입니다. 실전에서 자주 쓰이는 기준은 세 가지입니다.</p>
+    <ol>
+      <li><strong>선공을 잡아야 할 때 즉시</strong> — 메가로 스피드가 오르는 포켓몬은 미루면 미룰수록 손해입니다. 상대보다 느린 상태로 한 턴을 보내면 그 턴에 죽을 수 있습니다.</li>
+      <li><strong>확정 1타 라인을 넘길 때</strong> — 메가 전에는 2타인데 메가 후에는 1타라면, 그 상대를 만난 턴에 씁니다.</li>
+      <li><strong>상대 메가를 보고 나서</strong> — 내 메가 후보가 둘이라면, 상대가 무엇을 메가로 쓰는지 본 뒤에 결정하는 편이 유리합니다. 다만 이 여유는 내가 급하지 않을 때만 가능합니다.</li>
+    </ol>
+    <p>반대로 <strong>미루면 안 되는 상황</strong>도 명확합니다. 내 포켓몬이 이번 턴에 죽을 것 같으면 메가를 아끼는 의미가 없습니다. 메가진화를 못 쓰고 쓰러지면 그 판의 메가는 통째로 사라집니다.</p>
+
+    <h2>메가 선택이 파티에 주는 제약</h2>
+    <p>메가는 파티의 축이 되는 만큼 나머지 다섯 마리에 조건을 겁니다.</p>
+    <ul>
+      <li>메가가 <strong>느린 화력형</strong>이면(메가메타그로스처럼 무겁게 때리는 쪽) 상대 선공을 받아 줄 내구 요원이 필요합니다.</li>
+      <li>메가가 <strong>날씨를 부르는 특성</strong>이면(메가리자몽Y의 가뭄 등) 그 날씨를 이용할 포켓몬을 함께 넣어야 값어치가 삽니다.</li>
+      <li>메가스톤 때문에 도구 슬롯이 하나 고정되므로, <strong>설치기나 회복 역할은 다른 포켓몬이 맡아야</strong> 합니다.</li>
+    </ul>
+    <p>어떤 메가를 고를지에 대한 데이터 기반 정리는 <a href="/guide/mega-picks/">실전 메가진화 픽 가이드</a>에, 상대 메가를 계산에 반영하는 법은 <a href="/guide/ability-guessing/">상대 특성 맞히기</a>에 이어집니다.</p>
 
     <div class="related">
       <h3>함께 읽기</h3>

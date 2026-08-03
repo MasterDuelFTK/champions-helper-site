@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>선출 전 30초 — 상대 파티 6마리에서 읽어내는 것 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스는 선출 화면에서 상대 6마리를 봅니다. 제한된 시간에 무엇을 먼저 확인해야 하는지, 채용률 데이터를 근거로 우선순위를 정리한 실전 체크리스트입니다." />
+<link rel="canonical" href="https://champions-helper.com/guide/reading-opponent/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/reading-opponent/" />
+<meta property="og:title" content="선출 전 30초 — 상대 파티 6마리에서 읽어내는 것" />
+<meta property="og:description" content="선출 화면에서 상대 파티를 읽는 실전 우선순위 체크리스트." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="선출 전 30초 — 상대 파티 6마리에서 읽어내는 것" />
+<meta name="twitter:description" content="선출 화면에서 상대 파티를 읽는 실전 우선순위 체크리스트." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "선출 전 30초 — 상대 파티 6마리에서 읽어내는 것",
+  "description": "선출 화면에서 상대 파티를 읽는 실전 우선순위 체크리스트.",
+  "inLanguage": "ko",
+  "datePublished": "2026-08-03",
+  "dateModified": "2026-08-03",
+  "url": "https://champions-helper.com/guide/reading-opponent/",
+  "author": { "@type": "Organization", "name": "Champions Helper" },
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .article { max-width: 920px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 28px; font-weight: 800; margin: 0 0 10px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 20px; font-weight: 800; margin: 34px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 800; margin: 22px 0 8px; }
+  .article p { margin: 0 0 14px; }
+  .article strong { color: #fff; }
+  .article ul { margin: 0 0 14px; padding-left: 22px; }
+  .article li { margin-bottom: 6px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+  th { background: var(--panel2); }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: center; }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+  .formula { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 16px; margin: 8px 0 16px; font-family: Consolas, monospace; font-size: 13.5px; overflow-x: auto; }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 28px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .foot-links { font-size: 13px; margin: 0 0 12px; }
+  .foot-links a { color: var(--muted); }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 920px; margin: 0 auto; }
+</style>
+  <link rel="stylesheet" href="/site-header.css" />
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/">배틀데이터</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/board/">게시판</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 선출 전 30초</div>
+    <h1>선출 전 30초 — 상대 파티 6마리에서 읽어내는 것</h1>
+    <p class="lead">포켓몬 챔피언스의 승부는 상당 부분 선출 화면에서 갈립니다. 상대 6마리를 보고 내 3마리(더블은 4마리)를 고르는 이 짧은 시간에 무엇을 봐야 하는지, 앞선 칼럼들의 데이터를 근거로 우선순위를 정리했습니다.</p>
+
+    <h2>왜 순서가 중요한가</h2>
+    <p>선출 시간에 6마리 전부를 분석할 수는 없습니다. <strong>확인 순서를 정해 두고 위에서부터 훑는 것</strong>이 현실적입니다. 아래 순서는 실제 데이터에서 영향이 큰 순으로 배열했습니다.</p>
+
+    <h2>1순위 — 땅 기술 사용자를 먼저 찾는다</h2>
+    <p><a href="/guide/what-kills-you/">패배 기록 분석</a>에서 지진 한 기술이 전체 격침의 19.3%, 땅 타입 전체가 19.9%였습니다. 상대 파티에서 땅 기술을 쓸 수 있는 포켓몬을 먼저 세는 것이 가장 효율이 높습니다.</p>
+    <ul>
+      <li>땅 타입 포켓몬(한카리아스·하마돈·몰드류 등)은 지진 채용률이 사실상 100%에 가깝습니다.</li>
+      <li>땅이 아니어도 지진을 배우는 포켓몬이 많습니다. 메타그로스·갸라도스·킬가르도 등.</li>
+      <li>내 선출 후보 중 땅에 약한 포켓몬이 둘 이상이면 그중 하나는 빼는 것을 고려합니다.</li>
+    </ul>
+
+    <h2>2순위 — 내 에이스가 확실히 지는 상대가 있는가</h2>
+    <p><a href="/guide/matchup-map/">상성 지도</a>의 "확실히 짐" 칸을 떠올립니다. 내가 축으로 삼으려는 포켓몬을 확실히 잡는 상대가 6마리 안에 있다면, 그 포켓몬은 선봉에서 빼거나 아예 선출하지 않습니다.</p>
+    <p>예를 들어 아머까오를 축으로 잡았는데 상대에 리자몽·마폭시·번치코 중 하나라도 있으면 계획을 다시 짜야 합니다. 반대로 상대에 한카리아스·마스카나·갸라도스가 있다면 아머까오는 좋은 선택입니다.</p>
+
+    <h2>3순위 — 스피드 라인을 긋는다</h2>
+    <p>상대 6마리 중 <strong>내 에이스보다 빠를 가능성이 있는 포켓몬</strong>만 추립니다. 종족값 기준으로 최속을 계산해 내 실수치와 비교합니다.</p>
+    <p>여기서 두 가지 보정을 반드시 넣습니다.</p>
+    <ul>
+      <li><strong>구애스카프 8.7%</strong> — <a href="/guide/item-meta/">도구 메타</a> 기준 열두 마리 중 하나꼴입니다. 스피드가 애매한 상대는 스카프 가능성을 열어 둡니다.</li>
+      <li><strong>스피드 특성</strong> — 이상해꽃의 엽록소(70.5%)처럼 날씨·상태에 따라 2배가 되는 특성이 있습니다. 상대 파티에 날씨 요원이 함께 있으면 특히 주의합니다.</li>
+    </ul>
+    <p>다만 <a href="/guide/nature-meta/">성격 집계</a>에서 봤듯 상위 50종의 72%는 스피드 상승 성격을 쓰지 않습니다. <strong>모든 상대를 최속으로 가정하면 과하게 비관적</strong>이 됩니다. 채용률 1위 성격을 기본으로 놓고 계산하는 편이 실전에 가깝습니다.</p>
+
+    <h2>4순위 — 특성이 갈리는 포켓몬을 표시해 둔다</h2>
+    <p><a href="/guide/ability-guessing/">특성 확률표</a>에서 70% 미만 구간에 있는 포켓몬(아머까오·블래키·브리두라스·스코빌런 등)이 상대 파티에 있으면, 그 포켓몬 상대로는 <strong>확정 1타를 전제한 플레이를 피합니다</strong>. 브리두라스의 옹골참(28.2%)이 걸리면 확정 1타가 성립하지 않습니다.</p>
+
+    <h2>5순위 — 상대 파티의 구조를 읽는다</h2>
+    <p>6마리를 개별로만 보지 말고 <a href="/guide/team-cores/">코어 구조</a>를 봅니다.</p>
+    <ul>
+      <li><strong>설치기 보유자가 있는가</strong> — 스텔스록·압정뿌리기가 깔리면 내 교체 플랜의 비용이 올라갑니다.</li>
+      <li><strong>날씨·필드 요원이 있는가</strong> — 가뭄·잔비 특성이나 순풍·트릭룸 요원이 있으면 판의 규칙 자체가 바뀝니다.</li>
+      <li><strong>벽 요원이 있는가</strong> — 빛의점토(3.7%) 보유자가 있으면 장기전 구도를 각오해야 합니다.</li>
+      <li><strong>메가 후보가 몇인가</strong> — 메가는 판당 한 번뿐이라, 후보가 여럿이면 어느 쪽이 나올지가 곧 상대의 플랜입니다.</li>
+    </ul>
+
+    <h2>6순위 — 우선도 기술 보유자를 센다</h2>
+    <p>야습·불릿펀치·기습만으로 격침의 약 10%입니다. 상대 파티에 이들이 있으면 <strong>내 포켓몬을 체력 30% 이하로 남겨 두는 판단</strong>이 위험해집니다. 특히 따라큐(야습)·핫삼(불릿펀치)·대도각참(기습)은 상위권에 자주 보입니다.</p>
+
+    <h2>선출 최종 판단</h2>
+    <ol>
+      <li>확실히 유리한 카드가 <strong>둘 이상</strong> 있으면 그대로 갑니다.</li>
+      <li>유리한 카드가 하나뿐이면, 나머지 둘은 <strong>그 하나를 지키는 구성</strong>으로 채웁니다.</li>
+      <li>전부 5:5라면 선공권과 설치기 우위로 승부를 봅니다. 이 구도에서는 먼저 스텔스록을 까는 쪽이 유리합니다.</li>
+      <li><strong>답이 없는 상대가 하나 있다면</strong>, 그 상대를 만나는 것을 전제로 나머지 둘로 시간을 벌 수 있는지 봅니다.</li>
+    </ol>
+
+    <h2>이 판단을 자동으로</h2>
+    <p>위 여섯 단계를 30초 안에 손으로 하는 것은 현실적으로 어렵습니다. <a href="/">Champions Helper 데스크탑 앱</a>의 <strong>선출 정보</strong> 기능은 상대 파티를 화면에서 자동 인식한 뒤, 6×6 전 조합에 대해 쌍별 타수·스피드 우열을 계산해 히트맵으로 보여 줍니다. 추천 트리오와 선봉 후보, 순풍·트릭룸·벽 요원 경고까지 한 화면에 나옵니다.</p>
+    <p>브라우저에서 미리 연습해 보고 싶다면 <a href="/calc/">데미지 계산기</a>와 <a href="/builder/">파티 빌더</a>로 같은 계산을 수동으로 해 볼 수 있습니다.</p>
+
+    <div class="related">
+      <h3>함께 읽기</h3>
+      <a href="/guide/matchup-map/">상성 지도 →</a>
+      <a href="/guide/ability-guessing/">상대 특성 맞히기 →</a>
+      <a href="/guide/app-guide/">프로그램 사용 가이드 →</a>
+    </div>
+    <p class="note">본문 수치는 <strong>시즌 M-4 · 2026-08-02 집계분</strong> 기준입니다. 원본 데이터는 12시간마다 자동 갱신되므로
+      최신 순위·채용률은 <a href="/battle-data/">배틀데이터</a>와 <a href="/pokedex/">도감</a>에서 확인할 수 있습니다.
+      집계 방법과 출처는 <a href="/about/">사이트 소개</a>에 정리해 두었습니다.</p>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="/about/">사이트 소개</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

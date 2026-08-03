@@ -67,6 +67,16 @@
   .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
   footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
   .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 760px; margin: 0 auto; }
+
+  /* 183차 보강 — 표/공식 스타일(다른 가이드와 동일 규칙) */
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  .tablewrap table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 480px; }
+  .tablewrap th, .tablewrap td { padding: 9px 12px; border-bottom: 1px solid var(--line); text-align: left; }
+  .tablewrap th { background: var(--panel2); font-weight: 700; }
+  .tablewrap tr:last-child td { border-bottom: 0; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .formula { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 14px; margin: 12px 0 16px; font-size: 14px; overflow-x: auto; }
 </style>
   <link rel="stylesheet" href="/site-header.css" />
 </head>
@@ -136,6 +146,63 @@
       <li><a href="/calc/">데미지 계산기</a> — 특정 기술이 상대에게 몇 %를 주는지, 확정 1타가 되는지 즉시 계산.</li>
       <li><a href="/builder/">파티 빌더</a> — 노력치를 배분하며 실능력치를 실시간으로 확인하고 검증.</li>
       <li><a href="/#download">데스크탑 프로그램</a> — 게임 화면에서 상대 파티를 자동 인식해 매 턴 데미지를 실시간으로 보여줍니다.</li>
+    </ul>
+
+    
+    <h2>챔피언스만의 노력치 — 본가와 완전히 다릅니다</h2>
+    <p>다른 포켓몬 게임을 해 봤다면 이 부분을 반드시 다시 익혀야 합니다. 포켓몬 챔피언스의 노력치는 규칙이 다릅니다.</p>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th></th><th>본가 시리즈</th><th>포켓몬 챔피언스</th></tr></thead>
+      <tbody>
+        <tr><td>한 능력치 상한</td><td class="num">252</td><td class="num"><strong>32</strong></td></tr>
+        <tr><td>합계 상한</td><td class="num">510</td><td class="num"><strong>66</strong></td></tr>
+        <tr><td>실수치 환산</td><td>노력치 4당 1</td><td><strong>노력치 1당 1</strong></td></tr>
+        <tr><td>레벨 · 개체값</td><td>가변</td><td>전부 레벨 50 · 개체값 31 고정</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>여기서 중요한 결론이 하나 나옵니다. <strong>32 + 32 = 64</strong>이므로, 능력치 두 개를 최대로 채우면 66을 거의 다 씁니다. 즉 챔피언스의 빌드는 사실상 <strong>"어느 둘을 고를 것인가"</strong>의 문제입니다. 실제로 사용률 상위 50종의 96%가 이 구조를 택하고 있습니다.</p>
+
+    <h2>성격 — 스탯 하나를 올리고 하나를 내린다</h2>
+    <p>성격은 능력치 하나에 <strong>×1.1</strong>, 다른 하나에 <strong>×0.9</strong>를 겁니다. 보정은 노력치까지 더한 값 전체에 곱해집니다.</p>
+    <div class="formula">실수치 = floor( ( floor((2×종족값+31)×50÷100) + 5 + 노력치 ) × 성격보정 )</div>
+    <p>내리는 능력치는 <strong>안 쓰는 쪽</strong>으로 고릅니다. 물리 공격만 하는 포켓몬은 특공을 내려도 손해가 없고, 특수 공격만 하는 포켓몬은 공격을 내려도 됩니다. 이 선택이 사실상 공짜 보너스가 되는 셈입니다.</p>
+
+    <h2>랭크 배틀의 흐름</h2>
+    <ol>
+      <li><strong>파티 6마리를 등록</strong>합니다. 각각 기술 4개, 특성, 지닌 도구, 노력치, 성격을 정합니다.</li>
+      <li><strong>매칭 후 선출 화면</strong>에서 상대 6마리를 봅니다. 여기서 내가 쓸 3마리(더블은 4마리)를 고릅니다.</li>
+      <li><strong>배틀</strong>이 시작됩니다. 서로 기술을 고르고, 스피드가 빠른 쪽이 먼저 행동합니다.</li>
+      <li>상대 선출 포켓몬을 전부 쓰러뜨리면 승리입니다.</li>
+    </ol>
+    <p>초보자가 가장 자주 놓치는 것이 <strong>2단계</strong>입니다. 선출 화면에서 상대 파티를 보고 유리한 조합을 고르는 것만으로 승률이 크게 달라집니다. 무엇을 먼저 봐야 하는지는 <a href="/guide/reading-opponent/">선출 전 30초</a>에 순서대로 정리해 두었습니다.</p>
+
+    <h2>첫 파티를 짜는 순서</h2>
+    <p>처음이라면 아래 순서대로 채워 나가는 것을 권합니다.</p>
+    <ol>
+      <li><strong>주력 한 마리를 정합니다.</strong> 마음에 드는 포켓몬이면 됩니다. 다만 사용률 상위권에는 이유가 있으니, <a href="/battle-data/">배틀데이터</a>를 참고하면 실패가 적습니다.</li>
+      <li><strong>그 포켓몬의 약점 세 개를 확인합니다.</strong> <a href="/pokedex/">도감</a>의 타입 상성표에 자동 계산돼 있습니다.</li>
+      <li><strong>약점을 막아 줄 두 번째를 넣습니다.</strong> 주력의 약점 중 둘 이상을 반감하거나 무효화하는 포켓몬이 좋습니다.</li>
+      <li><strong>땅 대책을 확인합니다.</strong> 실제 랭크배틀에서 격침의 약 20%가 땅 기술입니다. 파티에 땅 약점이 셋 이상이면 다시 짜는 편이 낫습니다.</li>
+      <li><strong>물리와 특수를 섞습니다.</strong> 한쪽으로 몰리면 벽 하나에 파티 전체가 막힙니다.</li>
+      <li>나머지 자리는 <a href="/builder/">파티 빌더</a>의 추천 기능을 쓰면 약점 진단과 함께 후보를 제안받을 수 있습니다.</li>
+    </ol>
+
+    <h2>기술 4개를 고르는 기준</h2>
+    <ul>
+      <li><strong>자속 주력기 1~2개</strong> — 자기 타입과 같은 기술은 위력이 1.5배입니다. 실제로 경기를 끝내는 기술 대부분이 여기서 나옵니다.</li>
+      <li><strong>서브 공격기 1개</strong> — 주력기가 안 통하는 상대(반감·무효)를 찌르는 용도입니다.</li>
+      <li><strong>변화기 1개</strong> — 능력 상승, 회복, 상태이상, 설치기 중 파티 역할에 맞는 것을 넣습니다.</li>
+    </ul>
+    <p>초보 단계에서는 <strong>서브 기술을 너무 많이 넣지 않는 편</strong>이 좋습니다. 자속 등배 기술이 비자속 효과굉장 기술보다 약한 경우가 많아, 결국 주력기를 쓰게 되는 상황이 대부분입니다.</p>
+
+    <h2>다음에 읽을 것</h2>
+    <ul>
+      <li>계산 원리부터 알고 싶다면 → <a href="/guide/damage-formula/">데미지 계산 공식 완벽 정리</a></li>
+      <li>상성이 헷갈린다면 → <a href="/guide/type-chart/">타입 상성표</a></li>
+      <li>실전 메타가 궁금하다면 → <a href="/guide/meta-singles/">싱글 메타 분석</a></li>
+      <li>노력치·성격을 더 파고들려면 → <a href="/guide/ev-reality/">노력치 66의 현실</a></li>
     </ul>
 
     <div class="related">

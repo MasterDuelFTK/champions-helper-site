@@ -443,6 +443,7 @@ PAGE = """<!DOCTYPE html>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <title>{title}</title>
 <meta name="description" content="{desc}" />
+<meta name="robots" content="noindex,follow" />
 <link rel="canonical" href="{canon}" />
 <meta property="og:type" content="article" />
 <meta property="og:site_name" content="Champions Helper" />
@@ -682,18 +683,32 @@ def inject_index():
         f.write(html_src)
 
 # ── sitemap 재생성 ────────────────────────────────────────────────────
+# ★183차(AdSense 3차 거절 대응) — 자동생성 페이지는 sitemap에서 뺀다.
+#   도감 상세 236편 + 배틀데이터 2편은 전부 데이터에서 기계 생성한 페이지라
+#   색인되면 사이트의 91%가 템플릿 페이지로 계산돼 "가치 없는 콘텐츠" 판정을 부른다.
+#   페이지는 그대로 살아 있고(nav 링크·직접 접속·헬퍼 데이터 전부 무관), 색인만 빼는 것.
+#   PAGE/BD_PAGE 템플릿의 noindex,follow 와 한 세트 — 한쪽만 바꾸지 말 것.
 STATIC_ROUTES = [
     ("/", "weekly", "1.0"),
     ("/pokedex/", "weekly", "0.9"),
     ("/calc/", "weekly", "0.9"),
-    ("/battle-data/", "weekly", "0.8"),
-    ("/battle-data/doubles/", "weekly", "0.7"),
     ("/builder/", "weekly", "0.8"),
     ("/board/", "daily", "0.7"),
     ("/guide/", "monthly", "0.7"),
     ("/about/", "yearly", "0.5"),
     ("/guide/meta-singles/", "weekly", "0.8"),
     ("/guide/meta-doubles/", "weekly", "0.8"),
+    # 183차 신설 칼럼 10편 (build-columns.py 가 생성). 그쪽 COLUMNS 와 목록을 일치시킬 것.
+    ("/guide/what-kills-you/", "monthly", "0.8"),
+    ("/guide/finishers/", "monthly", "0.8"),
+    ("/guide/matchup-map/", "monthly", "0.8"),
+    ("/guide/item-meta/", "monthly", "0.8"),
+    ("/guide/ev-reality/", "monthly", "0.8"),
+    ("/guide/ability-guessing/", "monthly", "0.8"),
+    ("/guide/singles-vs-doubles/", "monthly", "0.8"),
+    ("/guide/nature-meta/", "monthly", "0.8"),
+    ("/guide/team-cores/", "monthly", "0.8"),
+    ("/guide/reading-opponent/", "monthly", "0.8"),
     ("/guide/speed-guide/", "monthly", "0.7"),
     ("/guide/ev-nature/", "monthly", "0.7"),
     ("/guide/team-building/", "monthly", "0.7"),
@@ -716,8 +731,7 @@ def build_sitemap():
                     f"    <changefreq>{freq}</changefreq>\n    <priority>{pri}</priority>\n  </url>")
     for loc, freq, pri in STATIC_ROUTES:
         u(loc, freq, pri)
-    for e in DEX:
-        u(f"/pokedex/{slug(e['en'])}/", "monthly", "0.6")
+    # 183차 — 도감 상세 236편 루프 제거(noindex 전환). 되살리면 noindex와 모순되는 sitemap이 된다.
     xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
            + "\n".join(urls) + "\n</urlset>\n")
@@ -735,6 +749,7 @@ BD_PAGE = """<!DOCTYPE html>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <title>포켓몬 챔피언스 {fmt_label}배틀 실전 사용률 — 배틀 데이터 | Champions Helper</title>
 <meta name="description" content="포켓몬 챔피언스 {fmt_label}배틀 랭크({season}) 기준, 포켓몬별 자주 채용하는 기술과 채용률 통계. 상대가 무엇을 들고 오는지 예측하세요." />
+<meta name="robots" content="noindex,follow" />
 <link rel="canonical" href="{canon_url}" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Champions Helper" />
@@ -977,4 +992,5 @@ if __name__ == "__main__":
                                   "https://champions-helper.com/battle-data/doubles/", "double")
     build_sitemap()
     print(f"OK — 상세페이지 {n}개 생성 (pokedex/<en>/index.html), 사용률 매칭 {sum(1 for e in DEX if usage_for(e['en']))}종")
-    print(f"     배틀데이터 싱글 {bd}종 · 더블 {bd_d}종 · 도감 인덱스 정적목록 주입 · sitemap {len(STATIC_ROUTES)}정적 + {len(seen)}상세 재생성")
+    print(f"     배틀데이터 싱글 {bd}종 · 더블 {bd_d}종 · 도감 인덱스 정적목록 주입 · "
+          f"sitemap {len(STATIC_ROUTES)}정적 재생성(도감 상세 {len(seen)}편 = noindex, 색인 제외)")

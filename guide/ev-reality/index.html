@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>노력치 66의 현실 — 상위 50종은 실제로 어떻게 나눠 쓰는가 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스의 노력치는 스탯당 32, 합계 66입니다. 상위 50종의 실제 배분 1위 스프레드를 전수 집계해, 96%가 선택한 극단 배분 구조와 그 예외를 분석합니다." />
+<link rel="canonical" href="https://champions-helper.com/guide/ev-reality/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/ev-reality/" />
+<meta property="og:title" content="노력치 66의 현실 — 상위 50종은 실제로 어떻게 나눠 쓰는가" />
+<meta property="og:description" content="상위 50종의 실제 노력치 배분 전수 집계. 96%가 32/32 구조." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="노력치 66의 현실 — 상위 50종은 실제로 어떻게 나눠 쓰는가" />
+<meta name="twitter:description" content="상위 50종의 실제 노력치 배분 전수 집계. 96%가 32/32 구조." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "노력치 66의 현실 — 상위 50종은 실제로 어떻게 나눠 쓰는가",
+  "description": "상위 50종의 실제 노력치 배분 전수 집계. 96%가 32/32 구조.",
+  "inLanguage": "ko",
+  "datePublished": "2026-08-03",
+  "dateModified": "2026-08-03",
+  "url": "https://champions-helper.com/guide/ev-reality/",
+  "author": { "@type": "Organization", "name": "Champions Helper" },
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .article { max-width: 920px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 28px; font-weight: 800; margin: 0 0 10px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 20px; font-weight: 800; margin: 34px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 800; margin: 22px 0 8px; }
+  .article p { margin: 0 0 14px; }
+  .article strong { color: #fff; }
+  .article ul { margin: 0 0 14px; padding-left: 22px; }
+  .article li { margin-bottom: 6px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+  th { background: var(--panel2); }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: center; }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+  .formula { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 16px; margin: 8px 0 16px; font-family: Consolas, monospace; font-size: 13.5px; overflow-x: auto; }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 28px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .foot-links { font-size: 13px; margin: 0 0 12px; }
+  .foot-links a { color: var(--muted); }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 920px; margin: 0 auto; }
+</style>
+  <link rel="stylesheet" href="/site-header.css" />
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/">배틀데이터</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/board/">게시판</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 노력치 66의 현실</div>
+    <h1>노력치 66의 현실 — 상위 50종은 실제로 어떻게 나눠 쓰는가</h1>
+    <p class="lead">포켓몬 챔피언스의 노력치는 본가와 다릅니다. 한 능력치에 최대 32, 합계 66. 이 제약은 생각보다 훨씬 강하게 빌드를 규정합니다. 상위 50종이 실제로 어떤 배분을 가장 많이 썼는지 전부 모아 보면, 사실상 <strong>정답이 정해져 있다</strong>는 것이 보입니다.</p>
+
+    <h2>먼저 구조부터 — 왜 32/32인가</h2>
+    <p>노력치 1당 실수치가 1씩 오릅니다(본가는 4당 1). 한 능력치 상한은 32, 합계 상한은 66입니다. 여기서 산수가 하나 나옵니다.</p>
+    <div class="formula">32 + 32 = 64, 남는 것은 2</div>
+    <p>즉 <strong>능력치 두 개를 최대로 채우면 66을 거의 다 쓰게 됩니다</strong>. 남은 2를 어디에 넣든 실수치는 2밖에 안 오르니 사실상 잉여입니다. 세 능력치에 22씩 나누는 배분도 가능하지만, 그러면 어느 것도 최대치에 못 미칩니다.</p>
+    <p>결과적으로 챔피언스의 노력치 설계는 <strong>"어느 둘을 고를 것인가"</strong>라는 이지선다에 가깝습니다.</p>
+
+    <h2>상위 50종의 1위 배분 — 96%가 같은 구조</h2>
+    <p>상위 50종 각각에서 가장 많이 쓰인 배분 하나씩을 뽑아 보면, <strong>48종(96%)이 32급 능력치를 두 개 가진 구조</strong>였습니다. 나머지 2종만 예외입니다.</p>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>순위</th><th>포켓몬</th><th>1위 배분</th><th>그 배분의 비율</th><th>유형</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td>한카리아스</td><td>H2 A32 S32</td><td class="num">53.1%</td><td>공격+스피드</td></tr>
+        <tr><td class="num">2</td><td>따라큐</td><td>H2 A32 S32</td><td class="num">25.1%</td><td>공격+스피드</td></tr>
+        <tr><td class="num">3</td><td>마스카나</td><td>H2 A32 S32</td><td class="num">61.9%</td><td>공격+스피드</td></tr>
+        <tr><td class="num">4</td><td>하마돈</td><td>H32 B32 D2</td><td class="num">20.4%</td><td>HP+방어</td></tr>
+        <tr><td class="num">5</td><td>브리두라스</td><td>H2 C32 S32</td><td class="num">21.8%</td><td>특공+스피드</td></tr>
+        <tr><td class="num">6</td><td>누리레느</td><td>H32 C32 S2</td><td class="num">10.0%</td><td>HP+특공</td></tr>
+        <tr><td class="num">7</td><td>메타그로스</td><td>H2 A32 S32</td><td class="num">28.8%</td><td>공격+스피드</td></tr>
+        <tr><td class="num">8</td><td>갸라도스</td><td>H1 A32 B1 S32</td><td class="num">26.3%</td><td>공격+스피드</td></tr>
+        <tr><td class="num">9</td><td>망나뇽</td><td>H2 C32 S32</td><td class="num">23.9%</td><td>특공+스피드</td></tr>
+        <tr><td class="num">13</td><td>개굴닌자</td><td>H2 C32 S32</td><td class="num">62.9%</td><td>특공+스피드</td></tr>
+        <tr><td class="num">14</td><td>삼삼드래</td><td>H2 C32 S32</td><td class="num">71.9%</td><td>특공+스피드</td></tr>
+        <tr><td class="num">15</td><td>아머까오</td><td>H32 B32 D2</td><td class="num">43.1%</td><td>HP+방어</td></tr>
+        <tr><td class="num">17</td><td>킬가르도</td><td>H32 A32 B1 D1</td><td class="num">16.9%</td><td>HP+공격</td></tr>
+        <tr><td class="num">28</td><td>찌리배리</td><td>H31 B4 D28 S3</td><td class="num">28.7%</td><td class="num">예외</td></tr>
+        <tr><td class="num">50</td><td>거북왕</td><td>H19 C18 S29</td><td class="num">12.3%</td><td class="num">예외</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>세 가지 유형으로 수렴합니다</h2>
+    <h3>① 공격 32 + 스피드 32 — 화력형</h3>
+    <p>한카리아스·따라큐·마스카나·메타그로스·갸라도스가 전부 이 형태입니다. 자기 주력기를 최대 위력으로 쏘면서 선공까지 잡겠다는 배분입니다. 마스카나는 이 배분 비율이 <strong>61.9%</strong>, 삼삼드래는 특공판으로 <strong>71.9%</strong>까지 올라갑니다. 사실상 표준형이 하나로 굳었다는 뜻입니다.</p>
+    <p>이 유형을 상대할 때는 <strong>내구를 전혀 안 챙긴 상태</strong>라고 가정해도 됩니다. HP에 남는 2만 넣었으니 체력은 종족값 그대로입니다. 이쪽이 먼저 때릴 수 있다면 대부분 유리하게 풀립니다.</p>
+
+    <h3>② HP 32 + 방어(또는 특방) 32 — 내구형</h3>
+    <p>하마돈·아머까오·라우드본·블래키·이상해꽃 등이 이 형태입니다. 스피드를 완전히 포기하고 버티는 쪽을 택합니다. HP에 32를 넣는다는 건 <strong>모든 물리·특수 공격에 대해 동시에 내구가 오른다</strong>는 뜻이라 효율이 좋습니다.</p>
+    <p>상위 50종 중 <strong>HP에 20 이상 투자한 종이 20종(40%)</strong>입니다. 화력형이 60%, 내구형이 40%로 메타가 갈려 있는 셈입니다.</p>
+
+    <h3>③ HP 32 + 공격/특공 32 — 무거운 화력형</h3>
+    <p>누리레느와 킬가르도가 대표적입니다. 스피드를 버리고 <strong>맞으면서 때리는</strong> 쪽을 택합니다. 원래 스피드 종족값이 낮아 32를 넣어도 선공을 못 잡는 포켓몬들이 주로 이 배분을 씁니다.</p>
+    <p>누리레느의 1위 배분 비율이 10.0%밖에 안 된다는 점도 눈여겨볼 만합니다. 이 포켓몬은 <strong>배분이 가장 안 굳은 종</strong>이라는 뜻이고, 상대로 만났을 때 추정이 가장 어렵다는 뜻이기도 합니다.</p>
+
+    <h2>예외 2종이 알려주는 것</h2>
+    <p>찌리배리(H31 B4 D28 S3)와 거북왕(H19 C18 S29)만 32를 두 번 채우지 않았습니다. 둘 다 <strong>특정 스피드 라인이나 내구 라인을 정확히 맞추려는</strong> 조정형 배분입니다.</p>
+    <p>이런 배분은 "이 상대의 이 기술을 확정으로 버틴다" 또는 "이 상대보다 1만 더 빠르다" 같은 구체적 목표가 있을 때 나옵니다. 남는 노력치를 다른 곳에 돌릴 수 있으니 이론적으로는 가장 효율적이지만, 목표로 삼은 상대가 메타에서 사라지면 의미가 없어집니다. 상위권에서 이런 배분이 두 종뿐인 이유입니다.</p>
+
+    <h2>성격 보정이 배분보다 중요할 때</h2>
+    <p>노력치 32는 실수치 32를 올립니다. 성격 보정은 <strong>노력치까지 더한 값 전체에 ×1.1</strong>입니다. 실수치가 150인 능력치라면 성격 보정만으로 15가 오릅니다.</p>
+    <div class="formula">실수치 = floor( ( floor((2×종족값+31)×50÷100) + 5 + 노력치 ) × 성격보정 )</div>
+    <p>즉 노력치 32(=+32)와 성격 보정(=+15 안팎)은 비슷한 급의 조정 수단이 아닙니다. <strong>노력치가 훨씬 큽니다.</strong> 하지만 성격은 노력치를 쓰지 않고 얻는 보너스이므로, 둘을 같은 능력치에 겹쳐 주는 것이 상위권 표준입니다. 실제로 상위 50종의 1위 성격을 보면 그렇게 나옵니다. 자세한 내용은 <a href="/guide/nature-meta/">성격 선택의 실제</a>에서 다뤘습니다.</p>
+
+    <h2>상대 배분을 추정하는 실전 요령</h2>
+    <ul>
+      <li>상대가 <strong>선공을 잡았다</strong> → 스피드 32 + 성격 보정일 가능성이 높습니다. 그러면 내구는 종족값 그대로입니다.</li>
+      <li>상대가 <strong>확정 1타여야 할 공격을 버텼다</strong> → HP 32 계열입니다. 그러면 스피드는 무보정입니다.</li>
+      <li>둘 다 아니라면 조정형이거나, 예상과 다른 도구(기합의띠·자뭉열매)를 들었을 가능성을 봅니다.</li>
+    </ul>
+    <p>챔피언스의 배분이 이렇게 몇 가지로 수렴하기 때문에, <strong>한 가지 정보만 얻으면 나머지가 대부분 따라옵니다</strong>. 이 추정을 자동으로 해 주는 것이 <a href="/">데스크탑 앱</a>의 위력 칩 테두리 표시입니다. 채용률 1위 배분을 기본 가정으로 잡고, 확정된 정보가 들어오면 그쪽으로 갱신합니다.</p>
+
+    <div class="related">
+      <h3>함께 읽기</h3>
+      <a href="/guide/nature-meta/">성격 선택의 실제 →</a>
+      <a href="/guide/item-meta/">지닌도구 메타 →</a>
+      <a href="/guide/ev-nature/">노력치·성격 배분 가이드 →</a>
+    </div>
+    <p class="note">본문 수치는 <strong>시즌 M-4 · 2026-08-02 집계분</strong> 기준입니다. 원본 데이터는 12시간마다 자동 갱신되므로
+      최신 순위·채용률은 <a href="/battle-data/">배틀데이터</a>와 <a href="/pokedex/">도감</a>에서 확인할 수 있습니다.
+      집계 방법과 출처는 <a href="/about/">사이트 소개</a>에 정리해 두었습니다.</p>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="/about/">사이트 소개</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

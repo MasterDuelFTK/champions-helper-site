@@ -75,6 +75,16 @@
   .foot-links { font-size: 13px; margin: 0 0 12px; }
   .foot-links a { color: var(--muted); }
   .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 820px; margin: 0 auto; }
+
+  /* 183차 보강 — 표/공식 스타일(다른 가이드와 동일 규칙) */
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  .tablewrap table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 480px; }
+  .tablewrap th, .tablewrap td { padding: 9px 12px; border-bottom: 1px solid var(--line); text-align: left; }
+  .tablewrap th { background: var(--panel2); font-weight: 700; }
+  .tablewrap tr:last-child td { border-bottom: 0; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .formula { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 14px; margin: 12px 0 16px; font-size: 14px; overflow-x: auto; }
 </style>
   <link rel="stylesheet" href="/site-header.css" />
 </head>
@@ -174,6 +184,62 @@
     <h2>자속(STAB)도 함께 기억하기</h2>
     <p>자신의 타입과 같은 타입의 기술을 쓰면 위력이 추가로 <strong>1.5배</strong>가 됩니다(자속, STAB). 그래서 상성상 2배인 데다 자속까지 받으면 데미지가 크게 뛰어오릅니다. 어떤 기술을 채용할지 정할 때 "자속 + 상성"을 함께 고려하는 것이 기본입니다.</p>
     <p>실제 데미지가 얼마나 나오는지는 <a href="/calc/">데미지 계산기</a>에서 타입 상성·자속이 자동 반영된 결과로 확인할 수 있습니다.</p>
+
+    
+    <h2>복합 타입 계산 — 배율은 곱해집니다</h2>
+    <p>포켓몬 대부분은 타입을 두 개 가집니다. 이때 받는 데미지 배율은 <strong>두 타입의 배율을 그대로 곱한</strong> 값입니다.</p>
+    <div class="formula">최종 상성 배율 = (타입1에 대한 배율) × (타입2에 대한 배율)</div>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>상황</th><th>계산</th><th>결과</th></tr></thead>
+      <tbody>
+        <tr><td>양쪽 다 약점</td><td>2 × 2</td><td class="num"><strong>×4</strong></td></tr>
+        <tr><td>한쪽만 약점</td><td>2 × 1</td><td class="num">×2</td></tr>
+        <tr><td>약점과 반감이 상쇄</td><td>2 × 0.5</td><td class="num">×1</td></tr>
+        <tr><td>양쪽 다 반감</td><td>0.5 × 0.5</td><td class="num">×0.25</td></tr>
+        <tr><td>한쪽이 무효</td><td>2 × 0</td><td class="num"><strong>×0</strong></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p><strong>×4는 실전에서 거의 즉사입니다.</strong> 대표적으로 얼음·비행인 프리져는 바위에 4배, 물·비행인 갸라도스는 전기에 4배를 받습니다. 파티에 4배 약점을 가진 포켓몬을 넣을 때는 그 타입 기술이 메타에 얼마나 흔한지 반드시 확인해야 합니다.</p>
+    <p>반대로 <strong>무효는 곱셈을 무시하고 0</strong>이 됩니다. 다른 타입이 4배 약점이어도 한쪽이 무효면 데미지는 0입니다. 비행 타입이 땅 기술을 아예 안 맞는 것이 대표적입니다.</p>
+
+    <h2>무효 관계 정리 — 이것만은 외워두기</h2>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>이 타입은</th><th>이 공격을 아예 안 맞습니다</th></tr></thead>
+      <tbody>
+        <tr><td>비행</td><td>땅</td></tr>
+        <tr><td>땅</td><td>전기</td></tr>
+        <tr><td>고스트</td><td>노말 · 격투</td></tr>
+        <tr><td>노말</td><td>고스트</td></tr>
+        <tr><td>강철</td><td>독</td></tr>
+        <tr><td>악</td><td>에스퍼</td></tr>
+        <tr><td>페어리</td><td>드래곤</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>무효 관계는 <strong>상성표에서 가장 값어치가 큽니다</strong>. 반감은 절반만 줄이지만 무효는 완전히 없애기 때문에, 상대의 주력기를 무효화할 수 있는 포켓몬 하나가 판 전체를 바꿉니다. <a href="/guide/what-kills-you/">패배 기록 분석</a>에서 땅이 격침의 19.9%로 1위였는데, 비행 타입 하나가 그 전체를 무효화한다는 점을 생각하면 값어치가 분명해집니다.</p>
+
+    <h2>특성이 상성을 바꾸는 경우</h2>
+    <p>타입 상성표만으로 계산이 끝나지 않습니다. 특성이 상성 자체를 덮어쓰는 경우가 있습니다.</p>
+    <ul>
+      <li><strong>부유</strong> — 땅이 아닌데도 땅 기술을 무효화합니다. 상성표에는 안 나옵니다.</li>
+      <li><strong>저수 · 마중물</strong> — 물 기술 무효. <strong>피뢰침 · 축전</strong> — 전기 기술 무효. <strong>먹보 · 흡수</strong> 계열도 같습니다.</li>
+      <li><strong>두꺼운지방</strong> — 불꽃과 얼음을 각각 반감합니다. 상성표상 등배여도 절반이 됩니다.</li>
+      <li><strong>노릇노릇바디</strong> — 불꽃 무효. <strong>방탄</strong> — 구슬·폭탄 계열 기술 무효.</li>
+    </ul>
+    <p class="note"><strong>단, 이 방어 특성들은 <a href="/guide/ability-guessing/">틀깨기 계열</a>에 전부 뚫립니다.</strong> 틀깨기·터보블레이즈·테라볼티지를 가진 공격자 앞에서는 부유도 저수도 작동하지 않습니다. 몰드류의 틀깨기 채용률이 69.9%라는 점을 기억해 두세요.</p>
+
+    <h2>상성표의 유명한 예외 — 프리즈드라이</h2>
+    <p>프리즈드라이는 얼음 기술인데도 <strong>물 타입에 효과가 굉장</strong>합니다. 원래 얼음은 물에 반감(×0.5)인데, 이 기술만 ×2로 뒤집힙니다.</p>
+    <p>물·비행인 갸라도스나 물·페어리인 누리레느를 상대할 때 특히 위험합니다. 갸라도스라면 비행 쪽 배율(얼음 ×2)까지 곱해져 <strong>×4</strong>가 됩니다. 상성표를 그대로 믿고 "얼음은 물에 안 통한다"고 판단하면 그대로 당합니다.</p>
+
+    <h2>자속(STAB)까지 더한 실제 배율</h2>
+    <p>공격하는 포켓몬이 자기 타입과 같은 기술을 쓰면 위력이 <strong>×1.5</strong>가 됩니다. 이것을 자속 보정이라고 합니다. 상성 배율과 자속은 따로 곱해지므로 실제 체감은 이렇게 됩니다.</p>
+    <div class="formula">자속 + 효과 굉장 = 1.5 × 2 = <strong>×3</strong><br>자속 + 등배 = 1.5 × 1 = ×1.5<br>비자속 + 효과 굉장 = 1 × 2 = ×2</div>
+    <p>즉 <strong>자속 등배 기술이 비자속 효과굉장 기술보다 약합니다.</strong> 서브 기술로 약점을 찌르는 것보다 주력 자속기를 그냥 때리는 편이 나은 경우가 자주 생기는 이유입니다. <a href="/guide/finishers/">결정타 분석</a>에서 실제 경기를 끝내는 기술 대부분이 자속 주력기였던 것도 이 계산 때문입니다.</p>
+    <p>정확한 데미지는 <a href="/calc/">데미지 계산기</a>에서 노력치·성격·도구·랭크까지 넣어 확인할 수 있습니다.</p>
 
     <div class="related">
       <h3>함께 읽기</h3>

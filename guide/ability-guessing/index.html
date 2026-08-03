@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>상대 특성 맞히기 — 복수 특성 포켓몬 확률표 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스에서 상대 특성은 보이지 않습니다. 상위 50종 중 복수 특성 종의 실제 채용률을 정리해, 어떤 특성을 기본값으로 가정하고 어디서 예외를 의심해야 하는지 데이터로 제시합니다." />
+<link rel="canonical" href="https://champions-helper.com/guide/ability-guessing/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/ability-guessing/" />
+<meta property="og:title" content="상대 특성 맞히기 — 복수 특성 포켓몬 확률표" />
+<meta property="og:description" content="복수 특성 포켓몬의 실제 채용률과 추정 전략." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="상대 특성 맞히기 — 복수 특성 포켓몬 확률표" />
+<meta name="twitter:description" content="복수 특성 포켓몬의 실제 채용률과 추정 전략." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "상대 특성 맞히기 — 복수 특성 포켓몬 확률표",
+  "description": "복수 특성 포켓몬의 실제 채용률과 추정 전략.",
+  "inLanguage": "ko",
+  "datePublished": "2026-08-03",
+  "dateModified": "2026-08-03",
+  "url": "https://champions-helper.com/guide/ability-guessing/",
+  "author": { "@type": "Organization", "name": "Champions Helper" },
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .article { max-width: 920px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 28px; font-weight: 800; margin: 0 0 10px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 20px; font-weight: 800; margin: 34px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 800; margin: 22px 0 8px; }
+  .article p { margin: 0 0 14px; }
+  .article strong { color: #fff; }
+  .article ul { margin: 0 0 14px; padding-left: 22px; }
+  .article li { margin-bottom: 6px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+  th { background: var(--panel2); }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: center; }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+  .formula { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 16px; margin: 8px 0 16px; font-family: Consolas, monospace; font-size: 13.5px; overflow-x: auto; }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 28px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .foot-links { font-size: 13px; margin: 0 0 12px; }
+  .foot-links a { color: var(--muted); }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 920px; margin: 0 auto; }
+</style>
+  <link rel="stylesheet" href="/site-header.css" />
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/">배틀데이터</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/board/">게시판</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 상대 특성 맞히기</div>
+    <h1>상대 특성 맞히기 — 복수 특성 포켓몬 확률표</h1>
+    <p class="lead">상대 포켓몬의 특성은 발동하기 전까지 보이지 않습니다. 그런데 특성 하나로 데미지가 반토막 나거나 기술이 통째로 무효가 되기도 합니다. 다행히 <strong>복수 특성 종이라도 실제 채용은 한쪽으로 크게 기웁니다</strong>. 공식 랭크 데이터의 특성 채용률을 정리하면 상당히 신뢰할 만한 기본 가정을 세울 수 있습니다.</p>
+
+    <h2>상위 50종 중 특성이 갈리는 종</h2>
+    <p>아래는 싱글 사용률 상위 50종 가운데 1위 특성 채용률이 95% 미만인 종입니다. 나머지는 사실상 특성이 하나로 고정돼 있어 추측할 필요가 없습니다.</p>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>순위</th><th>포켓몬</th><th>1위 특성</th><th>2위 특성</th><th>그 외</th></tr></thead>
+      <tbody>
+        <tr><td class="num">3</td><td>마스카나</td><td><strong>변환자재 90.8%</strong></td><td>심록 9.2%</td><td>—</td></tr>
+        <tr><td class="num">5</td><td>브리두라스</td><td>지구력 71.6%</td><td>옹골참 28.2%</td><td>굳건한신념 0.2%</td></tr>
+        <tr><td class="num">10</td><td>마폭시</td><td><strong>맹화 89.9%</strong></td><td>매지션 10.1%</td><td>—</td></tr>
+        <tr><td class="num">11</td><td>리자몽</td><td>맹화 84.0%</td><td>선파워 16.0%</td><td>—</td></tr>
+        <tr><td class="num">13</td><td>개굴닌자</td><td>변환자재 82.6%</td><td>급류 17.4%</td><td>—</td></tr>
+        <tr><td class="num">15</td><td>아머까오</td><td>프레셔 59.2%</td><td>미러아머 39.0%</td><td>긴장감 1.8%</td></tr>
+        <tr><td class="num">16</td><td>킬라플로르</td><td><strong>독치장 93.2%</strong></td><td>부식 6.8%</td><td>—</td></tr>
+        <tr><td class="num">18</td><td>대쓰여너</td><td><strong>적응력 94.5%</strong></td><td>쓱쓱 3.7%</td><td>틀깨기 1.8%</td></tr>
+        <tr><td class="num">21</td><td>라이츄</td><td>피뢰침 86.4%</td><td>정전기 13.6%</td><td>—</td></tr>
+        <tr><td class="num">25</td><td>찌르호크</td><td><strong>위협 91.4%</strong></td><td>이판사판 8.6%</td><td>—</td></tr>
+        <tr><td class="num">27</td><td>대도각참</td><td>총대장 87.8%</td><td>오기 11.9%</td><td>프레셔 0.4%</td></tr>
+        <tr><td class="num">31</td><td>드래펄트</td><td>틈새포착 76.1%</td><td>저주받은바디 12.8%</td><td>클리어바디 11.1%</td></tr>
+        <tr><td class="num">33</td><td>블래키</td><td>정신력 61.1%</td><td>싱크로 38.9%</td><td>—</td></tr>
+        <tr><td class="num">35</td><td>이어롭</td><td>유연 75.7%</td><td>헤롱헤롱바디 21.4%</td><td>서투름 2.9%</td></tr>
+        <tr><td class="num">36</td><td>대짱이</td><td>급류 79.8%</td><td>습기 20.2%</td><td>—</td></tr>
+        <tr><td class="num">37</td><td>메가니움</td><td>심록 62.1%</td><td>리프가드 37.9%</td><td>—</td></tr>
+        <tr><td class="num">40</td><td>이상해꽃</td><td>엽록소 70.5%</td><td>심록 29.5%</td><td>—</td></tr>
+        <tr><td class="num">42</td><td>몰드류</td><td>틀깨기 69.9%</td><td>모래헤치기 29.2%</td><td>모래의힘 0.9%</td></tr>
+        <tr><td class="num">48</td><td>픽시</td><td>천진 85.0%</td><td>매직가드 13.9%</td><td>헤롱헤롱바디 1.1%</td></tr>
+        <tr><td class="num">49</td><td>스코빌런</td><td>변덕쟁이 57.5%</td><td>불면 39.4%</td><td>엽록소 3.1%</td></tr>
+        <tr><td class="num">50</td><td>거북왕</td><td>급류 72.8%</td><td>젖은접시 27.2%</td><td>—</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>세 등급으로 나눠서 다루면 됩니다</h2>
+
+    <h3>① 90% 이상 — 그냥 확정으로 취급</h3>
+    <p>마스카나(변환자재 90.8%), 마폭시(맹화 89.9%), 킬라플로르(독치장 93.2%), 대쓰여너(적응력 94.5%), 찌르호크(위협 91.4%). 열 번 중 아홉 번은 맞습니다. <strong>계산할 때 1위 특성을 그냥 확정으로 놓아도 실전 손해가 거의 없습니다.</strong></p>
+    <p>다만 예외가 걸렸을 때의 파급이 큰 경우는 따로 기억해 둡니다. 마스카나의 변환자재는 <strong>기술 타입이 곧 자기 타입이 되는</strong> 특성이라, 심록 개체(9.2%)와는 데미지 계산이 완전히 달라집니다.</p>
+
+    <h3>② 70~90% — 기본값으로 쓰되 어긋나면 즉시 갱신</h3>
+    <p>리자몽(맹화 84%), 개굴닌자(변환자재 82.6%), 라이츄(피뢰침 86.4%), 대도각참(총대장 87.8%), 드래펄트(틈새포착 76.1%), 이어롭(유연 75.7%), 대짱이(급류 79.8%), 이상해꽃(엽록소 70.5%), 몰드류(틀깨기 69.9%), 거북왕(급류 72.8%), 픽시(천진 85%).</p>
+    <p>이 구간은 <strong>다섯 판에 한 번쯤은 틀립니다</strong>. 그래서 "계산이 예상과 어긋났다"는 신호가 나오면 특성을 먼저 의심해야 합니다.</p>
+    <p>특히 주의할 조합이 몇 개 있습니다.</p>
+    <ul>
+      <li><strong>이상해꽃 엽록소 70.5%</strong> — 쾌청이 깔려 있으면 스피드가 2배가 됩니다. 무보정이라고 계산해 놓고 선공을 뺏기는 대표적 사례입니다.</li>
+      <li><strong>몰드류 틀깨기 69.9%</strong> — 방어 측 특성 보정을 통째로 무시합니다. 부유로 지진을 피할 생각이었다면 그 계획이 70% 확률로 깨집니다.</li>
+      <li><strong>픽시 천진 85%</strong> — 상대의 능력 변화 랭크를 무시합니다. 칼춤을 몇 번 쌓았든 픽시 앞에서는 의미가 없습니다.</li>
+      <li><strong>드래펄트 틈새포착 76.1%</strong> — 리플렉터·빛의장막을 관통합니다. 벽을 깔았으니 버틴다는 계산이 무너집니다.</li>
+    </ul>
+
+    <h3>③ 70% 미만 — 추측하지 말고 정보를 기다린다</h3>
+    <p>아머까오(프레셔 59.2% / 미러아머 39.0%), 블래키(정신력 61.1% / 싱크로 38.9%), 메가니움(심록 62.1% / 리프가드 37.9%), 스코빌런(변덕쟁이 57.5% / 불면 39.4%), 브리두라스(지구력 71.6% / 옹골참 28.2%).</p>
+    <p>이 구간은 사실상 <strong>동전 던지기에 가깝습니다</strong>. 브리두라스의 옹골참(28.2%)이 걸리면 HP 풀에서 확정 1타가 아예 성립하지 않습니다. 이런 상대에게는 확정 1타를 전제한 플레이 자체를 피하고, 2타로 잡는 안전한 경로를 잡는 편이 낫습니다.</p>
+
+    <h2>메가진화는 예외입니다</h2>
+    <p>메가진화한 포켓몬의 특성은 <strong>폼에 고정</strong>됩니다. 리자몽이 메가 X가 되면 특성은 무조건 단단한발톱, 메가 Y가 되면 무조건 가뭄입니다. 메가 전의 채용률(맹화 84% / 선파워 16%)은 메가 이후에는 아무 의미가 없습니다.</p>
+    <p>즉 <strong>상대가 메가진화하는 순간 특성 추측 문제는 사라집니다</strong>. 대신 어떤 메가인지가 새 문제가 되는데, 이건 지닌 도구(메가스톤 종류)로 결정되므로 도구가 드러나면 같이 확정됩니다.</p>
+
+    <h2>특성 정보를 얻는 순간들</h2>
+    <ul>
+      <li><strong>등장 시 발동</strong> — 위협(공격 1랭크 다운), 프레셔, 가뭄·잔비 같은 날씨 특성은 나오자마자 로그에 뜹니다.</li>
+      <li><strong>피격 시 발동</strong> — 까칠한피부·정전기·불꽃몸은 때린 쪽에 효과가 돌아옵니다.</li>
+      <li><strong>데미지가 안 맞을 때</strong> — 계산보다 적게 들어갔다면 두꺼운지방·이상한비늘·퍼코트 계열, 아예 0이면 부유·저수·피뢰침 계열입니다.</li>
+      <li><strong>기술 타입이 바뀔 때</strong> — 변환자재·-스킨 계열은 로그의 상성 표기로 드러납니다.</li>
+    </ul>
+    <p><a href="/">데스크탑 앱</a>은 이 추정을 3단계로 자동 관리합니다. 기본값은 <strong>채용률 1위 특성</strong>이고, 배틀 중 확정된 정보를 입력하면 그 값이 우선하며, 가정을 바꿔 보고 싶으면 시뮬레이션 지정이 최우선으로 적용됩니다. 위 표를 외우지 않아도 같은 판단이 자동으로 이뤄집니다.</p>
+
+    <div class="related">
+      <h3>함께 읽기</h3>
+      <a href="/guide/item-meta/">지닌도구 메타 →</a>
+      <a href="/guide/matchup-map/">상성 지도 →</a>
+      <a href="/guide/abilities-items/">특성·지닌도구 기본 가이드 →</a>
+    </div>
+    <p class="note">본문 수치는 <strong>시즌 M-4 · 2026-08-02 집계분</strong> 기준입니다. 원본 데이터는 12시간마다 자동 갱신되므로
+      최신 순위·채용률은 <a href="/battle-data/">배틀데이터</a>와 <a href="/pokedex/">도감</a>에서 확인할 수 있습니다.
+      집계 방법과 출처는 <a href="/about/">사이트 소개</a>에 정리해 두었습니다.</p>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="/about/">사이트 소개</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

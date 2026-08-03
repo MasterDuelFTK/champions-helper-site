@@ -68,6 +68,16 @@
   .foot-links { font-size: 13px; margin: 0 0 12px; }
   .foot-links a { color: var(--muted); }
   .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 820px; margin: 0 auto; }
+
+  /* 183차 보강 — 표/공식 스타일(다른 가이드와 동일 규칙) */
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  .tablewrap table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 480px; }
+  .tablewrap th, .tablewrap td { padding: 9px 12px; border-bottom: 1px solid var(--line); text-align: left; }
+  .tablewrap th { background: var(--panel2); font-weight: 700; }
+  .tablewrap tr:last-child td { border-bottom: 0; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .formula { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 14px; margin: 12px 0 16px; font-size: 14px; overflow-x: auto; }
 </style>
   <link rel="stylesheet" href="/site-header.css" />
 </head>
@@ -155,6 +165,63 @@
       <tr><td>돌격조끼</td><td class="m">특방 ×1.5</td><td>특수방어 1.5배 (변화 기술 사용 불가)</td></tr>
       <tr><td>진화의휘석</td><td class="m">방어·특방 ×1.5</td><td>아직 진화가 남은 포켓몬의 방어·특방</td></tr>
     </table>
+
+    
+    <h2>상대 특성을 무시하는 특성</h2>
+    <p>방어 특성을 아무리 잘 골라도 통째로 무시당하는 경우가 있습니다. 계산이 어긋나는 가장 흔한 원인이라 따로 기억해 둘 값어치가 있습니다.</p>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>특성</th><th>효과</th><th>무엇이 뚫리나</th></tr></thead>
+      <tbody>
+        <tr><td><strong>틀깨기</strong></td><td>방어 측 특성 보정을 전부 무시</td><td>부유 · 저수 · 피뢰침 · 두꺼운지방 · 방탄 등 전부</td></tr>
+        <tr><td>터보블레이즈 · 테라볼티지</td><td>틀깨기와 같은 효과</td><td>동일</td></tr>
+        <tr><td><strong>천진</strong></td><td>상대의 능력 변화 랭크를 무시</td><td>칼춤 · 용의춤 · 리플렉터 계열로 쌓은 랭크</td></tr>
+        <tr><td>틈새포착</td><td>벽을 관통</td><td>리플렉터 · 빛의장막</td></tr>
+        <tr><td>화학변화가스</td><td>상대 특성을 전부 무효화</td><td>공격·방어 특성 모두</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="note"><strong>천진은 자기 랭크는 유지하면서 상대 랭크만 무시합니다.</strong> 픽시(천진 85%)를 상대로 칼춤을 쌓아도 데미지가 안 오르는데, 픽시 자신이 쌓은 랭크는 그대로 적용됩니다. 다만 천진 자체는 틀깨기에 뚫립니다.</p>
+
+    <h2>기술 타입을 바꾸는 특성</h2>
+    <p>이 계열은 상성 계산의 출발점을 바꿔 버리므로 영향이 가장 큽니다.</p>
+    <ul>
+      <li><strong>변환자재 · 리베로</strong> — 쓰는 기술의 타입이 곧 자기 타입이 됩니다. 결과적으로 <strong>모든 기술이 자속(×1.5)</strong>이 됩니다. 마스카나(90.8%)·개굴닌자(82.6%)가 대표적입니다.</li>
+      <li><strong>-스킨 계열</strong>(페어리스킨·프리즈스킨·에어로스킨 등) — 노말 기술이 해당 타입으로 바뀌고 위력도 ×1.2가 됩니다. 님피아의 하이퍼보이스가 페어리 기술이 되는 식입니다.</li>
+      <li><strong>노말스킨</strong> — 반대로 모든 기술이 노말 타입이 됩니다.</li>
+      <li><strong>촉촉보이스</strong> — 소리 기술이 물 타입이 됩니다.</li>
+    </ul>
+    <p>상성표대로 계산했는데 데미지가 전혀 안 맞는다면 이 계열을 먼저 의심하세요.</p>
+
+    <h2>반감열매 — 소수 채용이지만 판을 뒤집는 도구</h2>
+    <p>오카열매(불꽃)·플카열매(얼음)·하반열매(드래곤)처럼 특정 타입 대응 열매가 18종 있습니다. 개별 채용률은 1% 미만이지만 걸렸을 때의 영향이 큽니다.</p>
+    <ul>
+      <li><strong>효과가 굉장할 때만 발동</strong>합니다(카리열매만 노말 등배에서도 발동).</li>
+      <li>발동하면 데미지가 <strong>절반</strong>이 됩니다. ×2 상성이 유지된 채 별도로 ×0.5가 곱해지므로, 결과적으로 등배 데미지를 받습니다.</li>
+      <li>1회용입니다. 한 번 발동하면 사라집니다.</li>
+    </ul>
+    <p>"확정 1타"라고 계산하고 들어갔는데 반토막만 들어가 버티는 상황이 여기서 나옵니다. 상위권 매치업일수록 염두에 둘 값어치가 있습니다.</p>
+
+    <h2>스피드를 바꾸는 도구와 특성</h2>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>요소</th><th>배율</th><th>조건</th></tr></thead>
+      <tbody>
+        <tr><td>구애스카프</td><td class="num">×1.5</td><td>기술 하나로 고정됨</td></tr>
+        <tr><td>검은철구</td><td class="num">×0.5</td><td>비행·부유의 땅 면역도 사라짐</td></tr>
+        <tr><td>엽록소 · 쓱쓱 · 모래헤치기 · 눈치우기</td><td class="num">×2</td><td>해당 날씨일 때</td></tr>
+        <tr><td>곡예</td><td class="num">×2</td><td>도구를 들고 있지 않을 때</td></tr>
+        <tr><td>속보</td><td class="num">×1.5</td><td>상태이상일 때 (마비 감속도 무시)</td></tr>
+        <tr><td>순풍</td><td class="num">×2</td><td>4턴 지속, 자기 진영 전체</td></tr>
+        <tr><td>마비</td><td class="num">×0.5</td><td>속보 보유자는 예외</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>이 배율들은 순서대로 곱해집니다. 예컨대 쾌청 상태의 엽록소 이상해꽃이 순풍까지 받으면 스피드가 4배가 됩니다. 상대 스피드를 무보정으로 계산해 놓고 선공을 뺏기는 대표적인 사례입니다. 자세한 계산은 <a href="/guide/speed-guide/">스피드 실전 가이드</a>에 정리했습니다.</p>
+
+    <h2>메타에서 실제로 쓰이는 도구는 무엇인가</h2>
+    <p>이론상 좋은 도구와 실제로 채용되는 도구는 다릅니다. 상위 50종의 실제 채용률을 집계해 보면 먹다남은음식 13.9%, 기합의띠 9.7%, 자뭉열매 9.4%, 구애스카프 8.7% 순으로, <strong>상위 세 개가 전부 버티는 도구</strong>였습니다. 그 이유와 상대 도구를 추정하는 법은 <a href="/guide/item-meta/">지닌도구 메타</a>에서 자세히 다뤘습니다.</p>
+    <p>포켓몬별 실제 특성·도구 채용률은 <a href="/pokedex/">도감 상세 페이지</a>에서 종별로 확인할 수 있습니다.</p>
 
     <div class="related">
       <h3>함께 읽기</h3>

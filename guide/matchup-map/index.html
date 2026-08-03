@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1395643596867142" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<title>상성 지도 — 상위 20종이 확실히 이기는 상대와 지는 상대 | Champions Helper</title>
+<meta name="description" content="포켓몬 챔피언스 공식 랭크 데이터의 승리·패배 상대 기록을 교차해, 상위 20종의 유리·불리 매치업과 진짜 5:5 구도를 정리했습니다. 선출 판단에 바로 쓰는 상성 지도." />
+<link rel="canonical" href="https://champions-helper.com/guide/matchup-map/" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Champions Helper" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:url" content="https://champions-helper.com/guide/matchup-map/" />
+<meta property="og:title" content="상성 지도 — 상위 20종이 확실히 이기는 상대와 지는 상대" />
+<meta property="og:description" content="승리 상대·패배 상대 기록을 교차한 상위 20종 매치업 지도." />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="상성 지도 — 상위 20종이 확실히 이기는 상대와 지는 상대" />
+<meta name="twitter:description" content="승리 상대·패배 상대 기록을 교차한 상위 20종 매치업 지도." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "상성 지도 — 상위 20종이 확실히 이기는 상대와 지는 상대",
+  "description": "승리 상대·패배 상대 기록을 교차한 상위 20종 매치업 지도.",
+  "inLanguage": "ko",
+  "datePublished": "2026-08-03",
+  "dateModified": "2026-08-03",
+  "url": "https://champions-helper.com/guide/matchup-map/",
+  "author": { "@type": "Organization", "name": "Champions Helper" },
+  "publisher": { "@type": "Organization", "name": "Champions Helper" },
+  "isPartOf": { "@type": "WebSite", "name": "Champions Helper", "url": "https://champions-helper.com/" }
+}
+</script>
+<style>
+  :root {
+    --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
+    --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--txt);
+    font-family: "Malgun Gothic", "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .article { max-width: 920px; margin: 0 auto; padding: 36px 0 24px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .article h1 { font-size: 28px; font-weight: 800; margin: 0 0 10px; }
+  .lead { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .article h2 { font-size: 20px; font-weight: 800; margin: 34px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 800; margin: 22px 0 8px; }
+  .article p { margin: 0 0 14px; }
+  .article strong { color: #fff; }
+  .article ul { margin: 0 0 14px; padding-left: 22px; }
+  .article li { margin-bottom: 6px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+  th { background: var(--panel2); }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: center; }
+  .note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px; margin: 18px 0; font-size: 14px; color: var(--muted); }
+  .note strong { color: var(--accent2); }
+  .formula { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 16px; margin: 8px 0 16px; font-family: Consolas, monospace; font-size: 13.5px; overflow-x: auto; }
+  .related { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 28px 0 8px; }
+  .related h3 { margin: 0 0 10px; font-size: 15px; }
+  .related a { display: inline-block; margin-right: 16px; font-size: 14px; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 44px; margin-top: 16px; }
+  .foot-links { font-size: 13px; margin: 0 0 12px; }
+  .foot-links a { color: var(--muted); }
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 920px; margin: 0 auto; }
+</style>
+  <link rel="stylesheet" href="/site-header.css" />
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="/"><span class="dot"></span> Champions Helper</a>
+    <nav class="nav-links">
+      <a href="/#features">기능</a>
+      <a href="/pokedex/">도감</a>
+      <a href="/#how">사용법</a>
+      <a href="/builder/">파티 빌더</a>
+      <a href="/calc/">계산기</a>
+      <a href="/battle-data/">배틀데이터</a>
+      <a href="/guide/" class="active">가이드</a>
+      <a href="/board/">게시판</a>
+      <a href="/#download">다운로드</a>
+      <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener">디스코드</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="article">
+    <div class="crumb"><a href="/guide/">가이드</a> › 상성 지도</div>
+    <h1>상성 지도 — 상위 20종이 확실히 이기는 상대와 지는 상대</h1>
+    <p class="lead">타입 상성표는 "페어리는 드래곤에 강하다"까지만 알려줍니다. 실제 배틀은 종족값·기술 구성·스피드가 다 얽혀서 상성표대로 가지 않습니다. 공식 랭크 데이터에는 각 포켓몬이 <strong>이겼을 때 마주친 상대</strong>와 <strong>졌을 때 마주친 상대</strong>가 따로 기록돼 있습니다. 이 둘을 교차하면 실전 상성 지도가 나옵니다.</p>
+
+    <h2>읽는 법 — 세 칸의 의미</h2>
+    <ul>
+      <li><strong>확실히 이김</strong> — 승리 상대 목록에만 있고 패배 상대 목록에는 없는 포켓몬. 실제로 유리하게 굴러간 매치업입니다.</li>
+      <li><strong>확실히 짐</strong> — 패배 상대 목록에만 있는 포켓몬. 마주치면 교체를 먼저 생각해야 합니다.</li>
+      <li><strong>양쪽 모두</strong> — 승리·패배 목록에 다 있는 포켓몬. 빌드와 선공 여부에 따라 갈리는 <strong>진짜 5:5</strong>입니다.</li>
+    </ul>
+    <p>여기서 "확실히"는 통계적 경향이지 절대적 보장이 아닙니다. 지닌 도구·노력치·특성에 따라 개별 판은 얼마든지 뒤집힙니다. 그래도 <strong>선출 화면에서 30초 안에 판단해야 할 때</strong> 이 지도는 충분히 쓸 만합니다.</p>
+
+    <h2>싱글 상위 10종 매치업</h2>
+    <div class="tablewrap">
+    <table>
+      <thead><tr><th>순위</th><th>포켓몬</th><th>확실히 이김</th><th>확실히 짐</th><th>5:5</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td><a href="/pokedex/garchomp/">한카리아스</a></td><td>킬라플로르 · 리자몽 · 라이츄 · 하마돈 · 번치코</td><td>마스카나 · 메타그로스 · 갸라도스 · 개굴닌자 · 아쿠스타</td><td>브리두라스 · 누리레느 · 망나뇽 · 따라큐</td></tr>
+        <tr><td class="num">2</td><td><a href="/pokedex/mimikyu/">따라큐</a></td><td>하마돈 · 마폭시 · 망나뇽 · 개굴닌자 · 대쓰여너</td><td>메타그로스 · 갸라도스 · 리자몽 · 번치코 · 핫삼</td><td>한카리아스 · 누리레느 · 마스카나 · 브리두라스</td></tr>
+        <tr><td class="num">3</td><td><a href="/pokedex/meowscarada/">마스카나</a></td><td>하마돈 · 망나뇽 · 대쓰여너 · 마폭시</td><td>메타그로스 · 브리두라스 · 리자몽 · 번치코</td><td>한카리아스 · 누리레느 · 갸라도스 · 따라큐 · 개굴닌자</td></tr>
+        <tr><td class="num">4</td><td><a href="/pokedex/hippowdon/">하마돈</a></td><td>킬라플로르 · 번치코 · 킬가르도 · 라이츄 · 팬텀 · 찌리배리</td><td>누리레느 · 마스카나 · 리자몽 · 개굴닌자 · 갸라도스 · 망나뇽</td><td>한카리아스 · 브리두라스 · 따라큐 · 메타그로스</td></tr>
+        <tr><td class="num">5</td><td><a href="/pokedex/archaludon/">브리두라스</a></td><td>마스카나 · 따라큐 · 하마돈 · 킬라플로르</td><td>리자몽 · 메타그로스 · 망나뇽 · 마폭시 · 라이츄</td><td>한카리아스 · 누리레느 · 갸라도스 · 개굴닌자</td></tr>
+        <tr><td class="num">6</td><td><a href="/pokedex/primarina/">누리레느</a></td><td>하마돈 · 마폭시 · 킬라플로르 · 번치코</td><td>갸라도스 · 메타그로스 · 따라큐 · 리자몽</td><td>한카리아스 · 브리두라스 · 마스카나 · 개굴닌자 · 망나뇽</td></tr>
+        <tr><td class="num">7</td><td><a href="/pokedex/metagross/">메타그로스</a></td><td>따라큐 · 누리레느 · 하마돈 · 킬라플로르 · 망나뇽</td><td>리자몽 · 마폭시 · 개굴닌자 · 대쓰여너 · 번치코</td><td>한카리아스 · 마스카나 · 브리두라스 · 갸라도스</td></tr>
+        <tr><td class="num">11</td><td><a href="/pokedex/charizard/">리자몽</a></td><td>하마돈 · 누리레느 · 개굴닌자 · 로토무(워시)</td><td>망나뇽 · 마폭시 · 대쓰여너</td><td>브리두라스 · 마스카나 · 한카리아스 · 메타그로스 · 따라큐 · 갸라도스</td></tr>
+        <tr><td class="num">13</td><td><a href="/pokedex/greninja/">개굴닌자</a></td><td>하마돈 · 킬라플로르 · 망나뇽</td><td>갸라도스 · 리자몽 · 번치코</td><td>한카리아스 · 브리두라스 · 누리레느 · 메타그로스 · 마스카나 · 따라큐</td></tr>
+        <tr><td class="num">15</td><td><a href="/pokedex/corviknight/">아머까오</a></td><td>한카리아스 · 마스카나 · 갸라도스 · 개굴닌자 · 킬라플로르 · 대도각참</td><td>리자몽 · 마폭시 · 번치코 · 망나뇽 · 누리레느 · 라이츄</td><td>따라큐 · 메타그로스 · 브리두라스 · 삼삼드래</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>지도에서 읽히는 것</h2>
+
+    <h3>하마돈은 상위권 최대의 승점 공급원</h3>
+    <p>사용률 4위 하마돈은 상위 10종 중 <strong>일곱 종의 "확실히 이김" 칸</strong>에 이름이 올라 있습니다. 한카리아스·따라큐·마스카나·브리두라스·누리레느·메타그로스·개굴닌자가 전부 하마돈에게 유리합니다. 그런데도 사용률 4위인 이유는, 하마돈이 이기는 상대(킬라플로르·번치코·킬가르도·라이츄·팬텀·찌리배리)가 <strong>메타 중위권에 넓게 퍼져 있기</strong> 때문입니다.</p>
+    <p>파티에 하마돈을 넣는다면 상위권 상대에게 선출하지 않는다는 전제가 필요합니다. 반대로 하마돈을 상대할 때는 위 일곱 종 중 하나만 있으면 대체로 해결됩니다.</p>
+
+    <h3>아머까오 — 상위권을 잡고 중위권에 잡힌다</h3>
+    <p>아머까오는 흥미로운 형태입니다. 사용률 1위 한카리아스, 3위 마스카나, 8위 갸라도스를 <strong>확실히 이깁니다</strong>. 강철·비행 타입이 땅을 무효화하고 격투·풀을 반감하기 때문입니다. 그런데 리자몽·마폭시·번치코 같은 <strong>불꽃 계열에 확실히 집니다</strong>. 강철 타입의 전형적인 구도입니다.</p>
+    <p>즉 아머까오는 "상대 파티에 불꽃이 있느냐 없느냐" 한 줄로 선출 가치가 갈립니다. 이런 포켓몬은 6마리 중 한 자리를 차지할 값어치가 있지만, 상대 파티를 보기 전에는 선출을 확정할 수 없습니다.</p>
+
+    <h3>5:5 칸이 넓은 포켓몬 = 플레이로 갈리는 포켓몬</h3>
+    <p>리자몽과 개굴닌자는 5:5 칸이 여섯 종으로 가장 넓습니다. 두 포켓몬 모두 <strong>빌드 분기가 크다</strong>는 공통점이 있습니다. 리자몽은 메가 X/Y 중 무엇이냐에 따라 타입도 역할도 완전히 달라지고, 개굴닌자는 변환자재(82.6%)와 급류(17.4%)가 갈립니다.</p>
+    <p>이런 포켓몬을 상대할 때는 <strong>첫 턴 정보가 특히 중요합니다</strong>. 상대의 지닌 도구나 특성이 드러나는 순간 5:5가 명확한 유불리로 바뀝니다. 실전에서 이 정보를 놓치지 않으려면 <a href="/">데스크탑 앱</a>의 확정 패널에 드러난 정보를 그때그때 입력해 두는 편이 좋습니다. 특성·도구가 확정되면 그 자리에서 데미지 계산이 다시 잡힙니다.</p>
+
+    <h3>서로가 서로의 5:5인 최상위권</h3>
+    <p>한카리아스·브리두라스·누리레느·따라큐·마스카나는 대부분 서로의 5:5 칸에 들어 있습니다. 최상위권끼리는 <strong>상성이 아니라 선공과 빌드로 갈린다</strong>는 뜻입니다. 이 구간에서 승부를 가르는 건 스피드 라인 계산과 노력치 배분 추정입니다. 각각 <a href="/guide/speed-guide/">스피드 실전 가이드</a>와 <a href="/guide/ev-reality/">노력치 66의 현실</a>에서 다뤘습니다.</p>
+
+    <h2>선출 화면에서 쓰는 순서</h2>
+    <ol>
+      <li>상대 6마리 중 내 에이스가 <strong>확실히 지는</strong> 상대가 있는지 먼저 봅니다. 있으면 그 포켓몬은 선봉에서 뺍니다.</li>
+      <li>내 파티에 상대 에이스를 <strong>확실히 이기는</strong> 카드가 있는지 봅니다. 없으면 그 판은 5:5 구도를 여러 개 만드는 방향으로 갑니다.</li>
+      <li>5:5가 많은 상대라면 선공권을 먼저 계산합니다. 스피드가 같은 구간이면 도구(구애스카프)와 순풍 여부가 판을 결정합니다.</li>
+    </ol>
+    <p>이 판단을 6×6 전 조합에 대해 자동으로 계산해 주는 기능이 데스크탑 앱의 <strong>선출 정보</strong> 패널입니다. 쌍별 타수·스피드 우열·추천 트리오까지 한 화면에 나옵니다.</p>
+
+    <div class="related">
+      <h3>함께 읽기</h3>
+      <a href="/guide/what-kills-you/">무엇에 죽는가 — 패배 기록 분석 →</a>
+      <a href="/guide/team-cores/">실제로 함께 쓰이는 코어 →</a>
+      <a href="/guide/speed-guide/">스피드 실전 가이드 →</a>
+    </div>
+    <p class="note">본문 수치는 <strong>시즌 M-4 · 2026-08-02 집계분</strong> 기준입니다. 원본 데이터는 12시간마다 자동 갱신되므로
+      최신 순위·채용률은 <a href="/battle-data/">배틀데이터</a>와 <a href="/pokedex/">도감</a>에서 확인할 수 있습니다.
+      집계 방법과 출처는 <a href="/about/">사이트 소개</a>에 정리해 두었습니다.</p>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links"><a href="/about/">사이트 소개</a> · <a href="/privacy/">개인정보처리방침</a> · <a href="/terms/">이용약관</a></p>
+    <p class="disclaimer">
+      Champions Helper는 팬이 만든 비공식 보조 도구입니다.
+      “Pokémon”(포켓몬) 및 관련 명칭·이미지·캐릭터는 Nintendo, Game Freak, The Pokémon Company의
+      상표 및 저작물이며, 본 사이트는 이들과 어떠한 제휴·후원·승인 관계도 없습니다.<br>© 2026 Champions Helper.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
