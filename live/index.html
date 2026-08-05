@@ -133,6 +133,15 @@
     font-size: 12px; font-weight: 700; text-align: center; color: #ffd24a; background: rgba(0,0,0,0.72);
     border: 1px solid #ffd24a; border-radius: 50%; pointer-events: none; }
   .mu-name { font-weight: 700; font-size: 14px; text-align: center; }
+  /* 189차 — 남은 체력(체력바). 필드에 나와 있는 두 마리에만 뜬다(교체 후보는 풀피 고정).
+     ★수동 전용 — 게임 화면을 읽지 않는다. 눌러/끌어서 맞춘다. 100%가 기본이라 손댄 것만 노란테로 드러난다. */
+  .hp-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 96px; }
+  .hp-track { position: relative; width: 100%; height: 10px; background: #2a2e36; border: 1px solid var(--line);
+    border-radius: 5px; overflow: hidden; cursor: ew-resize; }
+  .hp-track.hp-set { border-color: #FFEE00; }   /* 노란테 = 사용자가 직접 넣은 값(시뮬 규약과 동일) */
+  .hp-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; }
+  .hp-txt { font-size: 10px; color: var(--muted); white-space: nowrap; }
+  .hp-txt.hp-set { color: #FFEE00; }
   /* 위력은 내 포켓몬 쪽(왼쪽)으로 — 중앙 정렬 안 함 */
   /* min-height: 메가 가능 포켓몬(내 원래 4행+내 메가 4행=8줄)일 때의 높이를 항상 예약 →
      비메가 포켓몬(4줄)을 내도 매치업 카드 세로가 고정되어 아래 시뮬 필드가 안 밀림(feedback#4). */
@@ -457,7 +466,7 @@
   <div id="bar">
     <span id="status">로컬 헬퍼 연결 대기…</span>
     <button id="battle-reset" title="게임이 끝났는데 다음 판 엔트리 화면에서 상대 파티를 인식하지 못할 때 누르세요. 배틀 진행 상태를 풀어 다음 엔트리 화면을 다시 인식합니다.">배틀 상태 초기화</button>
-    <span id="version">v0.183</span>
+    <span id="version">v0.189</span>
   </div>
   <!-- 160차 — LNA 권한 게이트(공개 도메인 → 로컬 헬퍼 연결에 크롬 권한 필요). 기본 숨김, 내용은 showLnaGate가 채움. -->
   <div id="lna-gate">
@@ -999,7 +1008,104 @@ function renderOpponents(list, mirror) {
 }
 
 // ── 매치업 ───────────────────────────────────────────────────
-function muSide(name, sprite, stages, burned, paralyzed, speedEl, mirror, types, aegisToggle, aegisBlade, side, actives, sel) {
+// 189차(feedback) — 남은 체력바. **필드에 나와 있는 두 마리만** 조절한다(교체 후보 6슬롯은 풀피 고정).
+//   손대기 전 기본값 = 풀피(사용자 지시) → 멀티스케일·스펙터가드가 처음부터 발효하고,
+//   궁지 4종(급류/심록/맹화/벌레의알림)·무기력과 분화·기사회생·소금물 위력은 끌어내릴 때 켜진다.
+// ★게임 화면 체력바를 읽지 않는다(수동 전용, 사용자 결정) — 오인식으로 데미지가 조용히 틀리는 경로를 만들지 않는다.
+// ★1% 미만으로는 못 내린다: 기절은 계산 대상이 아니고 0이면 분화가 위력 1이 된다(계산기 규약과 동일).
+// ★풀피 근처(≥97%)는 100%로 붙인다 — 멀티스케일이 걸리고 안 걸리고가 갈리는 자리라 드래그로 스치면 안 된다.
+// ★드래그가 되려면 상태를 **막대 바깥**에 둬야 한다(189차 2차 fix, 사용자 제보 "클릭만 되고 끌리지 않는다").
+//   /live는 WS push가 올 때마다 매치업을 통째로 다시 그린다 = 끌던 막대 요소가 그 순간 화면에서 떨어져 나가고,
+//   떨어진 요소의 getBoundingClientRect()는 전부 0이라 그 뒤 마우스 이동이 전부 무시됐다(첫 클릭만 먹은 이유).
+//   인식 틱마다 push가 오므로 손가락을 떼기 전에 거의 확실히 한 번은 다시 그려진다.
+//   → ① 누른 순간의 막대 좌표(left/width)를 **찍어서 들고 있고** ② 이동/뗌은 window 리스너 한 벌이 받고
+//     ③ 그리기는 매번 **지금 화면에 있는** 막대를 id로 다시 찾아서 한다. 다시 그려져도 드래그가 안 끊긴다.
+// ★드래그 중에는 모델값이 아니라 **손끝 값**을 그린다 — 서버 왕복이 한 박자 늦어 막대가 뒤로 튀는 걸 막는다.
+let hpDrag = null;      // { side, left, width, frac, lastPost }
+const HP_POST_MS = 50;  // 드래그 중 POST 간격(매 픽셀마다 위력창을 다시 계산시키지 않는다)
+
+function hpFracAt(clientX) {
+  let f = (clientX - hpDrag.left) / hpDrag.width;
+  f = Math.max(0.01, Math.min(1, f));
+  return f >= 0.97 ? 1 : f;   // 풀피 근처는 100%로 붙인다(멀티스케일이 갈리는 자리)
+}
+function hpPaintLive() {
+  // 지금 화면에 붙어 있는 막대를 id로 다시 찾는다(다시 그려졌으면 새 요소가 잡힌다).
+  const track = document.getElementById("hp-track-" + hpDrag.side);
+  if (!track) return;
+  const fill = track.querySelector(".hp-fill");
+  const f = hpDrag.frac;
+  if (fill) {
+    fill.style.width = (f * 100) + "%";
+    fill.style.background = f > 0.5 ? "#4CC38A" : f > 0.2 ? "#E0B341" : "#E05C5C";
+  }
+  track.classList.toggle("hp-set", f < 0.999);
+  const txt = track.parentElement && track.parentElement.querySelector(".hp-txt");
+  if (txt) {
+    const maxHp = Number(track.dataset.maxHp || 0);
+    txt.textContent = maxHp > 0
+      ? ("HP " + Math.max(1, Math.round(f * maxHp)) + "/" + maxHp + " · " + (Math.round(f * 1000) / 10) + "%")
+      : ("HP " + (Math.round(f * 1000) / 10) + "%");
+    txt.classList.toggle("hp-set", f < 0.999);
+  }
+}
+function hpDragTo(clientX, force) {
+  if (!hpDrag || hpDrag.width <= 0) return;
+  const f = hpFracAt(clientX);
+  if (f === hpDrag.frac && !force) return;
+  hpDrag.frac = f;
+  hpPaintLive();
+  const now = Date.now();
+  if (force || now - hpDrag.lastPost >= HP_POST_MS) {
+    hpDrag.lastPost = now;
+    sim("/api/sim/" + hpDrag.side + "/hp", { fraction: f });
+  }
+}
+// window 리스너는 **한 벌만** 단다(막대를 다시 그려도 붙였다 뗐다 하지 않는다).
+window.addEventListener("pointermove", (e) => { if (hpDrag) hpDragTo(e.clientX, false); });
+window.addEventListener("pointerup", (e) => {
+  if (!hpDrag) return;
+  hpDragTo(e.clientX, true);   // 마지막 값은 간격과 무관하게 반드시 보낸다(throttle에 걸려 유실되면 안 된다)
+  hpDrag = null;
+  if (lastModel) render(lastModel);   // 드래그 중 손끝 그림을 모델 기준으로 되돌린다
+});
+window.addEventListener("pointercancel", () => { hpDrag = null; });
+
+function hpBar(m, side) {
+  // 드래그 중이면 모델값이 아니라 손끝 값으로 그린다(push가 늦게 와도 막대가 뒤로 안 튄다).
+  const modelFrac = side === "my" ? (m.myHpFraction != null ? m.myHpFraction : 1) : (m.oppHpFraction != null ? m.oppHpFraction : 1);
+  const frac = (hpDrag && hpDrag.side === side) ? hpDrag.frac : modelFrac;
+  const maxHp = side === "my" ? (m.myMaxHp || 0) : 0;   // 상대 최대 HP는 노력치 가정(칩)마다 달라 절대값을 안 적는다
+  const set = frac < 0.999;
+  const pct = Math.round(frac * 1000) / 10;
+
+  const wrap = el("div", "hp-wrap");
+  const track = el("div", "hp-track" + (set ? " hp-set" : ""));
+  track.id = "hp-track-" + side;          // 다시 그려져도 드래그가 이 id로 현재 막대를 찾는다
+  track.dataset.maxHp = String(maxHp);
+  const fill = el("div", "hp-fill");
+  fill.style.width = (frac * 100) + "%";
+  fill.style.background = frac > 0.5 ? "#4CC38A" : frac > 0.2 ? "#E0B341" : "#E05C5C";
+  track.appendChild(fill);
+
+  track.onpointerdown = (ev) => {
+    if (ev.button !== undefined && ev.button !== 0) return;   // 좌클릭·터치·펜만
+    ev.preventDefault();
+    const r = track.getBoundingClientRect();
+    if (r.width <= 0) return;
+    hpDrag = { side: side, left: r.left, width: r.width, frac: frac, lastPost: 0 };
+    hpDragTo(ev.clientX, true);
+  };
+  track.title = "누르거나 끌어서 남은 체력을 맞춥니다 (기본 풀피 · 교체하면 풀피로 돌아갑니다)";
+  wrap.appendChild(track);
+
+  const txt = el("div", "hp-txt" + (set ? " hp-set" : ""),
+    maxHp > 0 ? ("HP " + Math.max(1, Math.round(frac * maxHp)) + "/" + maxHp + " · " + pct + "%") : ("HP " + pct + "%"));
+  if (maxHp <= 0) txt.title = "상대 최대 HP는 노력치 가정(칩)마다 달라 비율만 표시합니다.";
+  wrap.appendChild(txt);
+  return wrap;
+}
+function muSide(name, sprite, stages, burned, paralyzed, speedEl, mirror, types, aegisToggle, aegisBlade, side, actives, sel, hpEl) {
   const s = el("div", "mu-side" + (mirror ? " mirror" : ""));
   // info = sprite(위) / 타입 / 이름 / 스피드 (세로). 랭크칩은 sprite 옆 — 내=왼/상대=오른.
   const info = el("div", "mu-info");
@@ -1033,6 +1139,7 @@ function muSide(name, sprite, stages, burned, paralyzed, speedEl, mirror, types,
     info.appendChild(ar);
   }
   if (speedEl) info.appendChild(speedEl);
+  if (hpEl) info.appendChild(hpEl);   // 189차 — 체력바는 스피드 아래(그 마리의 '지금 상태'를 한 묶음으로)
   const ranks = rankBadges(stages, burned, paralyzed);
   if (mirror) { s.appendChild(info); s.appendChild(ranks); }
   else { s.appendChild(ranks); s.appendChild(info); }
@@ -1041,7 +1148,8 @@ function muSide(name, sprite, stages, burned, paralyzed, speedEl, mirror, types,
 function renderMatchup(m) {
   const host = el("div", "matchup-row");
   const d = m.double;   // 133차 — 더블 부가(필드 미니·광역기). null이면 싱글(muSide가 actives 무시).
-  host.appendChild(muSide(m.myName, m.mySpritePath, m.myStages, m.myBurned, m.myParalyzed, renderMySpeed(m.mySpeeds), false, m.myTypes, m.myAegisToggle, m.myAegisBlade, "my", d ? d.myActives : null, d ? d.selMy : -1));
+  // 189차 — 체력바는 그 자리에 실제로 포켓몬이 있을 때만(이름이 없으면 조절할 대상이 없다).
+  host.appendChild(muSide(m.myName, m.mySpritePath, m.myStages, m.myBurned, m.myParalyzed, renderMySpeed(m.mySpeeds), false, m.myTypes, m.myAegisToggle, m.myAegisBlade, "my", d ? d.myActives : null, d ? d.selMy : -1, m.myName ? hpBar(m, "my") : null));
   // 중앙: 기술 리스트(위 정렬) + (더블) 광역기 토글 — 중앙 하단 고정·기본 ON(사용자 지시). 더블 모드면 인식 전에도 상존.
   const center = el("div", "mu-center" + (m.oppPerspective ? " opp-persp" : ""));
   center.appendChild(m.oppPerspective ? renderOppCenter(m) : renderCenter(m));
@@ -1052,7 +1160,7 @@ function renderMatchup(m) {
     center.appendChild(spreadBtn);
   }
   host.appendChild(center);
-  host.appendChild(muSide(m.oppName, m.oppSpritePath, m.oppStages, m.oppBurned, m.oppParalyzed, renderOppSpeed(m.oppSpeeds), true, m.oppTypes, m.oppAegisToggle, m.oppAegisBlade, "opp", d ? d.oppActives : null, d ? d.selOpp : -1));
+  host.appendChild(muSide(m.oppName, m.oppSpritePath, m.oppStages, m.oppBurned, m.oppParalyzed, renderOppSpeed(m.oppSpeeds), true, m.oppTypes, m.oppAegisToggle, m.oppAegisBlade, "opp", d ? d.oppActives : null, d ? d.selOpp : -1, m.oppName ? hpBar(m, "opp") : null));
   return host;
 }
 
