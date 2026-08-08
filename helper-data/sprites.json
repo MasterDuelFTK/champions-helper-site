@@ -5386,24 +5386,6 @@
       "dHash": "0e0e0e0f0f0e0e0e"
     },
     {
-      "dexId": 923,
-      "formKey": "default",
-      "nameKo": "",
-      "displayName": "",
-      "iconFile": "0923_default.png",
-      "iconUrl": "sprite_poke.png#0923_00",
-      "dHash": "0e07070e4e061624"
-    },
-    {
-      "dexId": 923,
-      "formKey": "defaultShiny",
-      "nameKo": "",
-      "displayName": "",
-      "iconFile": "0923_default_shiny.png",
-      "iconUrl": "https://archives.bulbagarden.net/media/upload/9/9a/Menu_CP_0923_shiny.png",
-      "dHash": "0f07070e4e161624"
-    },
-    {
       "dexId": 925,
       "formKey": "default",
       "nameKo": "파밀리쥐",
