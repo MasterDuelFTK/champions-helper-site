@@ -30,6 +30,8 @@
   .article h1 { font-size: 28px; font-weight: 800; margin: 0 0 6px; }
   .updated { color: var(--muted); font-size: 13px; margin: 0 0 8px; }
   .article h2 { font-size: 19px; font-weight: 800; margin: 32px 0 10px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .article h3 { font-size: 16px; font-weight: 700; color: var(--accent2); margin: 22px 0 8px; }
+  .article code { background: var(--panel2); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 13px; }
   .article p { margin: 0 0 12px; }
   .article ul { margin: 0 0 14px; padding-left: 22px; }
   .article li { margin: 0 0 7px; }
@@ -64,8 +66,8 @@
 <main class="wrap">
   <article class="article">
     <h1>개인정보처리방침</h1>
-    <p class="updated">최종 업데이트: 2026년 6월 22일</p>
-    <p>Champions Helper(이하 "사이트")는 이용자의 개인정보를 존중하며, 본 방침을 통해 사이트가 어떤 정보를 어떻게 다루는지 안내합니다.</p>
+    <p class="updated">최종 업데이트: 2026년 8월 9일</p>
+    <p>Champions Helper(이하 "사이트")는 이용자의 개인정보를 존중하며, 본 방침을 통해 사이트와 <a href="#app">안드로이드 앱 「포챔스 헬퍼」</a>가 어떤 정보를 어떻게 다루는지 안내합니다.</p>
 
     <h2>1. 수집하는 정보</h2>
     <ul>
@@ -96,8 +98,45 @@
     <h2>6. 아동의 개인정보</h2>
     <p>사이트는 만 14세 미만 아동의 개인정보를 고의로 수집하지 않습니다.</p>
 
-    <h2>7. 방침의 변경</h2>
+    <h2 id="app">7. 안드로이드 앱 「포챔스 헬퍼」</h2>
+    <p>Google Play에 배포되는 안드로이드 앱 <strong>포챔스 헬퍼</strong>(패키지 <code>com.masterduelftk.pchcalc</code>)에 적용되는 내용입니다. 앱에는 계정이 없으며 회원가입·로그인 절차가 없습니다.</p>
+
+    <h3>7-1. 앱이 수집하지 않는 것</h3>
+    <ul>
+      <li>앱은 이름·이메일·전화번호·연락처·위치·사진 등 <strong>어떠한 개인정보도 수집하지 않습니다.</strong></li>
+      <li>앱에는 <strong>광고가 없으며</strong>, 광고 식별자(Advertising ID)를 수집하지 않습니다.</li>
+      <li>앱에는 <strong>분석·추적 SDK가 없습니다.</strong> 사용 기록을 외부로 보내지 않습니다.</li>
+      <li>앱은 <strong>화면 내용을 읽거나 캡처하지 않습니다.</strong> 다른 앱 위에 계산기 창을 <em>그리기만</em> 하며, 그 아래에 무엇이 있는지 알 수 없습니다.</li>
+    </ul>
+
+    <h3>7-2. 기기 안에만 저장되는 것</h3>
+    <ul>
+      <li>이용자가 등록한 파티(포켓몬·기술·특성·지닌 도구·노력치·성격), 배틀 형식 설정, 계산기 창 위치가 <strong>기기 내부 저장소에만</strong> 저장됩니다.</li>
+      <li>계산에 입력한 값은 <strong>전부 기기 안에서 처리</strong>되며 서버로 전송·저장되지 않습니다.</li>
+      <li>이 데이터는 앱을 삭제하거나 <em>설정 &gt; 애플리케이션 &gt; 포챔스 헬퍼 &gt; 저장공간 &gt; 데이터 삭제</em>로 완전히 지울 수 있습니다.</li>
+    </ul>
+
+    <h3>7-3. 앱이 하는 네트워크 통신</h3>
+    <p>앱은 아래 두 가지 목적으로만 <code>champions-helper.com</code>에 접속하며, 둘 다 <strong>공개된 정적 파일을 내려받기만</strong> 합니다. 이용자 정보를 함께 보내지 않습니다.</p>
+    <ul>
+      <li><strong>채용률 통계 갱신</strong> — 상대 포켓몬의 특성·지닌 도구·성격·노력치를 자동으로 추정하기 위한 통계 데이터입니다.</li>
+      <li><strong>앱 업데이트 확인</strong> — 새 버전이 나왔는지 버전 번호만 비교합니다.</li>
+    </ul>
+    <p>다른 웹 접속과 마찬가지로 이 과정에서 IP 주소·접속 시각 등이 서버 로그에 일시적으로 기록될 수 있습니다. 이는 통신에 기술적으로 수반되는 정보이며 이용자를 식별하는 데 사용하지 않습니다. 통신에 실패하거나 오프라인이어도 앱은 동봉된 데이터로 그대로 동작합니다.</p>
+
+    <h3>7-4. 앱이 요구하는 권한과 이유</h3>
+    <ul>
+      <li><strong>다른 앱 위에 표시</strong>(SYSTEM_ALERT_WINDOW) — 게임을 켠 채로 계산기를 띄우기 위한 핵심 권한입니다. 앱의 목적 자체가 이것입니다.</li>
+      <li><strong>포그라운드 서비스(특수 용도)</strong> — 게임을 조작하는 동안 계산기 창이 시스템에 의해 종료되지 않도록 유지합니다.</li>
+      <li><strong>알림</strong> — 계산기가 실행 중임을 알리고 창을 내릴 수 있는 알림, 그리고 새 버전 안내에만 사용합니다.</li>
+      <li><strong>인터넷</strong> — 위 7-3의 두 가지 용도에만 사용합니다.</li>
+    </ul>
+
+    <h2>8. 방침의 변경</h2>
     <p>본 개인정보처리방침은 법령이나 서비스 변경에 따라 수정될 수 있으며, 변경 시 이 페이지에 게시합니다.</p>
+
+    <h2>9. 문의</h2>
+    <p>본 방침이나 앱에 관한 문의는 <a href="mailto:contact@champions-helper.com">contact@champions-helper.com</a> 으로 연락해 주세요.</p>
   </article>
 </main>
 
