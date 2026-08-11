@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>PCH 엔진 자기검사</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+  body { background:#1b1d22; color:#e8eaed; font:14px "Malgun Gothic",system-ui,sans-serif; margin:0; padding:24px; }
+  h1 { font-size:18px; margin:0 0 4px; }
+  p.sub { color:#9aa0a8; margin:0 0 18px; font-size:13px; }
+  #status { padding:10px 12px; border:1px solid #3a3f49; border-radius:6px; background:#24272e; margin-bottom:14px; }
+  pre { background:#24272e; border:1px solid #3a3f49; border-radius:6px; padding:12px;
+        white-space:pre-wrap; line-height:1.6; max-height:70vh; overflow:auto; font-size:12px; }
+  .ok { color:#6fd08a; } .bad { color:#e07a7a; }
+</style>
+</head>
+<body>
+  <h1>PCH 계산 엔진 — 브라우저 자기검사</h1>
+  <p class="sub">
+    헬퍼(C#)와 <b>같은 엔진</b>을 wasm으로 띄워 골든 샘플(<code>CalcSamples</code>)을 돌린다.
+    이 출력이 <code>PCH.Parity</code> 콘솔 출력과 한 줄도 다르지 않아야 한다.
+  </p>
+  <div id="status">시작하는 중…</div>
+  <pre id="out"></pre>
+
+<script type="module">
+import { bootEngine, STAGES } from './pch-wasm.js';
+
+const statusEl = document.getElementById('status');
+const outEl = document.getElementById('out');
+
+// 사이트에 얹으면 /helper-data 가 기본. ?data= 로 바꿀 수 있다.
+const dataBase = new URLSearchParams(location.search).get('data') || '/helper-data';
+
+const t0 = performance.now();
+
+try {
+  const engine = await bootEngine({
+    dataBase,
+    onProgress: (s) => { statusEl.textContent = STAGES[s] ?? s; },
+  });
+
+  const boot = Math.round(performance.now() - t0);
+  statusEl.innerHTML =
+    `<span class="ok">엔진 준비 완료</span> — 종족 ${engine.speciesCount} · 로스터 ${engine.rosterCount} · 부팅 ${boot}ms`;
+
+  window.pchEngine = engine;   // 콘솔에서 직접 두드려 볼 수 있게
+  outEl.textContent = (engine.speciesCount === 0 ? engine.diag() + '\n\n' : '') + engine.selfTest();
+} catch (e) {
+  statusEl.innerHTML = `<span class="bad">실패</span> — ${e.message}`;
+  outEl.textContent = e.stack ?? String(e);
+}
+</script>
+</body>
+</html>

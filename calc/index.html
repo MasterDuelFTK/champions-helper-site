@@ -38,7 +38,7 @@
   :root {
     --bg: #1b1d22; --panel: #24272e; --panel2: #2b2f37; --line: #3a3f49;
     --txt: #e8eaed; --muted: #9aa0a8; --accent: #3a6fc8; --accent2: #5b8de0;
-    --ok: #6fd08a; --warn: #e0b15b; --bad: #e07a7a;
+    --ok: #6fd08a; --warn: #e0b15b; --bad: #e07a7a; --mega: #7a5bd0;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; }
@@ -51,34 +51,8 @@
   a:hover { text-decoration: underline; }
   .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
 
-                  
   h1.page { font-size: 26px; font-weight: 800; margin: 26px 0 4px; }
   .page-sub { color: var(--muted); font-size: 14px; margin: 0 0 18px; }
-
-  /* 환경 바 */
-  .field-bar {
-    display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
-    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
-    padding: 12px 16px; margin-bottom: 16px;
-  }
-  .field-bar .fb { display: flex; align-items: center; gap: 7px; font-size: 13px; }
-  .field-bar label { color: var(--muted); }
-
-  /* 두 진영 */
-  .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 820px) { .duel { grid-template-columns: 1fr; } }
-  .side { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
-  .side.atk { border-top: 3px solid var(--accent); }
-  .side.def { border-top: 3px solid var(--bad); }
-  .side h2 { font-size: 16px; margin: 0 0 14px; display: flex; align-items: center; gap: 8px; }
-  .side h2 .tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
-  .atk h2 .tag { background: rgba(58,111,200,.25); color: var(--accent2); }
-  .def h2 .tag { background: rgba(224,122,122,.22); color: var(--bad); }
-
-  .row { margin-bottom: 12px; }
-  .row > label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-  .row.inline { display: flex; gap: 10px; }
-  .row.inline > div { flex: 1; }
 
   input, select {
     width: 100%; background: var(--panel2); color: var(--txt);
@@ -88,66 +62,199 @@
   input:focus, select:focus { outline: none; border-color: var(--accent); }
   input[type="checkbox"] { width: auto; accent-color: var(--accent); }
 
-  .chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; min-height: 22px; }
-  .tchip { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 20px; color: #fff; }
-  .statline { font-size: 12px; color: var(--muted); margin-top: 6px; }
-  .statline b { color: var(--txt); font-weight: 600; }
-  .idxbox { display: flex; justify-content: space-between; align-items: center;
-    background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 9px 13px; margin-top: 10px; }
-  .idxbox .lbl { font-size: 12px; color: var(--muted); }
-  .idxbox .lbl small { font-size: 11px; opacity: .8; }
-  .idxbox b { font-size: 19px; font-weight: 800; }
-  .atk .idxbox b { color: var(--accent2); }
-  .def .idxbox b { color: var(--bad); }
+  /* 부팅 상태 */
+  .bootbar {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 22px 18px; text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 16px;
+  }
+  .bootbar .spin {
+    display: inline-block; width: 14px; height: 14px; margin-right: 8px; vertical-align: -2px;
+    border: 2px solid var(--line); border-top-color: var(--accent2); border-radius: 50%;
+    animation: sp .7s linear infinite;
+  }
+  @keyframes sp { to { transform: rotate(360deg); } }
+  .bootbar.bad { color: var(--bad); border-color: var(--bad); }
+
+  /* 모드 */
+  .modebar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .modebar .hint { color: var(--muted); font-size: 12px; }
 
   .seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
   .seg button {
-    flex: 1; background: var(--panel2); color: var(--muted); border: none;
-    padding: 7px 0; font-size: 13px; cursor: pointer; font-family: inherit;
+    background: var(--panel2); color: var(--muted); border: none;
+    padding: 7px 14px; font-size: 13px; cursor: pointer; font-family: inherit; white-space: nowrap;
   }
   .seg button.on { background: var(--accent); color: #fff; font-weight: 700; }
   .seg button + button { border-left: 1px solid var(--line); }
-  .seg.small button { padding: 4px 0; font-size: 12px; }
+  .seg.small button { padding: 5px 10px; font-size: 12px; }
 
-  .movebox { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 10px; margin-top: 4px; }
-  .movebox .mline { display: flex; gap: 8px; align-items: center; }
-  .megabtns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
-  .megabtns button {
-    background: var(--panel2); color: var(--muted); border: 1px solid var(--line);
-    border-radius: 7px; padding: 5px 11px; font-size: 12px; cursor: pointer; font-family: inherit;
+  /* 판 상황 */
+  .field-bar {
+    display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 16px; margin-bottom: 16px;
   }
-  .megabtns button.on { background: #7a5bd0; border-color: #7a5bd0; color: #fff; font-weight: 700; }
+  .field-bar .fb { display: flex; align-items: center; gap: 7px; font-size: 13px; }
+  .field-bar label { color: var(--muted); }
+  .field-bar select { width: auto; min-width: 104px; padding: 6px 8px; font-size: 13px; }
 
-  small.hint { color: var(--muted); font-size: 11px; }
+  /* 두 진영 */
+  .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 900px) { .duel { grid-template-columns: 1fr; } }
+  .side { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .side.my  { border-top: 3px solid var(--accent); }
+  .side.opp { border-top: 3px solid var(--bad); }
+  .side h2 { font-size: 15px; margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+  .side h2 .tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+  .my  h2 .tag { background: rgba(58,111,200,.25); color: var(--accent2); }
+  .opp h2 .tag { background: rgba(224,122,122,.22); color: var(--bad); }
 
-  /* 노력치 입력 + 원클릭 0/32 버튼 */
-  .ev-row { display: flex; gap: 6px; align-items: stretch; }
-  .ev-row > input { flex: 1; min-width: 0; }
-  .ev-btns { display: flex; flex-direction: column; gap: 3px; width: 34px; flex: none; }
-  .ev-btns button {
-    flex: 1; display: flex; align-items: center; justify-content: center;
-    border: none; border-radius: 6px; padding: 0; cursor: pointer; color: #1b1d22;
+  .row { margin-bottom: 11px; position: relative; }
+  .row > label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .row.inline { display: flex; gap: 10px; }
+  .row.inline > div { flex: 1; min-width: 0; }
+
+  /* 머리줄 = sprite + 이름 + 체력 */
+  .headline { display: flex; gap: 10px; align-items: flex-start; }
+  .headline .sprite {
+    width: 64px; height: 64px; flex: none; border-radius: 8px; background: var(--panel2);
+    border: 1px solid var(--line); object-fit: contain; image-rendering: -webkit-optimize-contrast;
   }
-  .ev-btns button svg { width: 15px; height: 15px; display: block; }
-  .ev-btns .ev-max { background: var(--warn); }
-  .ev-btns .ev-min { background: var(--bad); }
-  .ev-btns button:hover { filter: brightness(1.08); }
-  .ev-btns button:active { filter: brightness(0.9); }
+  .headline .hcol { flex: 1; min-width: 0; }
+
+  .chips { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+  .tchip { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; color: #fff; }
+  .achip {
+    font-size: 11px; padding: 2px 9px; border-radius: 20px; cursor: pointer;
+    background: var(--panel2); border: 1px solid var(--line); color: var(--muted); font-family: inherit;
+  }
+  .achip.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+  .achip.mega { border-color: var(--mega); color: #b9a4ef; }
+  .achip.mega.on { background: var(--mega); border-color: var(--mega); color: #fff; }
+
+  .desc { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .statline { font-size: 12px; color: var(--muted); margin-top: 5px; }
+  .statline b { color: var(--txt); font-weight: 600; }
+
+  /* 체력바 */
+  .hpwrap { margin-top: 7px; }
+  .hpbar { height: 12px; border-radius: 7px; background: var(--panel2); border: 1px solid var(--line);
+           overflow: hidden; cursor: pointer; position: relative; }
+  .hpbar > i { display: block; height: 100%; background: var(--ok); transition: width .06s linear; }
+  .hpbar.mid > i { background: var(--warn); }
+  .hpbar.low > i { background: var(--bad); }
+  .hprow { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 11px; color: var(--muted); }
+  .hprow input { width: 58px; padding: 3px 6px; font-size: 12px; text-align: right; }
+
+  /* 자동완성 */
+  .ac { position: absolute; z-index: 40; left: 0; right: 0; top: 100%; margin-top: 2px;
+        background: var(--panel2); border: 1px solid var(--accent); border-radius: 8px;
+        max-height: 220px; overflow: auto; box-shadow: 0 8px 22px rgba(0,0,0,.45); }
+  .ac div { padding: 6px 10px; font-size: 13px; cursor: pointer; }
+  .ac div:hover, .ac div.sel { background: var(--accent); color: #fff; }
+  .ac .ac-grp {
+    padding: 5px 10px 2px; font-size: 10px; color: var(--muted); cursor: default;
+    border-top: 1px solid var(--line); background: transparent;
+  }
+  .ac .ac-grp:hover { background: transparent; color: var(--muted); }
+  .ac .ac-grp:first-child { border-top: none; }
+
+  /* 콤보 = 타이핑 검색 + ▾ 전체 목록 */
+  .combo { position: relative; }
+  .combo input { padding-right: 26px; }
+  .combo-caret {
+    position: absolute; right: 1px; top: 1px; bottom: 1px; width: 24px;
+    background: transparent; border: none; color: var(--muted); cursor: pointer;
+    font-size: 11px; padding: 0; font-family: inherit;
+  }
+  .combo-caret:hover { color: var(--txt); }
+
+  /* 스탯 표 */
+  table.stats { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.stats th { color: var(--muted); font-weight: 500; font-size: 11px; padding: 2px 3px; text-align: center; }
+  table.stats td { padding: 2px 3px; text-align: center; }
+  table.stats td.nm { text-align: left; color: var(--muted); width: 48px; white-space: nowrap; }
+  table.stats td.bs { color: var(--muted); width: 32px; }
+  table.stats td.rl { font-weight: 700; width: 40px; }
+  table.stats input { width: 38px; padding: 2px 3px; font-size: 12px; text-align: center; }
+  table.stats input::-webkit-outer-spin-button,
+  table.stats input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+  /* 노력치 칸 = [0으로] [입력] [풀투자] */
+  .evcell { display: inline-flex; align-items: stretch; gap: 3px; }
+  .evb {
+    width: 20px; padding: 0; border: none; border-radius: 5px; cursor: pointer;
+    color: #1b1d22; display: flex; align-items: center; justify-content: center;
+  }
+  .evb svg { width: 13px; height: 13px; display: block; }
+  .evb.min { background: var(--bad); }
+  .evb.max { background: var(--warn); }
+  .evb:hover { filter: brightness(1.12); }
+  .evb:active { filter: brightness(.88); }
+  .stepper { display: inline-flex; align-items: center; gap: 2px; }
+  .stepper button, .natbtn {
+    background: var(--panel2); border: 1px solid var(--line); color: var(--muted);
+    border-radius: 5px; width: 20px; height: 20px; line-height: 1; padding: 0; cursor: pointer;
+    font-family: inherit; font-size: 12px;
+  }
+  .stepper button:hover, .natbtn:hover { border-color: var(--accent); }
+  .stepper .v { display: inline-block; width: 20px; font-weight: 700; }
+  .stepper .v.up { color: var(--ok); } .stepper .v.down { color: var(--bad); }
+  .natbtn.up { color: var(--ok); border-color: var(--ok); }
+  .natbtn.down { color: var(--bad); border-color: var(--bad); }
+
+  details.fold { margin-bottom: 11px; }
+  details.fold > summary {
+    font-size: 12px; color: var(--muted); cursor: pointer; list-style: none;
+    padding: 5px 0; border-top: 1px solid var(--line);
+  }
+  details.fold > summary::-webkit-details-marker { display: none; }
+  details.fold > summary::before { content: "▸ "; }
+  details.fold[open] > summary::before { content: "▾ "; }
+
+  .btnrow { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .btnrow button {
+    background: var(--panel2); border: 1px solid var(--line); color: var(--muted);
+    border-radius: 7px; padding: 5px 10px; font-size: 12px; cursor: pointer; font-family: inherit;
+  }
+  .btnrow button:hover { border-color: var(--accent); color: var(--txt); }
 
   /* 결과 */
-  .result { margin: 18px 0 60px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
-  .result .big { font-size: 30px; font-weight: 800; letter-spacing: -.5px; }
-  .result .verdict { font-size: 16px; font-weight: 700; margin-top: 2px; }
-  .result .pct { color: var(--muted); font-size: 14px; margin-top: 6px; }
-  .v-ko { color: var(--bad); } .v-maybe { color: var(--warn); } .v-safe { color: var(--ok); }
-  .bar { height: 12px; background: var(--panel2); border-radius: 7px; overflow: hidden; margin: 14px 0 6px; position: relative; }
-  .bar > span { position: absolute; top: 0; bottom: 0; }
-  .bar .rng { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
-  .notes { margin-top: 14px; display: flex; gap: 6px; flex-wrap: wrap; }
-  .note { font-size: 11px; background: var(--panel2); border: 1px solid var(--line); color: var(--muted); padding: 2px 9px; border-radius: 20px; }
-  .rolls { margin-top: 12px; font-size: 11px; color: var(--muted); word-break: break-all; font-family: "Consolas", monospace; }
+  .result { margin: 16px 0 10px; background: var(--panel); border: 1px solid var(--line);
+            border-radius: 14px; padding: 16px 18px; }
+  .result h2 { font-size: 15px; margin: 0 0 10px; }
+  .rhead { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+  table.rows { width: 100%; border-collapse: collapse; }
+  table.rows th {
+    font-size: 11px; color: var(--muted); font-weight: 500; text-align: left;
+    padding: 4px 6px; border-bottom: 1px solid var(--line);
+  }
+  table.rows td { padding: 7px 6px; border-bottom: 1px solid var(--line); font-size: 13px; vertical-align: middle; }
+  table.rows tr:last-child td { border-bottom: none; }
+  table.rows td.mv { font-weight: 600; }
+  table.rows td.pc { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  table.rows td.vd { font-weight: 700; white-space: nowrap; }
 
-  footer { border-top: 1px solid var(--line); padding: 26px 0 44px; }
+  /* 위력 칸 = [−] 숫자 [+] — 칸 폭을 고정해 단계 버튼이 있든 없든 숫자가 같은 자리에 온다 */
+  table.rows th.pw, table.rows td.pw { text-align: center; }
+  .pwcell { display: inline-grid; grid-template-columns: 22px 42px 22px; align-items: center; justify-items: center; }
+  /* ★자릿수가 달라도 자리가 어긋나지 않게 오른쪽 정렬 + 등폭 숫자 — 데미지 열과 같은 규칙 */
+  .pwv { width: 42px; text-align: right; padding-right: 6px; font-variant-numeric: tabular-nums; font-weight: 600; }
+  span.pwb { width: 20px; height: 20px; }
+  button.pwb {
+    width: 20px; height: 20px; line-height: 1; padding: 0; cursor: pointer; font-family: inherit; font-size: 12px;
+    background: var(--panel2); border: 1px solid var(--line); color: var(--muted); border-radius: 5px;
+  }
+  button.pwb:hover { border-color: var(--accent); color: var(--txt); }
+  .v-ko { color: var(--bad); } .v-maybe { color: var(--warn); } .v-safe { color: var(--ok); }
+  .note { font-size: 11px; background: var(--panel2); border: 1px solid var(--line);
+          color: var(--muted); padding: 1px 8px; border-radius: 20px; }
+  .speedline { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line);
+               font-size: 13px; color: var(--muted); }
+  .speedline b { color: var(--txt); }
+  .empty { color: var(--muted); font-size: 13px; padding: 10px 0; }
+
+  footer { border-top: 1px solid var(--line); padding: 26px 0 44px; margin-top: 40px; }
   footer .cols { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
   footer .fnav { display: flex; gap: 16px; font-size: 14px; flex-wrap: wrap; }
   footer .fnav a { color: var(--muted); }
@@ -177,208 +284,61 @@
 
 <main class="wrap">
   <h1 class="page">데미지 계산기</h1>
-  <p class="page-sub">포켓몬 챔피언스 기준(레벨 50 · 개체값 31 고정 · 노력치 직접가산). 종족·기술·노력치·성격·랭크·도구·특성·날씨·필드·벽을 넣으면 데미지 범위와 확정타를 계산합니다.</p>
+  <p class="page-sub">
+    포켓몬 챔피언스 기준(레벨 50 · 개체값 31 고정 · 노력치 직접가산).
+    <strong style="color:var(--txt)">데스크탑 헬퍼와 완전히 같은 계산 엔진</strong>이 브라우저에서 그대로 돌아갑니다 —
+    특성·지닌도구·날씨·필드·벽·랭크·체력·상태이상·더블 광역기까지 전부 반영합니다.
+  </p>
 
-  <!-- 환경 -->
-  <div class="field-bar">
-    <div class="fb"><label>날씨</label>
-      <select id="weather" style="width:120px">
-        <option value="None">없음</option>
-        <option value="Sun">쾌청</option>
-        <option value="Rain">비</option>
-        <option value="Sand">모래바람</option>
-        <option value="Snow">싸라기눈</option>
-      </select>
+  <div class="bootbar" id="boot"><span class="spin"></span><span id="bootMsg">계산 엔진 불러오는 중…</span></div>
+
+  <div id="app" hidden>
+    <div class="modebar">
+      <div class="seg" id="mode">
+        <button data-v="quick" class="on">빠른 계산</button>
+        <button data-v="party">내 파티로 계산</button>
+      </div>
+      <span class="hint" id="modeHint">두 포켓몬 이름만 넣으면 바로 계산합니다. 등록 없이 쓸 수 있습니다.</span>
     </div>
-    <div class="fb"><label>필드</label>
-      <select id="terrain" style="width:130px">
-        <option value="None">없음</option>
-        <option value="Electric">일렉트릭필드</option>
-        <option value="Grassy">그래스필드</option>
-        <option value="Psychic">사이코필드</option>
-        <option value="Misty">미스트필드</option>
-      </select>
+
+    <!-- 판 상황 -->
+    <div class="field-bar">
+      <div class="fb"><label>형식</label>
+        <div class="seg small" id="fmt"><button data-v="0" class="on">싱글</button><button data-v="1">더블</button></div>
+      </div>
+      <div class="fb"><label>날씨</label><select id="weather"></select></div>
+      <div class="fb"><label>필드</label><select id="terrain"></select></div>
+      <div class="fb"><input type="checkbox" id="crit"><label for="crit">급소</label></div>
+      <div class="fb"><input type="checkbox" id="spread"><label for="spread">광역기 ×0.75</label></div>
+      <div class="fb" style="margin-left:auto"><label>시점</label>
+        <div class="seg small" id="view"><button data-v="0" class="on">내가 공격</button><button data-v="1">상대가 공격</button></div>
+      </div>
     </div>
-    <div class="fb"><input type="checkbox" id="crit"><label for="crit">급소</label></div>
+
+    <div class="duel">
+      <section class="side my"  id="sideMy"></section>
+      <section class="side opp" id="sideOpp"></section>
+    </div>
+
+    <div class="result" id="result"></div>
   </div>
 
-  <div class="duel">
-    <!-- 공격자 -->
-    <section class="side atk">
-      <h2><span class="tag">공격</span> 공격하는 포켓몬</h2>
-      <div class="row">
-        <label>포켓몬</label>
-        <input id="atkName" list="speciesList" placeholder="이름 입력 (예: 리자몽)" autocomplete="off">
-        <div class="chips" id="atkTypes" style="margin-top:6px"></div>
-        <div class="megabtns" id="atkMega"></div>
-        <div class="statline" id="atkBase"></div>
-      </div>
-      <div class="row">
-        <label>특성</label>
-        <select id="atkAbil"><option value="">— 없음 —</option></select>
-      </div>
-      <div class="row">
-        <label>기술</label>
-        <input id="atkMove" list="moveList" placeholder="기술명 입력 (예: 오버히트)" autocomplete="off">
-        <div class="movebox" id="atkMoveBox" style="display:none">
-          <div class="mline">
-            <div class="chips" id="atkMoveType"></div>
-            <span id="atkMoveCat" class="note"></span>
-            <span style="flex:1"></span>
-            <label style="color:var(--muted);font-size:12px">위력</label>
-            <input id="atkPow" type="number" min="0" style="width:72px" inputmode="numeric">
-          </div>
-        </div>
-      </div>
-      <div class="row inline">
-        <div>
-          <label id="atkEvLbl">공격 노력치 0~32</label>
-          <div class="ev-row">
-            <input id="atkEv" type="number" min="0" max="32" value="32" inputmode="numeric">
-            <div class="ev-btns">
-              <button type="button" class="ev-max" data-target="atkEv" title="최대 투자 (32)" aria-label="최대 투자"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 13 12 7 19 13"></polyline><polyline points="5 18 12 12 19 18"></polyline></svg></button>
-              <button type="button" class="ev-min" data-target="atkEv" title="0으로" aria-label="0으로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 6 12 12 19 6"></polyline><polyline points="5 11 12 17 19 11"></polyline></svg></button>
-            </div>
-          </div>
-        </div>
-        <div>
-          <label>성격 보정</label>
-          <div class="seg" id="atkNat" data-v="up">
-            <button data-n="up" class="on">↑1.1</button>
-            <button data-n="neutral">무보정</button>
-            <button data-n="down">↓0.9</button>
-          </div>
-        </div>
-      </div>
-      <div class="row inline">
-        <div>
-          <label id="atkRankLbl">랭크업 (공격)</label>
-          <select id="atkRank"></select>
-        </div>
-        <div>
-          <label>체력 % (시전자)</label>
-          <input id="atkHp" type="number" min="1" max="100" value="100" inputmode="numeric">
-        </div>
-      </div>
-      <div class="row inline">
-        <div>
-          <label>지닌도구</label>
-          <select id="atkItem"></select>
-        </div>
-        <div>
-          <label>기타 배수</label>
-          <input id="atkMult" type="number" min="0" step="0.1" value="1" inputmode="decimal">
-        </div>
-      </div>
-      <div class="row">
-        <label>상태이상 <small class="hint">객기·근성 위력 / 화상 물리 ½</small></label>
-        <select id="atkStatus">
-          <option value="none">없음</option>
-          <option value="brn">화상</option>
-          <option value="psn">독</option>
-          <option value="tox">맹독</option>
-          <option value="par">마비</option>
-          <option value="slp">잠듦</option>
-        </select>
-      </div>
-      <div class="idxbox"><span class="lbl">결정력 <small>화력 지수</small></span><b id="atkIdx">—</b></div>
-      <div class="statline" id="atkReal"></div>
-    </section>
-
-    <!-- 수비자 -->
-    <section class="side def">
-      <h2><span class="tag">수비</span> 방어하는 포켓몬</h2>
-      <div class="row">
-        <label>포켓몬</label>
-        <input id="defName" list="speciesList" placeholder="이름 입력 (예: 한카리아스)" autocomplete="off">
-        <div class="chips" id="defTypes" style="margin-top:6px"></div>
-        <div class="megabtns" id="defMega"></div>
-        <div class="statline" id="defBase"></div>
-      </div>
-      <div class="row">
-        <label>특성</label>
-        <select id="defAbil"><option value="">— 없음 —</option></select>
-      </div>
-      <div class="row">
-        <label>HP 노력치 0~32</label>
-        <div class="ev-row">
-          <input id="defHpEv" type="number" min="0" max="32" value="0" inputmode="numeric">
-          <div class="ev-btns">
-            <button type="button" class="ev-max" data-target="defHpEv" title="최대 투자 (32)" aria-label="최대 투자"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 13 12 7 19 13"></polyline><polyline points="5 18 12 12 19 18"></polyline></svg></button>
-            <button type="button" class="ev-min" data-target="defHpEv" title="0으로" aria-label="0으로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 6 12 12 19 6"></polyline><polyline points="5 11 12 17 19 11"></polyline></svg></button>
-          </div>
-        </div>
-      </div>
-      <div class="row inline">
-        <div>
-          <label>방어 노력치 0~32</label>
-          <div class="ev-row">
-            <input id="defEv" type="number" min="0" max="32" value="0" inputmode="numeric">
-            <div class="ev-btns">
-              <button type="button" class="ev-max" data-target="defEv" title="최대 투자 (32)" aria-label="최대 투자"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 13 12 7 19 13"></polyline><polyline points="5 18 12 12 19 18"></polyline></svg></button>
-              <button type="button" class="ev-min" data-target="defEv" title="0으로" aria-label="0으로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 6 12 12 19 6"></polyline><polyline points="5 11 12 17 19 11"></polyline></svg></button>
-            </div>
-          </div>
-        </div>
-        <div>
-          <label>성격 보정</label>
-          <div class="seg" id="defNat" data-v="neutral">
-            <button data-n="up">↑1.1</button>
-            <button data-n="neutral" class="on">무보정</button>
-            <button data-n="down">↓0.9</button>
-          </div>
-        </div>
-      </div>
-      <div class="row inline">
-        <div>
-          <label id="defRankLbl">랭크업 (방어)</label>
-          <select id="defRank"></select>
-        </div>
-        <div>
-          <label>체력 % (피격자)</label>
-          <input id="defHp" type="number" min="1" max="100" value="100" inputmode="numeric">
-        </div>
-      </div>
-      <div class="row">
-        <label>지닌도구</label>
-        <select id="defItem"></select>
-      </div>
-      <div class="row">
-        <label style="margin-bottom:6px">벽</label>
-        <div class="chips">
-          <label><input type="checkbox" id="reflect"> 리플렉터</label>
-          <label style="margin-left:10px"><input type="checkbox" id="light"> 빛의장막</label>
-          <label style="margin-left:10px"><input type="checkbox" id="aurora"> 오로라베일</label>
-        </div>
-      </div>
-      <div class="idxbox"><span class="lbl">내구력 <small id="defIdxKind">물리</small></span><b id="defIdx">—</b></div>
-      <div class="statline" id="defReal"></div>
-    </section>
-  </div>
-
-  <!-- 결과 -->
-  <div class="result" id="result">
-    <div class="big" id="rDmg">—</div>
-    <div class="verdict" id="rVerdict">공격·수비 포켓몬과 기술을 입력하세요.</div>
-    <div class="pct" id="rPct"></div>
-    <div class="bar"><span class="rng" id="rBar" style="left:0;width:0"></span></div>
-    <div class="notes" id="rNotes"></div>
-    <div class="rolls" id="rRolls"></div>
-  </div>
   <section style="max-width:860px;margin:24px auto 0;padding:22px 0 4px;border-top:1px solid var(--line);color:var(--muted);font-size:14px;line-height:1.75;">
     <h2 style="font-size:18px;color:var(--txt);margin:0 0 12px;font-weight:800;">데미지 계산기 소개</h2>
-    <p style="margin:0 0 12px;">이 계산기는 포켓몬 챔피언스의 데미지 공식을 그대로 구현했습니다. 공격자와 수비자의 <strong style="color:var(--txt)">종족·노력치·성격·랭크·지닌 도구·특성</strong>, 그리고 <strong style="color:var(--txt)">날씨·필드·벽</strong> 같은 환경을 입력하면 데미지 범위(%)와 확정 1타 여부, 16난수 분포를 즉시 계산합니다. 모든 계산은 브라우저에서 바로 처리되어 프로그램 설치 없이 사용할 수 있습니다.</p>
+    <p style="margin:0 0 12px;">이 계산기는 포켓몬 챔피언스의 데미지 공식을 그대로 구현했습니다. 공격자와 수비자의 <strong style="color:var(--txt)">종족·노력치·성격·랭크·지닌 도구·특성</strong>, 그리고 <strong style="color:var(--txt)">날씨·필드·벽</strong> 같은 환경을 입력하면 데미지 범위(%)와 확정 1타 여부를 즉시 계산합니다. 모든 계산은 브라우저에서 바로 처리되어 프로그램 설치 없이 사용할 수 있습니다.</p>
+    <p style="margin:0 0 12px;">계산을 맡는 엔진은 <strong style="color:var(--txt)">데스크탑 프로그램·안드로이드 앱과 같은 하나의 구현</strong>입니다. 웹용으로 규칙을 따로 옮겨 적지 않았기 때문에, 프로그램에서 수정된 계산 규칙이 이 페이지에도 그대로 반영됩니다. 틀깨기·불가사의부적·반감열매·프리즈드라이처럼 예외가 많은 규칙, 더블 배틀의 광역기 감소와 벽 감소량 차이까지 동일하게 처리합니다.</p>
     <p style="margin:0 0 18px;">데미지가 어떤 순서로 계산되는지 궁금하다면 <a href="/guide/damage-formula/">데미지 계산 공식 가이드</a>를, 포켓몬별 종족값·타입·특성을 찾아보려면 <a href="/pokedex/">도감</a>을 참고하세요.</p>
 
     <h2 style="font-size:18px;color:var(--txt);margin:0 0 12px;font-weight:800;">사용법 — 3단계</h2>
-    <p style="margin:0 0 8px;"><strong style="color:var(--txt)">① 공격자 설정</strong> — 포켓몬 이름을 입력하면 종족값이 자동으로 채워집니다. 노력치(능력치당 최대 32)·성격 보정·랭크·지닌 도구·특성을 실제 대전 상황에 맞게 지정하세요.</p>
-    <p style="margin:0 0 8px;"><strong style="color:var(--txt)">② 수비자·환경 설정</strong> — 상대 포켓몬과 내구 배분(정확히 모른다면 HP·방어 풀투자 같은 최악 가정을 권장), 날씨·필드·벽 여부를 지정합니다.</p>
-    <p style="margin:0 0 18px;"><strong style="color:var(--txt)">③ 기술 선택 후 결과 읽기</strong> — 데미지 범위(%)와 <strong style="color:var(--txt)">확정 1타 / 난수 1타(확률) / 확정 2타</strong> 판정, 16가지 난수 분포가 표시됩니다. "난수 1타 75%"라면 16가지 난수 중 12가지에서 쓰러진다는 뜻입니다.</p>
+    <p style="margin:0 0 8px;"><strong style="color:var(--txt)">① 두 포켓몬 이름 입력</strong> — 이름을 넣으면 종족값·타입·특성 후보가 자동으로 채워집니다. 상대 쪽은 실제 랭크전 <strong style="color:var(--txt)">채용률 1위</strong>의 특성·지닌도구·성격·노력치·기술이 자동으로 얹히므로, 모르는 상대라도 현실적인 가정으로 바로 계산됩니다.</p>
+    <p style="margin:0 0 8px;"><strong style="color:var(--txt)">② 판 상황 지정</strong> — 싱글/더블, 날씨·필드, 급소, 벽, 순풍을 실제 상황에 맞게 켭니다. 더블을 고르면 광역기 감소(×0.75)와 벽 감소량이 자동으로 더블 기준으로 바뀝니다.</p>
+    <p style="margin:0 0 18px;"><strong style="color:var(--txt)">③ 결과 읽기</strong> — 기술 네 개의 데미지 범위(%)와 <strong style="color:var(--txt)">확정 1타 / 난수 1타(확률) / 확정 2타</strong> 판정이 한 번에 표시되고, 아래에 선공 여부(스피드 비교)가 함께 나옵니다. "난수 1타 75%"라면 16가지 난수 중 12가지에서 쓰러진다는 뜻입니다.</p>
 
     <h2 style="font-size:18px;color:var(--txt);margin:0 0 12px;font-weight:800;">자주 묻는 질문</h2>
     <p style="margin:0 0 8px;"><strong style="color:var(--txt)">Q. 게임 안의 실제 데미지와 같은가요?</strong><br>같습니다. 챔피언스의 공식(레벨 50·개체값 31·노력치 실수치 직접 가산·16난수)을 그대로 구현했고, 실제 게임 수치와 대조해 검증했습니다. 다른 결과가 나오는 사례를 발견하면 <a href="https://forms.gle/vzavUFn5xFDtdpu66" target="_blank" rel="noopener">제보</a>해 주세요 — 버그로 취급해 수정합니다.</p>
+    <p style="margin:0 0 8px;"><strong style="color:var(--txt)">Q. 프로그램(헬퍼)의 계산과 결과가 다르지 않나요?</strong><br>다르지 않습니다. 웹 계산기는 프로그램과 <strong style="color:var(--txt)">같은 엔진을 그대로</strong> 씁니다. 규칙 구현이 한 벌뿐이라 두 곳의 숫자가 갈릴 수 없습니다.</p>
     <p style="margin:0 0 8px;"><strong style="color:var(--txt)">Q. 본가(스칼렛·바이올렛) 계산기와 무엇이 다른가요?</strong><br>챔피언스는 노력치 체계가 다릅니다(1 포인트 = 실수치 1, 능력치당 32·합계 66). 본가 계산기에 챔피언스 배분을 넣으면 실수치부터 어긋납니다. 자세한 차이는 <a href="/guide/ev-nature/">노력치·성격 배분 가이드</a>를 참고하세요.</p>
-    <p style="margin:0 0 8px;"><strong style="color:var(--txt)">Q. 상대의 노력치를 모르는데 어떻게 넣나요?</strong><br>"내 공격이 통하는지"를 볼 때는 상대 내구를 풀투자(최악)로, "상대 공격을 버티는지"를 볼 때는 상대 화력을 풀투자+성격 보정(최악)으로 가정하는 것이 안전한 판단 기준입니다. 실전 채용 경향은 <a href="/battle-data/">배틀데이터</a>에서 확인할 수 있습니다.</p>
+    <p style="margin:0 0 8px;"><strong style="color:var(--txt)">Q. 상대의 노력치를 모르는데 어떻게 넣나요?</strong><br>기본값이 이미 실제 랭크전 채용률 1위 배분입니다. 더 보수적으로 보고 싶다면 상대 내구를 풀투자(최악)로 올리세요. 실전 채용 경향은 <a href="/battle-data/">배틀데이터</a>에서 확인할 수 있습니다.</p>
     <p style="margin:0;"><strong style="color:var(--txt)">Q. 배틀 중에 매번 입력하기 번거롭습니다.</strong><br>그 문제를 해결하는 것이 <a href="/#download">Champions Helper 데스크탑 앱</a>입니다. 배틀 화면을 자동 인식해 상대 파티 전원에 대한 데미지를 실시간으로 계산·표시합니다.</p>
   </section>
 </main>
@@ -398,7 +358,7 @@
         <a href="/#download">다운로드</a>
       </nav>
     </div>
-    <p class="foot-links" style="font-size:13px;margin:0 0 12px;"><a href="/about/" style="color:var(--muted)">사이트 소개</a> · <a href="/privacy/" style="color:var(--muted)">개인정보처리방침</a> · <a href="/terms/" style="color:var(--muted)">이용약관</a></p>
+    <p class="foot-links" style="font-size:13px;margin:0 0 12px;"><a href="https://forms.gle/vzavUFn5xFDtdpu66" target="_blank" rel="noopener" style="color:var(--muted)">🐞 버그 제보</a> · <a href="https://discord.gg/aTrGZyDEwH" target="_blank" rel="noopener" style="color:var(--muted)">💬 디스코드</a> · <a href="/about/" style="color:var(--muted)">사이트 소개</a> · <a href="/privacy/" style="color:var(--muted)">개인정보처리방침</a> · <a href="/terms/" style="color:var(--muted)">이용약관</a></p>
     <p class="disclaimer">
       Champions Helper는 팬이 만든 비공식 보조 도구입니다.
       “Pokémon”(포켓몬) 및 관련 명칭·이미지는 Nintendo, Game Freak, The Pokémon Company의
@@ -409,10 +369,9 @@
   </div>
 </footer>
 
-<datalist id="speciesList"></datalist>
 <datalist id="moveList"></datalist>
+<datalist id="abilList"></datalist>
 
-<script src="./engine.js?v=3"></script>
-<script src="./calc.js?v=3"></script>
+<script type="module" src="./calc-wasm.js?v=1"></script>
 </body>
 </html>
