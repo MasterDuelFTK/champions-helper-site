@@ -109,6 +109,9 @@ export async function bootEngine({ dataBase = '/helper-data', onProgress = () =>
     /** 체력 조건부 특성 문구(급류/멀티스케일 등). 해당 없으면 ''. */
     hpAbilityText: (abilityKo, hpFraction) => F.HpAbilityText(abilityKo ?? '', hpFraction),
 
+    /** 지금 실제로 계산에 들어가는 특성(메가면 그 폼의 기본 특성). 화면 표시는 이 값을 따라야 한다. */
+    effectiveAbility: (side) => F.EffectiveAbility(JSON.stringify(side)),
+
     /** 종족값·실수치·노력치 합. 계산과 같은 경로다. */
     realStats: (side) => parseOrNull(F.RealStats(JSON.stringify(side))),
 

@@ -61,7 +61,11 @@ let meta = null;
 
 function newSide() {
   return {
-    species: '', ability: null, item: null,
+    species: '', ability: null,
+    // ★사람이 직접 고른 특성인가. 파티 등록값·채용률로 자동으로 채워진 값은 false다 —
+    //   그래야 메가진화가 그 폼의 특성으로 바꿔 줄 수 있다(엔진 규칙: 직접 고른 특성만 메가를 이긴다).
+    abilityExplicit: false,
+    item: null,
     evs: [0, 0, 0, 0, 0, 0],
     mults: [1, 1, 1, 1, 1, 1],
     stages: [0, 0, 0, 0, 0],
@@ -126,12 +130,15 @@ function displayOf(side) {
 
     fillDatalists();
     buildFieldBar();
+    renderRail();
     renderSide('my');
     renderSide('opp');
     renderResult();
 
     $('boot').hidden = true;
     $('app').hidden = false;
+
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDetail(); });
 
     // 채용률은 무거워서(1.1MB) 첫 그림을 막지 않는다 — 뒤에서 받아 두고,
     // 다 받으면 이미 입력돼 있는 상대에게 소급 적용한다.
@@ -185,13 +192,9 @@ function buildFieldBar() {
 
   seg('mode', (v) => {
     S.mode = v;
-    $('modeHint').textContent = v === 'quick'
-      ? '두 포켓몬 이름만 넣으면 바로 계산합니다. 등록 없이 쓸 수 있습니다.'
-      : '저장해 둔 내 파티에서 골라 계산합니다. 상대 쪽과 판 상황은 빠른 계산과 똑같습니다.';
-
     // ★모드가 바꾸는 것은 "내 포켓몬을 어떻게 고르나" 하나뿐이다 — 지금 화면의 값은 건드리지 않는다.
     //   파티로 넘어왔다고 칩 하나를 자동으로 얹으면 방금까지 맞춰 둔 왼쪽 열이 소리 없이 날아간다.
-    renderPartyBar();
+    renderRail();
     renderSide('my');
   });
 }
@@ -227,10 +230,18 @@ function currentSlots() {
   return p ? engine.partySlots(p) : [];
 }
 
-function renderPartyBar() {
-  const host = $('partyBar');
-  host.hidden = S.mode !== 'party';
-  if (host.hidden) return;
+/**
+ * 왼쪽 레일. 파티 모드면 파티 선택 + **세로** 포켓몬 목록, 빠른 계산이면 짧은 안내.
+ * ★세로인 이유 = 가로 줄이 화면 위쪽을 차지하면 두 포켓몬 패널이 아래로 밀려 스크롤이 생긴다(사용자 지적).
+ */
+function renderRail() {
+  const host = $('railBody');
+
+  if (S.mode !== 'party') {
+    host.innerHTML = `<div class="railmsg">두 포켓몬 이름을 직접 넣어 계산합니다.
+      저장해 둔 파티가 있으면 <b>내 파티로 계산</b>에서 골라 쓸 수 있습니다.</div>`;
+    return;
+  }
 
   const list = Parties.load();
   if (S.partyId && !list.some((p) => p.id === S.partyId)) S.partyId = null;
@@ -240,49 +251,39 @@ function renderPartyBar() {
   const slots = currentSlots();
 
   host.innerHTML = `
-    <div class="party-top">
-      <label style="font-size:12px;color:var(--muted)">파티</label>
-      <select id="partyPick"${list.length ? '' : ' disabled'}>${
-        list.length
-          ? list.map((p) => `<option value="${escapeAttr(p.id)}"${p.id === S.partyId ? ' selected' : ''}>${
-              escapeHtml(p.name)} (${p.members.length})</option>`).join('')
-          : '<option value="">저장된 파티 없음</option>'
-      }</select>
-      <a class="pbtn" href="/builder/">파티 빌더에서 편집</a>
-    </div>
+    <h3>내 파티</h3>
+    <select id="partyPick"${list.length ? '' : ' disabled'}>${
+      list.length
+        ? list.map((p) => `<option value="${escapeAttr(p.id)}"${p.id === S.partyId ? ' selected' : ''}>${
+            escapeHtml(p.name)} (${p.members.length})</option>`).join('')
+        : '<option value="">저장된 파티 없음</option>'
+    }</select>
 
-    ${party ? `<div class="mons">${
-      slots.length
-        ? slots.map((s) => `
-          <button class="mon${s.index === S.memberIdx ? ' on' : ''}" data-slot="${s.index}" title="${escapeAttr(s.nameKo)}">
-            ${s.sprite ? `<img src="/sprites/${escapeAttr(s.sprite)}" alt="">` : ''}
-            <span class="nm">${escapeHtml(s.nameKo)}</span>
-          </button>`).join('')
-        : '<span class="party-msg">이 파티에 등록된 포켓몬이 없습니다.</span>'
+    ${party && slots.length ? `<div class="mons">${
+      slots.map((s) => `
+        <button class="mon${s.index === S.memberIdx ? ' on' : ''}" data-slot="${s.index}" title="${escapeAttr(s.nameKo)}">
+          ${s.sprite ? `<img src="/sprites/${escapeAttr(s.sprite)}" alt="">` : ''}
+          <span class="nm">${escapeHtml(s.nameKo)}</span>
+        </button>`).join('')
     }</div>` : ''}
 
-    <div class="party-msg">${
-      party
-        ? (slots.length ? '칩을 누르면 그 포켓몬으로 계산합니다.' : '<a href="/builder/">파티 빌더</a>에서 포켓몬을 등록하세요.')
-        : '저장된 파티가 없습니다. <a href="/builder/">파티 빌더</a>에서 파티를 만들면 여기에 나타납니다.'
-    }</div>
+    <div class="railmsg" style="margin-top:8px">${
+      !party ? '저장된 파티가 없습니다. <a href="/builder/">파티 빌더</a>에서 만들면 여기에 나타납니다.'
+        : (slots.length ? '누르면 그 포켓몬으로 계산합니다.' : '<a href="/builder/">파티 빌더</a>에서 포켓몬을 등록하세요.')
+    }<br><a href="/builder/">파티 빌더에서 편집</a></div>
   `;
 
-  wirePartyBar();
-}
-
-function wirePartyBar() {
   const pick = $('partyPick');
   if (pick) {
     pick.onchange = () => {
       S.partyId = pick.value || null;
       S.memberIdx = -1;   // 파티가 바뀌면 자리 번호는 뜻이 없어진다
       Parties.setLastId(S.partyId);
-      renderPartyBar();
+      renderRail();
     };
   }
 
-  $('partyBar').onclick = (e) => {
+  host.onclick = (e) => {
     const chip = e.target.closest('[data-slot]');
     if (chip) pickMember(+chip.dataset.slot);
   };
@@ -303,6 +304,7 @@ function pickMember(index) {
 
   d.species = slot.nameKo;
   d.ability = slot.abilityKo;
+  d.abilityExplicit = false;   // 파티 등록값은 **원종 기준 자동값** — 메가를 켜면 메가 특성이 이긴다
   d.item = slot.itemKo;
   d.evs = slot.evs.slice();
   d.mults = slot.mults.slice();
@@ -311,7 +313,7 @@ function pickMember(index) {
   S.my = d;
   S.memberIdx = index;
 
-  renderPartyBar();
+  renderRail();
   renderSide('my');
   recalc();
 }
@@ -320,6 +322,9 @@ function pickMember(index) {
 
 /** 그 열의 종족을 파티 칩이 정하는가(= 이름 입력칸 대신 이름표). 상대 쪽은 늘 이름 입력이다. */
 const byParty = (side) => S.mode === 'party' && side === 'my';
+
+/** 지금 계산에 들어가는 특성(메가면 그 폼 기본 특성). 화면·설명·체력 문구가 전부 이 값을 본다. */
+const effectiveAbility = (side) => engine.effectiveAbility(sideDto(side)) || '';
 
 function renderSide(side) {
   const host = $(side === 'my' ? 'sideMy' : 'sideOpp');
@@ -331,21 +336,26 @@ function renderSide(side) {
   const title = side === 'my' ? '내 포켓몬' : '상대 포켓몬';
   const tag = isAttacker ? '공격' : '수비';
 
-  host.innerHTML = `
-    <h2><span class="tag">${tag}</span> ${title}</h2>
+  // ★화면에 적는 특성 = **계산에 실제로 들어가는** 특성. 메가를 켜면 그 폼의 기본 특성이 되고
+  //   끄면 원래 값으로 돌아온다(판정은 엔진 한 곳). 직접 고른 특성이 있으면 그것이 그대로 유지된다.
+  const shownAbil = effectiveAbility(side);
 
-    <div class="row headline">
+  // ★제목 줄을 따로 두지 않는다 — 그 한 줄이 곧 스크롤이다.
+  //   어느 쪽인지는 sprite·테두리 색이 이미 말해 주고, 공격/수비만 타입 칩 줄에 얹는다.
+  host.innerHTML = `
+    <div class="row headline" title="${escapeAttr(title)}">
       <img class="sprite" id="${side}Sprite" alt="" ${sp && sp.sprite ? `src="/sprites/${escapeAttr(sp.sprite)}"` : 'style="visibility:hidden"'}>
       <div class="hcol">
         ${byParty(side) ? `
         <div class="picked">${d.species
             ? escapeHtml(d.species)
-            : '<span class="none">위 파티 줄에서 포켓몬을 고르세요</span>'}</div>` : `
+            : '<span class="none">왼쪽 파티에서 포켓몬을 고르세요</span>'}</div>` : `
         <div style="position:relative">
           <input id="${side}Name" placeholder="이름 입력 (예: ${side === 'my' ? '리자몽' : '한카리아스'})"
                  autocomplete="off" value="${escapeAttr(d.species)}">
         </div>`}
-        <div class="chips" id="${side}Types" style="margin-top:6px">${
+        <div class="chips" id="${side}Types" style="margin-top:4px">
+          <span class="tag ${side}">${tag}</span>${
           sp ? sp.types.map((t) => `<span class="tchip" style="background:${typeColor(t)}">${escapeHtml(t)}</span>`).join('') : ''
         }</div>
         ${base && base.megas.length ? `<div class="chips" id="${side}Megas" style="margin-top:6px">${
@@ -356,30 +366,33 @@ function renderSide(side) {
       </div>
     </div>
 
-    ${sp ? `<div class="statline" id="${side}Real"></div>` : '<div class="statline">이름을 넣으면 종족값·특성이 채워집니다.</div>'}
+    ${sp ? '' : '<div class="statline">이름을 넣으면 종족값·특성이 채워집니다.</div>'}
 
-    <div class="row">
-      <label>특성</label>
-      ${sp ? `<div class="chips" style="margin-bottom:5px" id="${side}AbilChips">${
-        sp.abilities.map((a) => `<button class="achip${d.ability === a ? ' on' : ''}" data-abil="${escapeAttr(a)}">${escapeHtml(a)}</button>`).join('')
-      }</div>` : ''}
-      <input id="${side}Abil" list="abilList" placeholder="특성" autocomplete="off" value="${escapeAttr(d.ability || '')}">
-      <div class="desc" id="${side}AbilDesc"></div>
-    </div>
-
-    <div class="row">
-      <label>지닌도구 <span class="note">계산에 걸리는 도구만</span></label>
-      <div class="combo">
-        <input id="${side}Item" placeholder="없음 — 이름을 치거나 ▾를 누르세요" autocomplete="off" value="${escapeAttr(d.item || '')}">
-        <button type="button" class="combo-caret" id="${side}ItemOpen" tabindex="-1" aria-label="목록 열기">▾</button>
+    <!-- ★특성·도구를 한 줄에 나란히 — 세로로 쌓으면 그만큼 화면이 길어진다 -->
+    <div class="row inline">
+      <div>
+        <label>특성${d.mega && !d.abilityExplicit ? ' <span class="note">메가 특성</span>' : ''}</label>
+        ${sp ? `<div class="chips" style="margin-bottom:3px" id="${side}AbilChips">${
+          sp.abilities.map((a) => `<button class="achip${shownAbil === a ? ' on' : ''}" data-abil="${escapeAttr(a)}">${escapeHtml(a)}</button>`).join('')
+        }</div>` : ''}
+        <input id="${side}Abil" list="abilList" placeholder="특성" autocomplete="off" value="${escapeAttr(shownAbil)}">
+        <div class="desc one" id="${side}AbilDesc"></div>
       </div>
-      <div class="desc" id="${side}ItemDesc"></div>
+      <div>
+        <label>지닌도구 <span class="note">계산에 걸리는 것만</span></label>
+        <div class="combo">
+          <input id="${side}Item" placeholder="없음 — ▾" autocomplete="off" value="${escapeAttr(d.item || '')}">
+          <button type="button" class="combo-caret" id="${side}ItemOpen" tabindex="-1" aria-label="목록 열기">▾</button>
+        </div>
+        <div class="desc one" id="${side}ItemDesc"></div>
+      </div>
     </div>
 
     <div class="row">
       <label>기술 ${isAttacker ? '<span class="note">이 쪽으로 계산됩니다</span>' : ''}</label>
-      ${d.moves.map((m, i) => `<input class="mv" data-i="${i}" list="moveList" placeholder="기술 ${i + 1}"
-              autocomplete="off" value="${escapeAttr(m)}" style="margin-bottom:4px">`).join('')}
+      <!-- ★2×4가 아니라 2×2 — 세로 네 줄이면 그만큼 화면을 잡아먹어 한 화면에 안 들어온다 -->
+      <div class="mvgrid">${d.moves.map((m, i) => `<input class="mv" data-i="${i}" list="moveList"
+              placeholder="기술 ${i + 1}" autocomplete="off" value="${escapeAttr(m)}">`).join('')}</div>
     </div>
 
     <div class="row inline">
@@ -387,18 +400,15 @@ function renderSide(side) {
         <select id="${side}Status">${meta.statuses.map((c) =>
           `<option value="${escapeAttr(c.key)}"${d.status === c.key ? ' selected' : ''}>${escapeHtml(c.ko)}</option>`).join('')}</select>
       </div>
-      <div><label>기타 배수</label>
-        <input id="${side}Misc" type="number" step="0.05" min="${meta.miscMin}" max="${meta.miscMax}" value="${d.misc}" inputmode="decimal">
-      </div>
-    </div>
-
-    <div class="row inline">
       <div><label>벽</label>
         <select id="${side}Screen">${meta.screens.map((c) =>
           `<option value="${escapeAttr(c.key)}"${String(d.screen) === c.key ? ' selected' : ''}>${escapeHtml(c.ko)}</option>`).join('')}</select>
       </div>
-      <div style="display:flex;align-items:flex-end;padding-bottom:8px">
-        <label style="display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12px;margin:0">
+      <div style="flex:0 0 62px"><label>기타</label>
+        <input id="${side}Misc" type="number" step="0.05" min="${meta.miscMin}" max="${meta.miscMax}" value="${d.misc}" inputmode="decimal">
+      </div>
+      <div style="flex:0 0 52px;display:flex;align-items:flex-end;padding-bottom:5px">
+        <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:11px;margin:0">
           <input type="checkbox" id="${side}Tail"${d.tailwind ? ' checked' : ''}> 순풍
         </label>
       </div>
@@ -459,6 +469,7 @@ function wireSide(side) {
       // 종족이 바뀌면 그 종족에 매인 것들을 놓는다(엉뚱한 종족의 메가/특성으로 계산되지 않게).
       d.mega = null;
       d.ability = null;
+      d.abilityExplicit = false;
       d.hp = 1.0;
       if (side === 'opp') { applyAssumption(false); }
       renderSide(side);
@@ -466,14 +477,20 @@ function wireSide(side) {
     });
   }
 
-  // 특성
+  // 특성 — 여기서 손대면 그 순간부터 **직접 고른 특성**이 되어 메가 기본 특성을 이긴다.
   const abilIn = $(`${side}Abil`);
-  abilIn.oninput = () => { d.ability = abilIn.value.trim() || null; syncAbilChips(side); refreshDescs(side); recalc(); };
+  abilIn.oninput = () => {
+    d.ability = abilIn.value.trim() || null;
+    d.abilityExplicit = !!d.ability;   // 비우면 다시 자동(메가면 메가 특성)으로 돌아간다
+    syncAbilChips(side); refreshDescs(side); paintHp(side); recalc();
+  };
   host.querySelector(`#${side}AbilChips`)?.addEventListener('click', (e) => {
     const b = e.target.closest('[data-abil]'); if (!b) return;
-    d.ability = (d.ability === b.dataset.abil) ? null : b.dataset.abil;
-    abilIn.value = d.ability || '';
-    syncAbilChips(side); refreshDescs(side); recalc();
+    const off = effectiveAbility(side) === b.dataset.abil && d.abilityExplicit;
+    d.ability = off ? null : b.dataset.abil;
+    d.abilityExplicit = !off;
+    abilIn.value = effectiveAbility(side);
+    syncAbilChips(side); refreshDescs(side); paintHp(side); recalc();
   });
 
   // 도구 — 드롭다운 + 타이핑 검색
@@ -548,16 +565,19 @@ function wireSide(side) {
 }
 
 function syncAbilChips(side) {
-  const d = S[side];
+  const cur = effectiveAbility(side);
   document.querySelectorAll(`#${side}AbilChips [data-abil]`)
-    .forEach((b) => b.classList.toggle('on', b.dataset.abil === d.ability));
+    .forEach((b) => b.classList.toggle('on', b.dataset.abil === cur));
 }
 
 function refreshDescs(side) {
   const d = S[side];
   const a = $(`${side}AbilDesc`), i = $(`${side}ItemDesc`);
-  if (a) a.textContent = d.ability ? engine.describeAbility(d.ability) : '';
-  if (i) i.textContent = d.item ? engine.describeItem(d.item, d.species) : '';
+  // 한 줄로 잘리므로 전문은 title(hover)에 남긴다.
+  const put = (el, text) => { if (el) { el.textContent = text; el.title = text; } };
+  const abil = effectiveAbility(side);
+  put(a, abil ? engine.describeAbility(abil) : '');
+  put(i, d.item ? engine.describeItem(d.item, d.species) : '');
 }
 
 // ── 스탯 표 ─────────────────────────────────────────────────────────────────
@@ -710,7 +730,8 @@ function paintHp(side, skipNum) {
   $(`${side}HpMax`).textContent = `/ ${max} · ${Math.round(d.hp * 1000) / 10}%`;
 
   // 체력 조건부 특성(급류·멀티스케일 등) 상태 한 줄 — 판정은 엔진이 한다.
-  $(`${side}HpAbil`).textContent = d.ability ? engine.hpAbilityText(d.ability, d.hp) : '';
+  const abil = effectiveAbility(side);
+  $(`${side}HpAbil`).textContent = abil ? engine.hpAbilityText(abil, d.hp) : '';
 }
 
 // ── 채용률 추정 ─────────────────────────────────────────────────────────────
@@ -727,6 +748,7 @@ function applyAssumption(force) {
   if (!a) return;
 
   d.ability = a.abilityKo ?? d.ability;
+  d.abilityExplicit = false;   // 채용률 1위도 자동값이다
   d.item = a.itemKo ?? d.item;
   if (a.mults) d.mults = a.mults.slice();
   if (a.evs) d.evs = a.evs.slice();
@@ -743,7 +765,7 @@ function applyAssumption(force) {
 function sideDto(side) {
   const d = S[side];
   return {
-    species: d.species, ability: d.ability, item: d.item,
+    species: d.species, ability: d.ability, abilityExplicit: d.abilityExplicit, item: d.item,
     evs: d.evs, mults: d.mults, stages: d.stages,
     status: d.status, types: d.types, hp: d.hp, mega: d.mega,
     moves: d.moves, misc: d.misc, screen: d.screen, tailwind: d.tailwind,
@@ -765,18 +787,25 @@ function recalc() {
   timer = setTimeout(renderResult, 50);
 }
 
+/** 마지막 계산 결과 — 상세 창이 다시 그릴 때 쓴다(값이 두 벌 생기지 않게 여기 하나만 둔다). */
+let lastOut = null;
+
 function renderResult() {
   const box = $('result');
 
   if (!S.my.species || !S.opp.species) {
-    box.innerHTML = `<h2>결과</h2><div class="empty">양쪽 포켓몬 이름을 넣으면 계산합니다.</div>`;
+    lastOut = null;
+    box.innerHTML = `<div class="card"><h2>결과</h2><div class="empty">양쪽 포켓몬을 정하면 계산합니다.</div></div>`;
+    closeDetail();
     return;
   }
 
   const out = engine.calculate(stateDto());
+  lastOut = out;
 
   if (out.error) {
-    box.innerHTML = `<h2>결과</h2><div class="empty">${escapeHtml(out.error)}</div>`;
+    box.innerHTML = `<div class="card"><h2>결과</h2><div class="empty">${escapeHtml(out.error)}</div></div>`;
+    closeDetail();
     return;
   }
 
@@ -784,18 +813,19 @@ function renderResult() {
   const stepByEn = new Map(steps.map((s) => [s.moveEn, s]));
 
   box.innerHTML = `
-    <h2>결과</h2>
-    <div class="rhead">${escapeHtml(out.header)}${out.field ? ` · ${escapeHtml(out.field)}` : ''}</div>
-    ${out.rows.length ? `
-    <table class="rows">
-      <tr><th style="width:26px"></th><th>기술</th><th>타입</th><th class="pw">위력</th>
-          <th style="text-align:right">데미지</th><th>판정</th><th></th></tr>
-      ${out.rows.map((r) => rowHtml(r, stepByEn.get(r.moveEn))).join('')}
-    </table>` : '<div class="empty">기술을 넣으면 데미지가 표시됩니다.</div>'}
-    ${out.speed ? `<div class="speedline">스피드 <b>${out.speed.mine}</b>${tag(out.speed.mineNote)} vs <b>${out.speed.theirs}</b>${tag(out.speed.theirsNote)} — <b>${escapeHtml(out.speed.verdict)}</b></div>` : ''}
+    <div class="card">
+      <h2>결과</h2>
+      <div class="rhead">${escapeHtml(out.header)}${out.field ? `<br>${escapeHtml(out.field)}` : ''}</div>
+      ${out.rows.length
+        ? out.rows.map((r) => rowHtml(r, stepByEn.get(r.moveEn))).join('')
+        : '<div class="empty">기술을 넣으면 데미지가 표시됩니다.</div>'}
+      ${out.speed ? `<div class="speedline">스피드 <b>${out.speed.mine}</b>${tag(out.speed.mineNote)}
+        vs <b>${out.speed.theirs}</b>${tag(out.speed.theirsNote)}<br><b>${escapeHtml(out.speed.verdict)}</b></div>` : ''}
+    </div>
   `;
 
   box.querySelectorAll('[data-crit]').forEach((el) => {
+    el.onclick = (e) => e.stopPropagation();   // 급소 체크가 상세 창을 열지 않게
     el.onchange = () => {
       const en = el.dataset.crit;
       const def = S.crit;   // 확정급소 여부는 엔진이 안다 — 여기선 값만 실어 보낸다
@@ -806,7 +836,8 @@ function renderResult() {
   });
 
   box.querySelectorAll('[data-step]').forEach((el) => {
-    el.onclick = () => {
+    el.onclick = (e) => {
+      e.stopPropagation();
       const en = el.dataset.step;
       const s = stepByEn.get(en);
       if (!s) return;
@@ -815,6 +846,13 @@ function renderResult() {
       renderResult();
     };
   });
+
+  // 기술 줄을 누르면 상세 창 — 열려 있으면 계산이 바뀔 때마다 따라 갱신된다.
+  box.querySelectorAll('[data-detail]').forEach((el) => {
+    el.onclick = () => openDetail(el.dataset.detail);
+  });
+
+  if (detailEn) renderDetail();
 }
 
 function rowHtml(r, step) {
@@ -822,15 +860,101 @@ function rowHtml(r, step) {
     : r.verdict.includes('난수 1타') ? 'v-maybe'
     : r.verdict.includes('변화기') ? '' : 'v-safe';
 
-  return `<tr>
-    <td><input type="checkbox" data-crit="${escapeAttr(r.moveEn || '')}"${r.crit ? ' checked' : ''} title="급소"></td>
-    <td class="mv">${escapeHtml(r.moveKo)}${r.spread ? ' <span class="note">광역</span>' : ''}</td>
-    <td><span class="tchip" style="background:${typeColor(r.typeKo)}">${escapeHtml(r.typeKo)}</span></td>
-    <td class="pw">${powerCell(r, step)}</td>
-    <td class="pc" style="text-align:right">${escapeHtml(r.percent)}</td>
-    <td class="vd ${cls}">${escapeHtml(r.verdict)}</td>
-    <td>${r.note ? `<span class="note">${escapeHtml(r.note)}</span>` : ''}</td>
-  </tr>`;
+  return `<div class="rrow" data-detail="${escapeAttr(r.moveEn || '')}" title="누르면 계산 내역">
+    <div class="top">
+      <span class="mv">${escapeHtml(r.moveKo)}</span>
+      <span class="tchip" style="background:${typeColor(r.typeKo)}">${escapeHtml(r.typeKo)}</span>
+      ${powerCell(r, step)}
+    </div>
+    <div class="pc">${escapeHtml(r.percent)}</div>
+    <div class="sub">
+      <span class="vd ${cls}">${escapeHtml(r.verdict)}</span>
+      ${r.spread ? '<span class="note">광역</span>' : ''}
+      ${r.note ? `<span class="note">${escapeHtml(r.note)}</span>` : ''}
+      <label style="margin-left:auto;display:flex;align-items:center;gap:4px">
+        <input type="checkbox" data-crit="${escapeAttr(r.moveEn || '')}"${r.crit ? ' checked' : ''}> 급소
+      </label>
+    </div>
+  </div>`;
+}
+
+// ── 상세 창(계산 내역) ──────────────────────────────────────────────────────
+//
+// ★결과 열은 좁아서 숫자만 보여준다. "왜 그 숫자인가"(양쪽 실수치·성격·노력치)는 이 창이 맡는다.
+//   값은 전부 이미 있는 것에서 나온다 — 새 계산 경로를 만들지 않는다(두 벌이 되면 화면끼리 어긋난다).
+
+let detailEn = null;
+
+function openDetail(moveEn) {
+  if (!moveEn) return;
+  detailEn = moveEn;
+  renderDetail();
+}
+
+function closeDetail() {
+  detailEn = null;
+  $('detail').hidden = true;
+}
+
+function renderDetail() {
+  const host = $('detail');
+  const row = lastOut?.rows?.find((r) => r.moveEn === detailEn);
+  if (!row) { closeDetail(); return; }
+
+  // 공격/수비가 어느 쪽인지는 시점이 정한다(상대 시점이면 상대가 공격자).
+  const atk = S.oppView ? 'opp' : 'my';
+  const def = S.oppView ? 'my' : 'opp';
+  const atkStats = engine.realStats(sideDto(atk));
+  const defStats = engine.realStats(sideDto(def));
+
+  const kv = (k, v) => `<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+  const arrow = (m) => (m > 1 ? ' ↑' : m < 1 ? ' ↓' : '');
+  const statLine = (rs, side, i, label) => {
+    const key = STAT_KEYS[i];
+    return kv(label, `EV ${S[side].evs[i]} · IV 31 · 실수값 <b>${rs.real[key]}</b>`
+      + `<span style="color:var(--muted)"> (성격 ×${S[side].mults[i]}${arrow(S[side].mults[i])})</span>`);
+  };
+
+  const cls = row.verdict.includes('확정 1타') ? 'v-ko'
+    : row.verdict.includes('난수 1타') ? 'v-maybe'
+    : row.verdict.includes('변화기') ? '' : 'v-safe';
+
+  host.innerHTML = `
+    <div class="box">
+      <button class="x" id="detailX" aria-label="닫기">✕</button>
+
+      <div class="sect">
+        <h3 class="atk">⚔ 공격측</h3>
+        ${kv('포켓몬', `${escapeHtml(displayOf(atk)?.nameKo ?? '')} <span style="color:var(--muted)">LV 50</span>`)}
+        ${atkStats ? statLine(atkStats, atk, 1, '공격') : ''}
+        ${atkStats ? statLine(atkStats, atk, 3, '특공') : ''}
+        ${kv('기술', `${escapeHtml(row.moveKo)} <span style="color:var(--muted)">${escapeHtml(row.typeKo)} · 위력 ${row.power || '—'}</span>`)}
+        ${row.crit ? kv('급소', '적용') : ''}
+        ${row.note ? kv('보정', escapeHtml(row.note)) : ''}
+      </div>
+
+      <div class="sect">
+        <h3 class="def">🛡 수비측</h3>
+        ${kv('포켓몬', `${escapeHtml(displayOf(def)?.nameKo ?? '')} <span style="color:var(--muted)">LV 50</span>`)}
+        ${defStats ? kv('체력수치', `EV ${S[def].evs[0]} · IV 31 · 실수값 <b>${defStats.real.hp}</b>`
+            + `<span style="color:var(--muted)"> (남은 체력 ${Math.round(S[def].hp * 100)}%)</span>`) : ''}
+        ${defStats ? statLine(defStats, def, 2, '방어') : ''}
+        ${defStats ? statLine(defStats, def, 4, '특방') : ''}
+      </div>
+
+      <div class="sect" style="margin-bottom:0">
+        <h3>결과</h3>
+        <div class="big">${escapeHtml(row.percent)}</div>
+        <div class="verdict ${cls}">${escapeHtml(row.verdict)}</div>
+        ${lastOut.field ? `<div class="rolls">${escapeHtml(lastOut.field)}</div>` : ''}
+        ${lastOut.speed ? `<div class="rolls">스피드 ${lastOut.speed.mine} vs ${lastOut.speed.theirs} — ${escapeHtml(lastOut.speed.verdict)}</div>` : ''}
+      </div>
+    </div>
+  `;
+
+  host.hidden = false;
+  $('detailX').onclick = closeDetail;
+  host.onclick = (e) => { if (e.target === host) closeDetail(); };   // 바깥을 누르면 닫힌다
 }
 
 /**
