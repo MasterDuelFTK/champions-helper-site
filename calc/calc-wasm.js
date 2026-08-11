@@ -8,6 +8,7 @@
 //   엔진 쪽은 무상태라 "화면과 다른 값으로 계산되는" 경로가 존재하지 않는다.
 
 import { bootEngine, STAGES } from './pch-wasm.js';
+import * as Parties from './party-store.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -77,6 +78,9 @@ function newSide() {
 
 const S = {
   mode: 'quick',
+  // 파티 모드 — 고른 파티와 그 안에서 지금 계산 중인 자리(저장된 members 배열의 인덱스).
+  partyId: null,
+  memberIdx: -1,
   doubles: false,
   weather: 'None',
   terrain: 'None',
@@ -183,7 +187,12 @@ function buildFieldBar() {
     S.mode = v;
     $('modeHint').textContent = v === 'quick'
       ? '두 포켓몬 이름만 넣으면 바로 계산합니다. 등록 없이 쓸 수 있습니다.'
-      : '저장해 둔 내 파티에서 골라 계산합니다. (준비 중 — 다음 단계에서 붙습니다)';
+      : '저장해 둔 내 파티에서 골라 계산합니다. 상대 쪽과 판 상황은 빠른 계산과 똑같습니다.';
+
+    // ★모드가 바꾸는 것은 "내 포켓몬을 어떻게 고르나" 하나뿐이다 — 지금 화면의 값은 건드리지 않는다.
+    //   파티로 넘어왔다고 칩 하나를 자동으로 얹으면 방금까지 맞춰 둔 왼쪽 열이 소리 없이 날아간다.
+    renderPartyBar();
+    renderSide('my');
   });
 }
 
@@ -197,7 +206,120 @@ function seg(id, onPick) {
   };
 }
 
+// ── 파티 줄(내 파티로 계산) ─────────────────────────────────────────────────
+//
+// ★두 모드는 **같은 화면**이다. 다른 것은 "내 포켓몬을 어떻게 고르나" 하나뿐 —
+//   빠른 계산은 이름을 치고, 파티 모드는 아래 칩에서 고른다. 나머지(상대·판 상황·결과)는 100% 공통.
+//
+// ★★계산기는 파티를 **고르기만** 한다(사용자 지시). 만들기·고치기·지우기·헬퍼 연동은 전부 /builder 소관 —
+//   여기에 파티 편집을 조금이라도 두면 빌더와 두 벌이 되고, 어느 쪽이 진짜인지 사용자가 알 수 없게 된다.
+//   저장소(localStorage `pch-parties`)는 빌더가 쓰는 것과 같은 한 벌이라 빌더에서 저장하면 여기 바로 뜬다.
+
+/** 지금 고른 파티(없으면 null). 저장소를 매번 읽는다 — 빌더 탭에서 방금 저장한 것도 그대로 보인다. */
+function currentParty() {
+  if (!S.partyId) return null;
+  return Parties.get(S.partyId);
+}
+
+/** 파티 → 계산기 슬롯(성격 이름 → 배수, 노력치 32/66 자르기는 엔진이 한다). */
+function currentSlots() {
+  const p = currentParty();
+  return p ? engine.partySlots(p) : [];
+}
+
+function renderPartyBar() {
+  const host = $('partyBar');
+  host.hidden = S.mode !== 'party';
+  if (host.hidden) return;
+
+  const list = Parties.load();
+  if (S.partyId && !list.some((p) => p.id === S.partyId)) S.partyId = null;
+  if (!S.partyId) S.partyId = list.some((p) => p.id === Parties.lastId()) ? Parties.lastId() : (list[0]?.id ?? null);
+
+  const party = currentParty();
+  const slots = currentSlots();
+
+  host.innerHTML = `
+    <div class="party-top">
+      <label style="font-size:12px;color:var(--muted)">파티</label>
+      <select id="partyPick"${list.length ? '' : ' disabled'}>${
+        list.length
+          ? list.map((p) => `<option value="${escapeAttr(p.id)}"${p.id === S.partyId ? ' selected' : ''}>${
+              escapeHtml(p.name)} (${p.members.length})</option>`).join('')
+          : '<option value="">저장된 파티 없음</option>'
+      }</select>
+      <a class="pbtn" href="/builder/">파티 빌더에서 편집</a>
+    </div>
+
+    ${party ? `<div class="mons">${
+      slots.length
+        ? slots.map((s) => `
+          <button class="mon${s.index === S.memberIdx ? ' on' : ''}" data-slot="${s.index}" title="${escapeAttr(s.nameKo)}">
+            ${s.sprite ? `<img src="/sprites/${escapeAttr(s.sprite)}" alt="">` : ''}
+            <span class="nm">${escapeHtml(s.nameKo)}</span>
+          </button>`).join('')
+        : '<span class="party-msg">이 파티에 등록된 포켓몬이 없습니다.</span>'
+    }</div>` : ''}
+
+    <div class="party-msg">${
+      party
+        ? (slots.length ? '칩을 누르면 그 포켓몬으로 계산합니다.' : '<a href="/builder/">파티 빌더</a>에서 포켓몬을 등록하세요.')
+        : '저장된 파티가 없습니다. <a href="/builder/">파티 빌더</a>에서 파티를 만들면 여기에 나타납니다.'
+    }</div>
+  `;
+
+  wirePartyBar();
+}
+
+function wirePartyBar() {
+  const pick = $('partyPick');
+  if (pick) {
+    pick.onchange = () => {
+      S.partyId = pick.value || null;
+      S.memberIdx = -1;   // 파티가 바뀌면 자리 번호는 뜻이 없어진다
+      Parties.setLastId(S.partyId);
+      renderPartyBar();
+    };
+  }
+
+  $('partyBar').onclick = (e) => {
+    const chip = e.target.closest('[data-slot]');
+    if (chip) pickMember(+chip.dataset.slot);
+  };
+}
+
+/** 칩 선택 = 그 마리로 갈아끼우기. ★랭크·상태이상·체력은 0/기본에서 시작한다(교체하면 풀리는 게임 정합). */
+function pickMember(index) {
+  const slot = currentSlots().find((s) => s.index === index);
+  if (!slot) return;
+
+  const keep = S.my;
+  const d = newSide();
+
+  // 벽·순풍·기타 배수는 **마리가 아니라 진영**에 붙는 것이라 교체해도 남는다.
+  d.screen = keep.screen;
+  d.tailwind = keep.tailwind;
+  d.misc = keep.misc;
+
+  d.species = slot.nameKo;
+  d.ability = slot.abilityKo;
+  d.item = slot.itemKo;
+  d.evs = slot.evs.slice();
+  d.mults = slot.mults.slice();
+  d.moves = [0, 1, 2, 3].map((i) => slot.movesKo[i] || '');
+
+  S.my = d;
+  S.memberIdx = index;
+
+  renderPartyBar();
+  renderSide('my');
+  recalc();
+}
+
 // ── 한쪽 패널 ───────────────────────────────────────────────────────────────
+
+/** 그 열의 종족을 파티 칩이 정하는가(= 이름 입력칸 대신 이름표). 상대 쪽은 늘 이름 입력이다. */
+const byParty = (side) => S.mode === 'party' && side === 'my';
 
 function renderSide(side) {
   const host = $(side === 'my' ? 'sideMy' : 'sideOpp');
@@ -215,10 +337,14 @@ function renderSide(side) {
     <div class="row headline">
       <img class="sprite" id="${side}Sprite" alt="" ${sp && sp.sprite ? `src="/sprites/${escapeAttr(sp.sprite)}"` : 'style="visibility:hidden"'}>
       <div class="hcol">
+        ${byParty(side) ? `
+        <div class="picked">${d.species
+            ? escapeHtml(d.species)
+            : '<span class="none">위 파티 줄에서 포켓몬을 고르세요</span>'}</div>` : `
         <div style="position:relative">
           <input id="${side}Name" placeholder="이름 입력 (예: ${side === 'my' ? '리자몽' : '한카리아스'})"
                  autocomplete="off" value="${escapeAttr(d.species)}">
-        </div>
+        </div>`}
         <div class="chips" id="${side}Types" style="margin-top:6px">${
           sp ? sp.types.map((t) => `<span class="tchip" style="background:${typeColor(t)}">${escapeHtml(t)}</span>`).join('') : ''
         }</div>
@@ -324,18 +450,21 @@ function wireSide(side) {
   const d = S[side];
   const host = $(side === 'my' ? 'sideMy' : 'sideOpp');
 
-  // 이름 — 로스터 한정 자동완성
-  attachSpeciesAc($(`${side}Name`), (name) => {
-    if (name === d.species) return;
-    d.species = name;
-    // 종족이 바뀌면 그 종족에 매인 것들을 놓는다(엉뚱한 종족의 메가/특성으로 계산되지 않게).
-    d.mega = null;
-    d.ability = null;
-    d.hp = 1.0;
-    if (side === 'opp') { applyAssumption(false); }
-    renderSide(side);
-    recalc();
-  });
+  // 이름 — 로스터 한정 자동완성. ★파티 모드의 내 열에는 입력칸이 없다(칩이 종족을 정한다).
+  const nameIn = $(`${side}Name`);
+  if (nameIn) {
+    attachSpeciesAc(nameIn, (name) => {
+      if (name === d.species) return;
+      d.species = name;
+      // 종족이 바뀌면 그 종족에 매인 것들을 놓는다(엉뚱한 종족의 메가/특성으로 계산되지 않게).
+      d.mega = null;
+      d.ability = null;
+      d.hp = 1.0;
+      if (side === 'opp') { applyAssumption(false); }
+      renderSide(side);
+      recalc();
+    });
+  }
 
   // 특성
   const abilIn = $(`${side}Abil`);

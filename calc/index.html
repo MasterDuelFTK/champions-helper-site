@@ -88,6 +88,37 @@
   .seg button + button { border-left: 1px solid var(--line); }
   .seg.small button { padding: 5px 10px; font-size: 12px; }
 
+  /* 파티 줄(내 파티로 계산) — 왼쪽 열의 종족을 이름 입력 대신 여기 칩으로 고른다 */
+  .party-bar {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 16px; margin-bottom: 16px;
+  }
+  .party-top { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .party-top select { width: auto; min-width: 170px; padding: 6px 8px; font-size: 13px; }
+  .party-top .right { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
+  .pbtn {
+    background: var(--panel2); border: 1px solid var(--line); color: var(--muted);
+    border-radius: 7px; padding: 5px 10px; font-size: 12px; cursor: pointer;
+    font-family: inherit; white-space: nowrap;
+  }
+  .pbtn:hover { border-color: var(--accent); color: var(--txt); text-decoration: none; }
+  a.pbtn { display: inline-block; line-height: 1.5; }
+
+  .mons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .mon {
+    position: relative; width: 80px; padding: 6px 4px 5px; border-radius: 10px; cursor: pointer;
+    background: var(--panel2); border: 1px solid var(--line); color: var(--muted);
+    text-align: center; font-family: inherit;
+  }
+  .mon.on { border-color: var(--accent); background: rgba(58,111,200,.18); color: var(--txt); }
+  .mon img { width: 52px; height: 52px; display: block; margin: 0 auto; object-fit: contain; }
+  .mon .nm { font-size: 11px; line-height: 1.3; word-break: keep-all; }
+  .party-msg { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
+
+  /* 파티 모드의 내 포켓몬 이름 = 칩이 정하므로 입력칸이 아니라 이름표다 */
+  .picked { font-size: 16px; font-weight: 700; padding: 6px 0 0; }
+  .picked .none { font-size: 13px; font-weight: 400; color: var(--muted); }
+
   /* 판 상황 */
   .field-bar {
     display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
@@ -301,6 +332,9 @@
       <span class="hint" id="modeHint">두 포켓몬 이름만 넣으면 바로 계산합니다. 등록 없이 쓸 수 있습니다.</span>
     </div>
 
+    <!-- 파티 줄 — 내용은 calc-wasm.js가 그린다(모드가 '내 파티로 계산'일 때만 보인다) -->
+    <div class="party-bar" id="partyBar" hidden></div>
+
     <!-- 판 상황 -->
     <div class="field-bar">
       <div class="fb"><label>형식</label>
@@ -333,6 +367,10 @@
     <p style="margin:0 0 8px;"><strong style="color:var(--txt)">① 두 포켓몬 이름 입력</strong> — 이름을 넣으면 종족값·타입·특성 후보가 자동으로 채워집니다. 상대 쪽은 실제 랭크전 <strong style="color:var(--txt)">채용률 1위</strong>의 특성·지닌도구·성격·노력치·기술이 자동으로 얹히므로, 모르는 상대라도 현실적인 가정으로 바로 계산됩니다.</p>
     <p style="margin:0 0 8px;"><strong style="color:var(--txt)">② 판 상황 지정</strong> — 싱글/더블, 날씨·필드, 급소, 벽, 순풍을 실제 상황에 맞게 켭니다. 더블을 고르면 광역기 감소(×0.75)와 벽 감소량이 자동으로 더블 기준으로 바뀝니다.</p>
     <p style="margin:0 0 18px;"><strong style="color:var(--txt)">③ 결과 읽기</strong> — 기술 네 개의 데미지 범위(%)와 <strong style="color:var(--txt)">확정 1타 / 난수 1타(확률) / 확정 2타</strong> 판정이 한 번에 표시되고, 아래에 선공 여부(스피드 비교)가 함께 나옵니다. "난수 1타 75%"라면 16가지 난수 중 12가지에서 쓰러진다는 뜻입니다.</p>
+
+    <h2 style="font-size:18px;color:var(--txt);margin:0 0 12px;font-weight:800;">내 파티로 계산</h2>
+    <p style="margin:0 0 12px;">자주 쓰는 파티는 등록해 두면 매번 이름을 칠 필요가 없습니다. 위쪽 <strong style="color:var(--txt)">[내 파티로 계산]</strong>을 누르면 저장한 파티가 포켓몬 칩으로 뜨고, 칩 하나를 누르는 것만으로 <strong style="color:var(--txt)">특성·지닌도구·성격·노력치·기술 네 개</strong>가 한 번에 들어갑니다. 상대 쪽 입력과 판 상황, 결과 표는 빠른 계산과 완전히 같습니다.</p>
+    <p style="margin:0 0 18px;">파티를 만들고 고치는 곳은 <a href="/builder/">파티 빌더</a>입니다 — 계산기는 저장된 파티를 골라 쓰기만 합니다. 파티는 <strong style="color:var(--txt)">이 브라우저에만</strong> 저장되며 서버로 전송되지 않습니다.</p>
 
     <h2 style="font-size:18px;color:var(--txt);margin:0 0 12px;font-weight:800;">자주 묻는 질문</h2>
     <p style="margin:0 0 8px;"><strong style="color:var(--txt)">Q. 게임 안의 실제 데미지와 같은가요?</strong><br>같습니다. 챔피언스의 공식(레벨 50·개체값 31·노력치 실수치 직접 가산·16난수)을 그대로 구현했고, 실제 게임 수치와 대조해 검증했습니다. 다른 결과가 나오는 사례를 발견하면 <a href="https://forms.gle/vzavUFn5xFDtdpu66" target="_blank" rel="noopener">제보</a>해 주세요 — 버그로 취급해 수정합니다.</p>

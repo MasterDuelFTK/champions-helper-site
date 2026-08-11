@@ -112,6 +112,12 @@ export async function bootEngine({ dataBase = '/helper-data', onProgress = () =>
     /** 종족값·실수치·노력치 합. 계산과 같은 경로다. */
     realStats: (side) => parseOrNull(F.RealStats(JSON.stringify(side))),
 
+    /**
+     * 저장된 파티(헬퍼 /api/parties와 같은 모양) → 계산기 슬롯 목록.
+     * 성격 이름 → 스탯 배수, 노력치 32/66 자르기까지 엔진이 한다.
+     */
+    partySlots: (party) => JSON.parse(F.PartySlots(JSON.stringify(party ?? {}))),
+
     /** 본체 — 지금 상태로 계산. */
     calculate: (state) => JSON.parse(F.Calculate(JSON.stringify(state))),
 

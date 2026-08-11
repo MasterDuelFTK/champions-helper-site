@@ -9,14 +9,14 @@
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <title>포켓몬 챔피언스 파티 빌더 — 종족값·실수치·노력치 검증 | Champions Helper</title>
-<meta name="description" content="포켓몬 챔피언스 파티 빌더. 종족값·실수치 자동 계산과 노력치 분배 검증. 등록한 파티는 실행 중인 Champions Helper 프로그램에 바로 반영됩니다." />
+<meta name="description" content="포켓몬 챔피언스 파티 빌더. 종족값·실수치 자동 계산과 노력치 분배 검증. 프로그램 설치 없이 브라우저에서 바로 파티를 짜고 데미지 계산기에 그대로 쓸 수 있습니다." />
 <link rel="canonical" href="https://champions-helper.com/builder/" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Champions Helper" />
 <meta property="og:locale" content="ko_KR" />
 <meta property="og:url" content="https://champions-helper.com/builder/" />
 <meta property="og:title" content="포켓몬 챔피언스 파티 빌더 — 종족값·실수치·노력치 검증" />
-<meta property="og:description" content="종족값·실수치 자동 계산과 노력치 분배 검증. 등록한 파티는 실행 중인 Champions Helper 프로그램에 바로 반영됩니다." />
+<meta property="og:description" content="종족값·실수치 자동 계산과 노력치 분배 검증. 브라우저에서 바로 파티를 짜고 데미지 계산기에 그대로 쓸 수 있습니다." />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:title" content="포켓몬 챔피언스 파티 빌더" />
 <meta name="twitter:description" content="종족값·실수치 자동 계산과 노력치 검증을 지원하는 포켓몬 챔피언스 파티 빌더." />
@@ -100,6 +100,7 @@
                   cursor: pointer; font-weight: 700; }
   .pitem .pname:hover { color: var(--accent); }
   .pitem .pcount { font-size: 11px; color: var(--muted); }
+  .pitem.on { border-color: var(--accent); }
 
   /* 슬롯 6칸 */
   .slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
@@ -208,17 +209,15 @@
   <div class="page-head">
     <div>
       <h1>파티 빌더</h1>
-      <p>종족값·실수치 자동 계산 + 노력치 검증. 등록한 파티는 실행 중인 프로그램에 바로 반영됩니다.</p>
+      <p>종족값·실수치 자동 계산 + 노력치 검증. 저장한 파티는 <a href="/calc/">계산기</a>의 「내 파티로 계산」에서 바로 고를 수 있습니다.</p>
     </div>
-    <span id="status">헬퍼 연결 대기…</span>
+    <span id="status">계산 엔진 불러오는 중…</span>
   </div>
 
-  <!-- 헬퍼(프로그램) 미연결 안내 -->
+  <!-- 엔진 로드 실패 안내(정상 상태에서는 숨김) -->
   <div id="offline">
-    <h3>⚠ Champions Helper 프로그램이 실행되어 있지 않습니다</h3>
-    <p>파티 빌더는 PC에서 실행 중인 Champions Helper 프로그램과 통신해 종족값·실수치를 계산하고 파티를 저장합니다.
-       프로그램을 실행한 뒤 이 페이지를 새로고침하세요.</p>
-    <a class="btn primary" href="/#download">⬇ 프로그램 다운로드</a>
+    <h3>⚠ 계산 엔진을 불러오지 못했습니다</h3>
+    <p id="offlineWhy">새로고침해도 같다면 <a href="https://forms.gle/vzavUFn5xFDtdpu66" target="_blank" rel="noopener">제보</a>해 주세요.</p>
   </div>
 
   <div id="main">
@@ -323,7 +322,8 @@
 
 <section style="max-width:860px;margin:12px auto 0;padding:22px 0 4px;border-top:1px solid var(--line);color:var(--muted);font-size:14px;line-height:1.75;">
     <h2 style="font-size:18px;color:var(--txt);margin:0 0 12px;font-weight:800;">파티 빌더 소개</h2>
-    <p style="margin:0 0 12px;">파티 빌더는 포켓몬을 고르고 <strong style="color:var(--txt)">노력치를 배분하면 실능력치가 실시간으로 계산</strong>되어, 어태커·내구형 등 원하는 역할에 맞게 능력치를 맞출 수 있습니다. 노력치 합계 검증으로 잘못된 분배도 바로 확인됩니다. 등록한 파티는 PC에서 실행 중인 <a href="/#download">Champions Helper 프로그램</a>에 곧바로 반영되어, 배틀 중 실시간 데미지 계산에 사용됩니다.</p>
+    <p style="margin:0 0 12px;">파티 빌더는 포켓몬을 고르고 <strong style="color:var(--txt)">노력치를 배분하면 실능력치가 실시간으로 계산</strong>되어, 어태커·내구형 등 원하는 역할에 맞게 능력치를 맞출 수 있습니다. 노력치 합계 검증으로 잘못된 분배도 바로 확인됩니다. 계산은 <strong style="color:var(--txt)">데스크탑 프로그램과 같은 엔진</strong>이 브라우저에서 그대로 처리하므로, 프로그램을 켜지 않아도 파티를 짤 수 있습니다.</p>
+    <p style="margin:0 0 12px;">저장한 파티는 이 브라우저에 보관되며 <a href="/calc/">데미지 계산기</a>의 「내 파티로 계산」에서 바로 골라 쓸 수 있습니다. PC에서 <a href="/#download">Champions Helper 프로그램</a>을 실행 중이면 오른쪽 위에 <strong style="color:var(--txt)">헬퍼와 연결됨</strong>이 표시되고, 저장할 때 프로그램에도 함께 반영됩니다.</p>
     <p style="margin:0;">실능력치와 데미지가 어떻게 계산되는지는 <a href="/guide/damage-formula/">데미지 계산 공식 가이드</a>에서, 포켓몬별 종족값은 <a href="/pokedex/">도감</a>에서 확인할 수 있습니다.</p>
   </section>
 </main>
@@ -355,38 +355,38 @@
 
 <script src="/calc/engine.js"></script>
 <script src="recommend.js"></script>
-<script>
-"use strict";
-// === 헬퍼(데스크탑 프로그램) API 주소 ===
-// 공개 사이트(브라우저)는 PC에서 실행 중인 로컬 헬퍼(127.0.0.1:8732)에 직접 fetch한다(cross-origin).
-// 로컬 미리보기: http://localhost:8000 → 헬퍼 http://127.0.0.1:8732 (헬퍼 측 CORS 허용 필요).
-// 배포(Phase4 wss) 시 이 한 줄을 https://local.champions-helper.com:8732 로 교체.
-const API_BASE = "http://127.0.0.1:8732";
+<script type="module">
+// 파티 빌더 — 파티를 **만들고 고치는 유일한 곳**.
+//
+// ★199차: 헬퍼(데스크탑 프로그램) 의존을 걷어냈다. 종족·기술·도구·성격·실수치는 전부
+//   브라우저에서 도는 헬퍼 엔진(wasm)이 답하고, 파티는 브라우저 저장소에 저장된다.
+//   종전엔 `/api/master/meta` 한 번이 실패하면 폼을 만들기도 전에 return해서 입력칸이 통째로 죽었다.
+//
+// ★규칙(실수치·노력치 상한·성격 배수)은 한 줄도 여기 없다 — 전부 엔진이 판정한다.
+//   헬퍼는 이제 **선택적인 주고받기 상대**일 뿐이라, 꺼져 있어도 빌더는 온전히 동작한다.
+//
+// ★계산기(/calc)는 이 저장소를 **읽기만** 한다(사용자 지시). 파티 편집은 여기 한 곳뿐.
+
+import { bootEngine, STAGES } from '/calc/pch-wasm.js';
+import * as Parties from '/calc/party-store.js';
 
 const $ = (s) => document.querySelector(s);
 const STAT_LABELS = [["hp","HP"],["atk","공격"],["def","방어"],["spa","특공"],["spd","특방"],["spe","스피드"]];
 
+let engine = null;
+
 const state = {
-  meta: { natures: [], items: [], moves: [] },
+  meta: { natures: [], items: [], moves: [], maxEvPerStat: 32, maxEvTotal: 66 },
   slots: new Array(6).fill(null),
   editing: 0,
   partyId: null,
-  cur: null,        // 현재 폼 선택 종족 dto
+  cur: null,        // 현재 폼 선택 종족
 };
 let moveAcs = [], itemAc = null, natureAc = null;   // 자동완성 핸들
 
 function setStatus(txt, kind) { const s = $("#status"); s.textContent = txt; s.className = kind || ""; }
-function showOffline() { $("#offline").style.display = "block"; }
+function showOffline(why) { $("#offline").style.display = "block"; if (why) $("#offlineWhy").textContent = why; }
 function hideOffline() { $("#offline").style.display = "none"; }
-
-async function api(path, method, body) {
-  const opt = { method: method || "GET", headers: { "Content-Type": "application/json" } };
-  if (body !== undefined) opt.body = JSON.stringify(body);
-  const r = await fetch(API_BASE + path, opt);
-  if (!r.ok) throw new Error(path + " → " + r.status);
-  const ct = r.headers.get("content-type") || "";
-  return ct.includes("json") ? r.json() : r.text();
-}
 
 // ── 공통 자동완성 드롭다운 ──────────────────────────────────
 // wrap(.ac) 안의 .ac-input에 붙임. items()=후보배열, getText=표시/매칭문자열,
@@ -429,49 +429,50 @@ function makeAutocomplete(wrap, opts) {
 }
 
 // ── 초기 로드 ───────────────────────────────────────────────
-// 프로그램 실행 시점엔 로컬 웹서버가 막 부팅 중일 수 있어 첫 fetch가 실패할 수 있음
-// → 0.7s 간격으로 재시도(서버 준비될 때까지). 끝내 실패하면 미연결 안내 표시.
-async function init(attempt) {
-  attempt = attempt || 0;
-  try { state.meta = await api("/api/master/meta"); }
-  catch (e) {
-    if (attempt < 12) { setStatus("헬퍼 연결 대기…", "warn"); setTimeout(() => init(attempt + 1), 700); return; }
-    setStatus("헬퍼 미연결", "bad"); showOffline(); return;
+async function init() {
+  renderSlots();   // 엔진을 기다리는 동안에도 슬롯 6칸은 보이게
+
+  try {
+    engine = await bootEngine({ dataBase: "/helper-data", onProgress: (s) => setStatus(STAGES[s] ?? s, "warn") });
+  } catch (e) {
+    setStatus("엔진 로드 실패", "bad");
+    showOffline(e.message);
+    return;
   }
-  setStatus("● 연결됨", "ok");
+
+  const m = engine.meta;
+  state.meta = {
+    natures: m.natures, items: m.items, moves: m.moves,
+    maxEvPerStat: m.maxEvPerStat, maxEvTotal: m.maxEvTotal,
+  };
+
   hideOffline();
+
   buildStatRows();
   buildMoveInputs();
   setupSpeciesSearch();
   setupNatureAc();
-  // 지닌 도구 — 자유 입력 + 자동완성
   itemAc = makeAutocomplete($("#itemAc"), { items: () => state.meta.items });
+
   renderSlots();
-  await loadParties();
-  await importFromBoard();
+  loadParties();
+  importFromBoard();
+
+  watchHelper();
 }
 
 // ── 게시판 "빌더로 복사" 가져오기(/board 상세 → localStorage 경유) ──
-async function importFromBoard() {
+function importFromBoard() {
   let raw = null;
   try { raw = localStorage.getItem("pch-board-import"); if (raw !== null) localStorage.removeItem("pch-board-import"); } catch {}
   if (!raw) return;
   let p; try { p = JSON.parse(raw); } catch { return; }
   if (!p || !Array.isArray(p.members) || !p.members.length) return;
+
   state.partyId = null;
   $("#partyName").value = (p.name || "게시판 파티").slice(0, 40);
-  state.slots = new Array(6).fill(null);
-  p.members.slice(0, 6).forEach((m, i) => {
-    state.slots[i] = {
-      speciesId: m.speciesId, nameKo: m.nameKo, type1: "", type2: null, baseStats: null, abilities: null,
-      abilityKo: m.abilityKo || null, natureKo: m.natureKo || null, evs: m.evs || {},
-      movesKo: m.movesKo || [], itemKo: m.itemKo || null,
-    };
-  });
-  await hydrateSlots();
-  state.editing = 0; renderSlots(); loadSlot(0);
-  PCHReco.onPartyChanged();
-  setStatus("게시판 파티 불러옴 — '저장'을 눌러야 내 파티로 저장됩니다", "ok");
+  loadMembers(p.members);
+  const h = $("#saveHint"); h.textContent = "게시판 파티 불러옴 — '저장'을 눌러야 저장됩니다."; h.className = "hint";
 }
 
 function buildStatRows() {
@@ -480,7 +481,7 @@ function buildStatRows() {
     const tr = document.createElement("tr");
     // 노력치 input — value 없이 placeholder="0"(그림자) → 입력 시 0 지울 필요 없음
     tr.innerHTML = `<td class="lbl">${ko}</td><td id="base_${k}">–</td>`
-      + `<td><input type="number" id="ev_${k}" min="0" max="32" placeholder="0" /></td>`
+      + `<td><input type="number" id="ev_${k}" min="0" max="${state.meta.maxEvPerStat}" placeholder="0" /></td>`
       + `<td class="real" id="real_${k}">–</td>`;
     return tr;
   }));
@@ -511,13 +512,14 @@ function natureArrows(n) {
   return (n.boost ? `<span class="up">${n.boost}↑</span>` : "") + (n.drop ? `<span class="down">${n.drop}↓</span>` : "");
 }
 function findNature(name) { return state.meta.natures.find((x) => x.nameKo === name) || null; }
+function defaultNatureKo() { return state.meta.natures[0] ? state.meta.natures[0].nameKo : "성실"; }
 function setupNatureAc() {
   natureAc = makeAutocomplete($("#natureAc"), {
     items: () => state.meta.natures,
     getText: (n) => n.nameKo,
     renderRow: natureRow,
-    onPick: (n) => { $("#natureArrows").innerHTML = natureArrows(n); refreshStats(); },
-    onType: (v) => { $("#natureArrows").innerHTML = natureArrows(findNature(v.trim())); },
+    onPick: () => { $("#natureArrows").innerHTML = natureArrows(findNature(natureAc.input.value)); refreshStats(); },
+    onType: (v) => { $("#natureArrows").innerHTML = natureArrows(findNature(v.trim())); refreshStats(); },
   });
 }
 function setNature(name) {
@@ -525,7 +527,7 @@ function setNature(name) {
   $("#natureArrows").innerHTML = natureArrows(findNature(name));
 }
 
-// ── 종족 검색(서버 fuzzy) ───────────────────────────────────
+// ── 종족 검색(엔진 = 챔피언스 로스터 한정) ──────────────────
 function setupSpeciesSearch() {
   makeAutocomplete($("#speciesAc"), {
     items: () => speciesHits,           // doSearch가 채움
@@ -534,15 +536,27 @@ function setupSpeciesSearch() {
       const t = s.type2 ? `${s.type1}/${s.type2}` : s.type1;
       d.innerHTML = `<span>${s.nameKo}</span><span class="t">${t}</span>`; return d; },
     onPick: selectSpecies,
-    onType: (v) => { clearTimeout(searchTimer); const q = v.trim(); if (!q) { speciesHits = []; return; } searchTimer = setTimeout(() => doSearch(q), 160); },
+    onType: (v) => { const q = v.trim(); doSearch(q); },
   });
 }
-let speciesHits = [], searchTimer = null;
-async function doSearch(q) {
-  try { speciesHits = await api("/api/master/species?q=" + encodeURIComponent(q)); }
-  catch { speciesHits = []; return; }
+let speciesHits = [];
+
+/** 엔진 종족 정보 → 빌더가 쓰는 모양. ★타입은 엔진이 준 한글 그대로(사이트에 타입표 사본을 두지 않는다). */
+function toSpecies(nameKo) {
+  const s = engine.species(nameKo);
+  if (!s) return null;
+  return {
+    id: s.id, nameKo: s.nameKo,
+    type1: s.types[0], type2: s.types[1] ?? null,
+    baseStats: s.base, abilities: s.abilities, sprite: s.sprite,
+  };
+}
+
+function doSearch(q) {
+  if (!engine || !q) { speciesHits = []; return; }
+  speciesHits = engine.suggest(q, 10).map(toSpecies).filter(Boolean);
   // 목록을 즉시 다시 그리도록 input 이벤트 유발
-  const inp = $("#speciesInput"); inp.dispatchEvent(new Event("focus"));
+  $("#speciesInput").dispatchEvent(new Event("focus"));
 }
 
 // 종족 선택 → 종족값/타입/특성 채움. 노력치/성격/기술/도구는 유지.
@@ -555,30 +569,43 @@ function selectSpecies(s) {
   $("#buildCard").style.display = "block";
   const ab = $("#abilitySel");
   ab.replaceChildren(...(s.abilities || []).map((a) => { const o = document.createElement("option"); o.value = a; o.textContent = a; return o; }));
-  ab.onchange = () => {};
-  if (!natureAc.input.value) setNature(state.meta.natures[0] ? state.meta.natures[0].nameKo : "성실");
+  if (!natureAc.input.value) setNature(defaultNatureKo());
   STAT_LABELS.forEach(([k]) => { $("#base_" + k).textContent = s.baseStats[k]; });
   refreshStats();
 }
 
-// ── 실수치(서버 C# StatCalculator 단일 소스) ────────────────
-let statsTimer = null;
+// ── 실수치(엔진 = 계산과 같은 경로) ─────────────────────────
 function readEvs() { const e = {}; STAT_LABELS.forEach(([k]) => { e[k] = clampInt($("#ev_" + k).value, 0, 99); }); return e; }
 function clampInt(v, lo, hi) { v = parseInt(v, 10); if (isNaN(v)) v = 0; return Math.max(lo, Math.min(hi, v)); }
+
+/** 지금 폼 → 엔진에 넘길 한쪽. 성격은 **배수**로 펴서 넘긴다(환산표는 엔진이 준 meta.natures). */
+function sideFromForm() {
+  const evs = readEvs();
+  const nat = findNature(natureAc.input.value);
+  return {
+    species: state.cur.nameKo,
+    evs: STAT_LABELS.map(([k]) => evs[k]),
+    mults: nat ? nat.mults : undefined,
+  };
+}
+
 function refreshStats() {
-  if (!state.cur) return;
-  clearTimeout(statsTimer);
-  statsTimer = setTimeout(async () => {
-    const evs = readEvs();
-    let res;
-    try { res = await api("/api/party/stats", "POST", { speciesId: state.cur.id, evs, natureKo: natureAc.input.value }); }
-    catch { return; }
-    if (!res.ok) return;
-    STAT_LABELS.forEach(([k]) => { $("#real_" + k).textContent = res.real[k]; });
-    const t = $("#evTotal");
-    t.textContent = `노력치 합계: ${res.evTotal} / 66` + (res.evValid ? "" : "  ⚠ 분배 위반(칸당≤32·합≤66)");
-    t.className = "ev-total" + (res.evValid ? "" : " bad");
-  }, 120);
+  if (!state.cur || !engine) return;
+
+  const rs = engine.realStats(sideFromForm());
+  if (!rs) return;
+
+  STAT_LABELS.forEach(([k]) => { $("#real_" + k).textContent = rs.real[k]; });
+
+  // ★상한(칸당·합계)은 엔진이 준 값을 쓴다. 요청한 값 기준으로 판정해야 "넣었는데 조용히 잘림"이 보인다.
+  const evs = readEvs();
+  const total = STAT_LABELS.reduce((a, [k]) => a + evs[k], 0);
+  const valid = total <= state.meta.maxEvTotal && !STAT_LABELS.some(([k]) => evs[k] > state.meta.maxEvPerStat);
+
+  const t = $("#evTotal");
+  t.textContent = `노력치 합계: ${total} / ${state.meta.maxEvTotal}`
+    + (valid ? "" : `  ⚠ 분배 위반(칸당≤${state.meta.maxEvPerStat}·합≤${state.meta.maxEvTotal})`);
+  t.className = "ev-total" + (valid ? "" : " bad");
 }
 
 // ── 슬롯 ────────────────────────────────────────────────────
@@ -601,13 +628,16 @@ function commitSlot() {
   if (dup >= 0) { hint.textContent = `같은 종족이 슬롯 ${dup+1}에 이미 있습니다.`; hint.className = "hint bad"; return; }
   const evs = readEvs();
   const total = STAT_LABELS.reduce((a, [k]) => a + evs[k], 0);
-  const overStat = STAT_LABELS.some(([k]) => evs[k] > 32);
-  if (overStat || total > 66) { hint.textContent = "노력치 분배 위반(칸당≤32·합≤66)."; hint.className = "hint bad"; return; }
+  const overStat = STAT_LABELS.some(([k]) => evs[k] > state.meta.maxEvPerStat);
+  if (overStat || total > state.meta.maxEvTotal) {
+    hint.textContent = `노력치 분배 위반(칸당≤${state.meta.maxEvPerStat}·합≤${state.meta.maxEvTotal}).`;
+    hint.className = "hint bad"; return;
+  }
   state.slots[state.editing] = {
     speciesId: state.cur.id, nameKo: state.cur.nameKo,
     type1: state.cur.type1, type2: state.cur.type2,
     baseStats: state.cur.baseStats, abilities: state.cur.abilities,
-    abilityKo: $("#abilitySel").value || null, natureKo: natureAc.input.value || "성실",
+    abilityKo: $("#abilitySel").value || null, natureKo: natureAc.input.value || defaultNatureKo(),
     evs, movesKo: moveValues(), itemKo: (itemAc.input.value || "").trim() || null,
   };
   hint.textContent = "슬롯 " + (state.editing + 1) + " 적용됨."; hint.className = "hint";
@@ -627,7 +657,7 @@ function loadSlot(i) {
   $("#speciesInfo").style.display = "block"; $("#buildCard").style.display = "block";
   $("#abilitySel").replaceChildren(...(m.abilities || []).map((a) => { const o = document.createElement("option"); o.value = a; o.textContent = a; return o; }));
   $("#abilitySel").value = m.abilityKo || (m.abilities && m.abilities[0]) || "";
-  setNature(m.natureKo || (state.meta.natures[0] && state.meta.natures[0].nameKo));
+  setNature(m.natureKo || defaultNatureKo());
   STAT_LABELS.forEach(([k]) => { $("#base_" + k).textContent = m.baseStats ? m.baseStats[k] : "–"; $("#ev_" + k).value = m.evs[k] ? m.evs[k] : ""; });
   moveAcs.forEach((a, i) => a.setValue((m.movesKo && m.movesKo[i]) || ""));
   itemAc.setValue(m.itemKo || "");
@@ -644,18 +674,21 @@ function resetForm() {
   STAT_LABELS.forEach(([k]) => { $("#ev_" + k).value = ""; });
   moveAcs.forEach((a) => a.setValue(""));
   itemAc && itemAc.setValue("");
-  setNature(state.meta.natures[0] ? state.meta.natures[0].nameKo : "성실");
+  setNature(defaultNatureKo());
   $("#commitHint").textContent = "";
 }
 
-// ── 파티 저장/불러오기/삭제 ─────────────────────────────────
-async function loadParties() {
-  let list;
-  try { list = await api("/api/parties"); } catch { return; }
+// ── 파티 저장/불러오기/삭제 (브라우저 저장소) ───────────────
+function loadParties() {
+  const list = Parties.load();
   const host = $("#plist");
-  if (!list.length) { host.replaceChildren(Object.assign(document.createElement("div"), { className: "hint", textContent: "저장된 파티 없음" })); return; }
+  if (!list.length) {
+    host.replaceChildren(Object.assign(document.createElement("div"),
+      { className: "hint", textContent: "저장된 파티 없음" }));
+    return;
+  }
   host.replaceChildren(...list.map((p) => {
-    const d = document.createElement("div"); d.className = "pitem";
+    const d = document.createElement("div"); d.className = "pitem" + (p.id === state.partyId ? " on" : "");
     d.innerHTML = `<span class="pname">${p.name}</span><span class="pcount">${p.members.length}마리</span>`;
     d.querySelector(".pname").onclick = () => loadParty(p.id);
     const del = document.createElement("button"); del.className = "btn small danger"; del.textContent = "삭제";
@@ -664,69 +697,156 @@ async function loadParties() {
     return d;
   }));
 }
-async function loadParty(id) {
-  let p;
-  try { p = await api("/api/parties/" + id); } catch { return; }
-  state.partyId = id; $("#partyName").value = p.name;
+function loadParty(id) {
+  const p = Parties.get(id);
+  if (!p) return;
+  state.partyId = id;
+  $("#partyName").value = p.name;
+  Parties.setLastId(id);
+  loadMembers(p.members);
+  const h = $("#saveHint"); h.textContent = `'${p.name}' 불러옴`; h.className = "hint";
+  loadParties();
+}
+
+/**
+ * 저장된 멤버 목록 → 슬롯 6칸.
+ * ★종족은 **id**로 짚는다(엔진 partySlots) — 이름은 표시용이고 폼은 음수 id라, 이름으로 되짚으면
+ *   폼이 원종으로 무너지거나 옛 이름이 안 잡힌다. 노력치 32/66 자르기·성격 이름 정규화도 엔진이 한다.
+ */
+function loadMembers(members) {
   state.slots = new Array(6).fill(null);
-  p.members.forEach((m, i) => {
-    if (i >= 6) return;
+
+  const slots = engine ? engine.partySlots({ members }) : [];
+  slots.slice(0, 6).forEach((s, i) => {
+    const sp = toSpecies(s.nameKo);
+    const evs = {};
+    STAT_LABELS.forEach(([k], j) => { evs[k] = s.evs[j]; });
     state.slots[i] = {
-      speciesId: m.speciesId, nameKo: m.nameKo, type1: "", type2: null,
-      baseStats: null, abilities: null,
-      abilityKo: m.abilityKo, natureKo: m.natureKo, evs: m.evs, movesKo: m.movesKo, itemKo: m.itemKo,
+      speciesId: s.speciesId, nameKo: s.nameKo,
+      type1: sp ? sp.type1 : "", type2: sp ? sp.type2 : null,
+      baseStats: sp ? sp.baseStats : null, abilities: sp ? sp.abilities : null,
+      abilityKo: s.abilityKo, natureKo: s.natureKo, evs,
+      movesKo: s.movesKo, itemKo: s.itemKo,
     };
   });
-  await hydrateSlots();
+
   state.editing = 0; renderSlots(); loadSlot(0);
   PCHReco.onPartyChanged();
-  setStatus(`'${p.name}' 불러옴`, "ok");
 }
-async function hydrateSlots() {
-  for (const m of state.slots) {
-    if (!m || m.baseStats) continue;
-    try {
-      const hits = await api("/api/master/species?q=" + encodeURIComponent(m.nameKo));
-      const sp = (hits || []).find((h) => h.id === m.speciesId) || (hits || [])[0];
-      if (sp) { m.type1 = sp.type1; m.type2 = sp.type2; m.baseStats = sp.baseStats; m.abilities = sp.abilities; }
-    } catch { /* 무시 */ }
-  }
+
+/** 슬롯 → 저장 모양(헬퍼 /api/parties와 같은 JSON). */
+function membersFromSlots() {
+  return state.slots.filter(Boolean).map((m) => ({
+    speciesId: m.speciesId, nameKo: m.nameKo, abilityKo: m.abilityKo, itemKo: m.itemKo,
+    natureKo: m.natureKo, evs: m.evs, movesKo: m.movesKo,
+  }));
 }
+
 async function savePartyAsync() {
-  const members = [];
-  state.slots.forEach((m) => {
-    if (!m) return;
-    members.push({ speciesId: m.speciesId, abilityKo: m.abilityKo, itemKo: m.itemKo,
-                   natureKo: m.natureKo, evs: m.evs, movesKo: m.movesKo });
-  });
+  const members = membersFromSlots();
   const hint = $("#saveHint");
   if (!members.length) { hint.textContent = "최소 한 마리를 슬롯에 등록하세요."; hint.className = "hint bad"; return; }
-  const body = { name: $("#partyName").value || "새 파티", members };
-  try {
-    const saved = state.partyId ? await api("/api/parties/" + state.partyId, "PUT", body)
-                                : await api("/api/parties", "POST", body);
-    state.partyId = saved.id;
-    hint.textContent = `저장됨 (${members.length}마리).`; hint.className = "hint";
-    await loadParties();
-    setStatus("저장 완료", "ok");
-  } catch (e) { hint.textContent = "저장 실패: " + e.message; hint.className = "hint bad"; }
+
+  const saved = Parties.upsert({
+    id: state.partyId || Parties.newId(),
+    name: $("#partyName").value || "새 파티",
+    members,
+  });
+  if (!saved) { hint.textContent = "저장 실패(브라우저 저장소를 쓸 수 없습니다)."; hint.className = "hint bad"; return; }
+
+  state.partyId = saved.id;
+  Parties.setLastId(saved.id);
+  hint.textContent = `저장됨 (${members.length}마리)`; hint.className = "hint";
+  loadParties();
+
+  // 프로그램이 켜져 있으면 거기까지 반영한다(종전 동작). 꺼져 있으면 브라우저 저장으로 끝.
+  if (helperOnline && await pushToHelper(Parties.get(state.partyId))) {
+    hint.textContent = `저장됨 (${members.length}마리) · 프로그램 반영`;
+  }
 }
+
 async function deleteParty(id, name) {
-  if (!confirm(`'${name}' 파티를 삭제할까요?`)) return;
-  try { await api("/api/parties/" + id, "DELETE"); } catch { return; }
+  const where = helperOnline ? "브라우저와 프로그램 양쪽에서" : "이 브라우저에서";
+  if (!confirm(`'${name}' 파티를 삭제할까요? ${where} 지워집니다.`)) return;
+
+  Parties.remove(id);
   if (state.partyId === id) newParty();
-  await loadParties();
+  loadParties();
+
+  // ★프로그램에도 같은 파티가 있으면 같이 지운다 — 안 그러면 다음 연결 때 가져와서 되살아난다.
+  if (helperOnline) { try { await Parties.deleteFromHelper(id); } catch { /* 다음에 */ } }
 }
+
 function newParty() {
   state.partyId = null; state.slots = new Array(6).fill(null); state.editing = 0;
   $("#partyName").value = "새 파티"; $("#saveHint").textContent = "";
   renderSlots(); resetForm();
   PCHReco.onPartyChanged();
+  loadParties();
 }
 
-// 헬퍼 미연결이어도 슬롯 6칸은 즉시 그려둠(연결되면 init이 데이터 채움).
-renderSlots();
-init(0);
+// ── 헬퍼 연동 = 버튼이 아니라 상태 ──────────────────────────
+//
+// ★종전(헬퍼 전용 시절)의 감각을 그대로 지킨다: **저장을 누르면 프로그램에 반영된다.**
+//   달라진 것은 프로그램이 꺼져 있어도 빌더가 죽지 않고 브라우저에 저장된다는 점뿐이다.
+//   그래서 「가져오기/보내기」 버튼을 두지 않는다 — 연결 여부는 오른쪽 배지가 말해 주고,
+//   나머지는 저장이 알아서 한다.
+
+let helperOnline = false;
+let helperMerged = false;   // 처음 연결됐을 때 한 번만 프로그램 파티를 가져온다
+
+function paintHelper() {
+  if (helperOnline) setStatus("● 헬퍼와 연결됨", "ok");
+  else setStatus("헬퍼와 연결되지 않음", "");
+}
+
+/**
+ * 연결 상태를 지켜본다. 사용자가 도중에 프로그램을 켤 수 있으므로 주기적으로 다시 본다.
+ * ★프로그램 파티 가져오기는 **첫 연결 때 한 번만** — 매번 병합하면 브라우저에서 지운 파티가 되살아난다.
+ */
+async function watchHelper() {
+  const tick = async () => {
+    const wasOnline = helperOnline;
+    helperOnline = await Parties.ping();
+    if (helperOnline !== wasOnline) paintHelper();
+
+    if (helperOnline && !helperMerged) {
+      helperMerged = true;
+      try { await Parties.importFromHelper(); loadParties(); } catch { /* 다음 기회에 */ }
+    }
+  };
+
+  paintHelper();
+  await tick();
+  setInterval(tick, 20000);
+}
+
+/** 저장한 파티를 프로그램에도 밀어 넣는다. 실패는 조용히 — 브라우저 저장은 이미 끝났다. */
+async function pushToHelper(party) {
+  try {
+    const { id } = await Parties.sendToHelper(party);
+    if (id !== party.id) { state.partyId = id; Parties.setLastId(id); loadParties(); }
+    return true;
+  } catch {
+    helperOnline = false;
+    paintHelper();
+    return false;
+  }
+}
+
+// ── 전역 노출 ───────────────────────────────────────────────
+//
+// ★이 스크립트는 모듈이라 top-level 선언이 **전역이 아니다**. 그래서 두 부류를 직접 내건다:
+//   ① 마크업의 인라인 onclick 핸들러
+//   ② recommend.js(고전 스크립트)가 이름으로 찾는 것들 — `state`(파티 읽기)와
+//     `loadSlot`/`selectSpecies`/`commitSlot`/`renderSlots`(추천 후보를 빈 슬롯에 채울 때).
+//   ★`state`를 안 내걸면 추천 카드가 파티를 **빈 것으로 보고** 아무 말도 하지 않는다(증상이 조용하다).
+Object.assign(window, {
+  commitSlot, clearSlot, savePartyAsync, newParty,
+  state, loadSlot, selectSpecies, renderSlots,
+});
+
+init().then(() => { window.natureAc = natureAc; });   // 폼이 선 뒤라야 추천이 기존 선택 플로우를 탄다
 </script>
 </body>
 </html>
