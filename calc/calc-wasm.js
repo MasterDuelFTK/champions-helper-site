@@ -1022,7 +1022,8 @@ function attachItemCombo(side) {
     paint();
 
     box.querySelectorAll('[data-i]').forEach((el) => {
-      el.onmousedown = (ev) => { ev.preventDefault(); commit(hits[+el.dataset.i].v); };
+      // pointerdown = 마우스·손가락 공통(터치에서 mousedown이 안 오는 브라우저가 있다).
+      el.onpointerdown = (ev) => { ev.preventDefault(); commit(hits[+el.dataset.i].v); };
     });
   };
 
@@ -1032,7 +1033,7 @@ function attachItemCombo(side) {
   //   현재 값으로 걸러 버리면 방금 칸을 누른 사람에게 자기가 이미 고른 것 하나만 보인다.
   //   select()로 잡아 두어, 곧바로 치면 옛 값을 지우지 않고도 새로 검색된다.
   input.onfocus = () => { input.select(); open(''); };
-  caret.onmousedown = (e) => {
+  caret.onpointerdown = (e) => {
     e.preventDefault();
     if (box) { close(); return; }
     input.focus();
@@ -1084,7 +1085,17 @@ function attachSpeciesAc(input, onPick) {
     sel = 0;
     box.innerHTML = items.map((n, i) => `<div class="${i === sel ? 'sel' : ''}">${escapeHtml(n)}</div>`).join('');
     [...box.children].forEach((el, i) => {
-      el.onmousedown = (e) => { e.preventDefault(); input.value = items[i]; close(); onPick(items[i]); };
+      // ★고른 값을 close() **전에** 붙잡는다 — close()가 items를 비우므로, 뒤에서 읽으면 undefined다.
+      //   (이 버그로 "목록을 눌러 고르기"가 통째로 죽어 있었다. 키보드 Enter 경로만 살아 있어서
+      //    Enter가 없는 폰에서는 이름을 아예 넣을 수 없었다 — 199차 feedback.)
+      // ★pointerdown = 마우스·손가락·펜 공통. 터치에서 mousedown은 늦게 오거나 아예 안 오는 브라우저가 있다.
+      el.onpointerdown = (e) => {
+        e.preventDefault();          // 포커스가 빠져 blur→close가 먼저 도는 것을 막는다
+        const v = items[i];
+        input.value = v;
+        close();
+        onPick(v);
+      };
     });
   };
 

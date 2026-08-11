@@ -408,7 +408,8 @@ function makeAutocomplete(wrap, opts) {
     list.replaceChildren(...hits.map((it) => {
       const d = document.createElement("div"); d.className = "ac-opt";
       if (opts.renderRow) d.appendChild(opts.renderRow(it)); else d.textContent = getText(it);
-      d.onmousedown = (e) => { e.preventDefault(); pick(it); };   // blur 전에 선택
+      // pointerdown = 마우스·손가락 공통(blur 전에 선택). 터치에서 mousedown은 늦게 오거나 안 오는 브라우저가 있다.
+      d.onpointerdown = (e) => { e.preventDefault(); pick(it); };
       return d;
     }));
     list.style.display = "block";
