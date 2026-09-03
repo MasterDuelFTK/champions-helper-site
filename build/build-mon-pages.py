@@ -693,7 +693,9 @@ STATIC_ROUTES = [
     ("/pokedex/", "weekly", "0.9"),
     ("/calc/", "weekly", "0.9"),
     ("/builder/", "weekly", "0.8"),
-    ("/board/", "daily", "0.7"),
+    # 203차 — /board/ 는 sitemap 에서 제외(글 0개 = 색인 대상 32장 중 유일한 빈 페이지,
+    #          애드센스 심사에 thin content 신호로 잡힌다). board/index.html 은 noindex,follow.
+    #          글이 쌓이면 이 줄과 그 meta 를 함께 되돌린다.
     ("/guide/", "monthly", "0.7"),
     ("/about/", "yearly", "0.5"),
     ("/guide/meta-singles/", "weekly", "0.8"),
