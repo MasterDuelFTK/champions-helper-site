@@ -78,7 +78,7 @@ PAGE = """<!DOCTYPE html>
       <h3>함께 읽기</h3>
 {related}
     </div>
-    <p class="note">본문 수치는 <strong>{snapshot}</strong> 기준입니다. 원본 데이터는 12시간마다 자동 갱신되므로
+    <p class="note">본문 수치는 <strong>{snapshot}</strong> 기준입니다. 원본 데이터는 4시간마다 자동 갱신되므로
       최신 순위·채용률은 <a href="/battle-data/">배틀데이터</a>와 <a href="/pokedex/">도감</a>에서 확인할 수 있습니다.
       집계 방법과 출처는 <a href="/about/">사이트 소개</a>에 정리해 두었습니다.</p>
   </article>

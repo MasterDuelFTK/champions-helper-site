@@ -45,7 +45,7 @@ except FileNotFoundError:
     print("  (move-usage-double.json 없음 — 더블 섹션 생략)")
 
 # 169차 — 갱신 시각 표기. move-usage.json 의 version = 산출 시각(unix, UTC 기준 생성).
-#   cron 은 12시간 간격이지만 GitHub Actions 스케줄은 정각을 보장하지 않으므로(큐 지연)
+#   cron 은 4시간 간격이지만 GitHub Actions 스케줄은 정각을 보장하지 않으므로(큐 지연)
 #   "예정 시각"이 아니라 실제 생성 시각을 KST 로 보여준다.
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
@@ -790,7 +790,7 @@ BD_PAGE = """<!DOCTYPE html>
   .bd-search::placeholder {{ color: var(--muted); }}
   .bd-search-cnt {{ color: var(--muted); font-size: 13px; white-space: nowrap; }}
   .bd-empty {{ color: var(--muted); font-size: 14px; padding: 22px 2px; margin: 0; }}
-  /* 169차 — 갱신 시각(실제 산출 시각). cron 은 12시간 간격이나 러너 큐 지연이 있어 분 단위는 매번 다르다. */
+  /* 169차 — 갱신 시각(실제 산출 시각). cron 은 4시간 간격이나 러너 큐 지연이 있어 분 단위는 매번 다르다. */
   .bd-updated {{ margin: 8px 0 0; font-size: 13px; color: var(--txt); }}
   .bd-updated b {{ color: var(--accent2); font-weight: 800; }}
   .bd-updated .cycle {{ color: var(--muted); font-weight: 500; margin-left: 6px; }}
@@ -975,7 +975,7 @@ def build_battle_data_page(usage_map, season, fmt_label, subdir, canon_url, acti
     # 169차 — 갱신 시각. 싱글/더블 각 파일의 version(산출 시각)을 그 페이지에 그대로 쓴다.
     upd = _fmt_updated(USAGE_VERSION if active_tab == "single" else USAGE_D_VERSION)
     updated_line = (f'마지막 갱신 <b>{upd} KST</b>'
-                    f'<span class="cycle">· 12시간마다 자동 갱신</span>') if upd else \
+                    f'<span class="cycle">· 4시간마다 자동 갱신</span>') if upd else \
                    '<span class="cycle">데이터는 주기적으로 자동 갱신됩니다.</span>'
     page = BD_PAGE.format(season=esc(season or "현재 시즌"), attrib=ATTRIB, updated_line=updated_line,
                           body="\n  ".join(parts), fmt_label=fmt_label, canon_url=canon_url)
