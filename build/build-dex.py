@@ -90,11 +90,15 @@ FORM_SPRITES = {
     -10032: (711, "pumpkinSuper"),  # gourgeist-super
     -10126: (745, "lugaMidnight"),  # lycanroc-midnight
     -10152: (745, "lugaDusk"),      # lycanroc-dusk
+    -10108: (53,  "alola"),         # persian-alola        (204차 M-C)
+    -10184: (849, "lowKey"),        # toxtricity-low-key   (204차 M-C)
+    -10186: (876, "female"),        # indeedee-female      (204차 M-C)
 }
 
 def mega_form_key(name_ko):
     if name_ko.endswith("X"): return "megaX"
     if name_ko.endswith("Y"): return "megaY"
+    if name_ko.endswith("Z"): return "megaZ"   # 204차 M-C — Z메가(루카리오/한카리아스/앱솔)
     return "mega"
 
 dex = []

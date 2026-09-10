@@ -26824,6 +26824,218 @@
       ],
       "isMegaForm": true,
       "megaBaseSpeciesId": 254
+    },
+    {
+      "id": -10108,
+      "nameKo": "페르시온(알로라의 모습)",
+      "nameEn": "persian-alola",
+      "types": [
+        "DARK"
+      ],
+      "baseStats": {
+        "hp": 65,
+        "atk": 60,
+        "def": 60,
+        "spa": 75,
+        "spd": 65,
+        "spe": 115
+      },
+      "weightHg": 330,
+      "abilities": [
+        "fur-coat",
+        "technician",
+        "rattled"
+      ],
+      "isMegaForm": false,
+      "megaBaseSpeciesId": null
+    },
+    {
+      "id": -10184,
+      "nameKo": "스트린더(로우한 모습)",
+      "nameEn": "toxtricity-low-key",
+      "types": [
+        "ELECTRIC",
+        "POISON"
+      ],
+      "baseStats": {
+        "hp": 75,
+        "atk": 98,
+        "def": 70,
+        "spa": 114,
+        "spd": 70,
+        "spe": 75
+      },
+      "weightHg": 400,
+      "abilities": [
+        "punk-rock",
+        "minus",
+        "technician"
+      ],
+      "isMegaForm": false,
+      "megaBaseSpeciesId": null
+    },
+    {
+      "id": -10186,
+      "nameKo": "에써르(암컷의 모습)",
+      "nameEn": "indeedee-female",
+      "types": [
+        "PSYCHIC",
+        "NORMAL"
+      ],
+      "baseStats": {
+        "hp": 70,
+        "atk": 55,
+        "def": 65,
+        "spa": 95,
+        "spd": 105,
+        "spe": 85
+      },
+      "weightHg": 280,
+      "abilities": [
+        "own-tempo",
+        "synchronize",
+        "psychic-surge"
+      ],
+      "isMegaForm": false,
+      "megaBaseSpeciesId": null
+    },
+    {
+      "id": -20448,
+      "nameKo": "메가루카리오Z",
+      "nameEn": "lucario-mega-z",
+      "types": [
+        "FIGHTING",
+        "STEEL"
+      ],
+      "baseStats": {
+        "hp": 70,
+        "atk": 100,
+        "def": 70,
+        "spa": 164,
+        "spd": 70,
+        "spe": 151
+      },
+      "weightHg": 494,
+      "abilities": [
+        "aura-guard"
+      ],
+      "isMegaForm": true,
+      "megaBaseSpeciesId": 448
+    },
+    {
+      "id": -20445,
+      "nameKo": "메가한카리아스Z",
+      "nameEn": "garchomp-mega-z",
+      "types": [
+        "DRAGON",
+        "GROUND"
+      ],
+      "baseStats": {
+        "hp": 108,
+        "atk": 130,
+        "def": 85,
+        "spa": 141,
+        "spd": 85,
+        "spe": 151
+      },
+      "weightHg": 990,
+      "abilities": [
+        "levitate"
+      ],
+      "isMegaForm": true,
+      "megaBaseSpeciesId": 445
+    },
+    {
+      "id": -20359,
+      "nameKo": "메가앱솔Z",
+      "nameEn": "absol-mega-z",
+      "types": [
+        "DARK",
+        "GHOST"
+      ],
+      "baseStats": {
+        "hp": 65,
+        "atk": 154,
+        "def": 60,
+        "spa": 75,
+        "spd": 60,
+        "spe": 151
+      },
+      "weightHg": 490,
+      "abilities": [
+        "sharpness"
+      ],
+      "isMegaForm": true,
+      "megaBaseSpeciesId": 359
+    },
+    {
+      "id": -10089,
+      "nameKo": "메가보만다",
+      "nameEn": "salamence-mega",
+      "types": [
+        "DRAGON",
+        "FLYING"
+      ],
+      "baseStats": {
+        "hp": 95,
+        "atk": 145,
+        "def": 130,
+        "spa": 120,
+        "spd": 90,
+        "spe": 120
+      },
+      "weightHg": 1126,
+      "abilities": [
+        "aerilate"
+      ],
+      "isMegaForm": true,
+      "megaBaseSpeciesId": 373
+    },
+    {
+      "id": -20768,
+      "nameKo": "메가갑주무사",
+      "nameEn": "golisopod-mega",
+      "types": [
+        "BUG",
+        "STEEL"
+      ],
+      "baseStats": {
+        "hp": 75,
+        "atk": 150,
+        "def": 175,
+        "spa": 70,
+        "spd": 120,
+        "spe": 40
+      },
+      "weightHg": 1480,
+      "abilities": [
+        "tough-claws"
+      ],
+      "isMegaForm": true,
+      "megaBaseSpeciesId": 768
+    },
+    {
+      "id": -20998,
+      "nameKo": "메가드닐레이브",
+      "nameEn": "baxcalibur-mega",
+      "types": [
+        "DRAGON",
+        "ICE"
+      ],
+      "baseStats": {
+        "hp": 115,
+        "atk": 175,
+        "def": 117,
+        "spa": 105,
+        "spd": 101,
+        "spe": 87
+      },
+      "weightHg": 3150,
+      "abilities": [
+        "thermal-exchange"
+      ],
+      "isMegaForm": true,
+      "megaBaseSpeciesId": 998
     }
   ],
   "moves": [
@@ -44653,6 +44865,12 @@
       "nameKo": "하바네로분출",
       "nameEn": "spicy-spray",
       "descriptionKo": "기술로 데미지를 입으면 상대를 화상 상태로 만든다."
+    },
+    {
+      "id": 314,
+      "nameKo": "파동의방호",
+      "nameEn": "aura-guard",
+      "descriptionKo": "상대가 사용한 접촉하는 물리 기술로 받는 데미지가 절반이 된다."
     }
   ],
   "items": [
@@ -59901,6 +60119,41 @@
       "nameEn": "bewearite",
       "category": "mega-stones",
       "descriptionKo": "대여르에게 지니게 하면 배틀할 때 메가진화할 수 있는 신비한 메가스톤의 일종."
+    },
+    {
+      "id": -30448,
+      "nameKo": "루카리오나이트Z",
+      "nameEn": "lucarionite-z",
+      "category": "mega-stones",
+      "descriptionKo": "루카리오에게 지니게 하면 배틀할 때 메가루카리오Z로 메가진화할 수 있는 신비한 메가스톤의 일종."
+    },
+    {
+      "id": -30445,
+      "nameKo": "한카리아스나이트Z",
+      "nameEn": "garchompite-z",
+      "category": "mega-stones",
+      "descriptionKo": "한카리아스에게 지니게 하면 배틀할 때 메가한카리아스Z로 메가진화할 수 있는 신비한 메가스톤의 일종."
+    },
+    {
+      "id": -30359,
+      "nameKo": "앱솔나이트Z",
+      "nameEn": "absolite-z",
+      "category": "mega-stones",
+      "descriptionKo": "앱솔에게 지니게 하면 배틀할 때 메가앱솔Z로 메가진화할 수 있는 신비한 메가스톤의 일종."
+    },
+    {
+      "id": -30768,
+      "nameKo": "갑주무사나이트",
+      "nameEn": "golisopite",
+      "category": "mega-stones",
+      "descriptionKo": "갑주무사에게 지니게 하면 배틀할 때 메가진화할 수 있는 신비한 메가스톤의 일종."
+    },
+    {
+      "id": -30998,
+      "nameKo": "드닐레이브나이트",
+      "nameEn": "baxcalibrite",
+      "category": "mega-stones",
+      "descriptionKo": "드닐레이브에게 지니게 하면 배틀할 때 메가진화할 수 있는 신비한 메가스톤의 일종."
     }
   ]
 }
