@@ -20,8 +20,12 @@ export const STAGES = {
   ready: '준비 완료',
 };
 
+// ★cache: 'no-cache' = 매번 서버에 재검증(ETag → 안 바뀌었으면 304, 바뀌었으면 새 파일).
+//   종전 'force-cache'는 브라우저 캐시에 한 번 들어온 master/sprites를 재검증 없이 계속 써서,
+//   서버가 새 데이터(data-version 7)를 내도 계산기가 옛 로스터를 보여 줬다(206차 실사고 — 신규 종 검색 불가).
+//   Pages 는 max-age=600 + ETag 라 재검증 비용은 요청당 수백 바이트다.
 async function fetchBytes(url) {
-  const res = await fetch(url, { cache: 'force-cache' });
+  const res = await fetch(url, { cache: 'no-cache' });
   if (!res.ok) throw new Error(`${url} → ${res.status}`);
   return new Uint8Array(await res.arrayBuffer());
 }

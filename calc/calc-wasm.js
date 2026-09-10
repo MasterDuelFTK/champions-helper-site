@@ -7,7 +7,7 @@
 // ★상태는 통째로 JSON 한 덩어리(S)이고, 계산은 그걸 그대로 엔진에 넘긴다.
 //   엔진 쪽은 무상태라 "화면과 다른 값으로 계산되는" 경로가 존재하지 않는다.
 
-import { bootEngine, STAGES } from './pch-wasm.js';
+import { bootEngine, STAGES } from './pch-wasm.js?v=2';
 import * as Parties from './party-store.js';
 
 const $ = (id) => document.getElementById(id);
