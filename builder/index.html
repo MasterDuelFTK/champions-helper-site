@@ -78,7 +78,7 @@
     padding: 5px 7px; font-size: 13px; font-family: inherit; width: 100%;
   }
   input:focus, select:focus { outline: 1px solid var(--accent); }
-  input[type=number] { width: 56px; text-align: center; }
+  input[type=number], #statRows input { width: 56px; text-align: center; }   /* 206차 — 노력치 칸이 text 로 바뀐 뒤에도 같은 폭 */
   /* placeholder = 그림자 숫자(흐림) → 0을 굳이 지울 필요 없음 */
   input::placeholder { color: #5a606b; }
 
@@ -482,11 +482,20 @@ function buildStatRows() {
     const tr = document.createElement("tr");
     // 노력치 input — value 없이 placeholder="0"(그림자) → 입력 시 0 지울 필요 없음
     tr.innerHTML = `<td class="lbl">${ko}</td><td id="base_${k}">–</td>`
-      + `<td><input type="number" id="ev_${k}" min="0" max="${state.meta.maxEvPerStat}" placeholder="0" /></td>`
+      + `<td><input type="text" maxlength="2" id="ev_${k}" placeholder="0" autocomplete="off" /></td>`
       + `<td class="real" id="real_${k}">–</td>`;
     return tr;
   }));
-  STAT_LABELS.forEach(([k]) => { $("#ev_" + k).oninput = refreshStats; });
+  // 206차(제보) — 노력치 칸은 type="number"였는데, Windows 크롬은 number 칸(그리고 inputmode=numeric 칸도)에 포커스가 오면
+  //   Windows 입력 범위(InputScope)를 "숫자"로 넘기고, 한글 IME는 그걸 받으면 스스로 영문으로 내려간 뒤 Tab으로 다음 기술 칸에
+  //   가도 되돌리지 않았다 → "노력치 → 기술로 넘어가면 영문 타자로 바뀐다". ★inputmode=numeric 으로 바꿔도 같은 증상(실측).
+  //   그래서 데스크탑(마우스)에서는 순수 text 칸으로 두고 숫자 외 글자만 JS로 걸러낸다. 숫자 키패드는 터치 기기에서만 inputmode 로 켠다.
+  const touch = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+  STAT_LABELS.forEach(([k]) => {
+    const inp = $("#ev_" + k);
+    if (touch) inp.setAttribute("inputmode", "numeric");
+    inp.oninput = (e) => { const d = e.target.value.replace(/[^0-9]/g, ""); if (d !== e.target.value) e.target.value = d; refreshStats(); };
+  });
 }
 function buildMoveInputs() {
   const host = $("#moveInputs");

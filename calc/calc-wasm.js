@@ -23,6 +23,11 @@ const typeColor = (ko) => TYPE_COLOR[ko] || '#6b7280';
 
 // 스탯 표 행 = H,A,B,C,D,S. 랭크는 HP가 없어 인덱스가 하나 밀린다.
 const STAT_KEYS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+// 206차(제보) — 숫자 칸의 inputmode/type=number 는 Windows 크롬에서 한글 IME를 영문으로 내려놓고 되돌리지 않는다(빌더와 같은 실측).
+//   숫자 키패드(inputmode)는 터치 기기에서만 붙인다. 데스크탑은 순수 text + JS 숫자 필터.
+const COARSE = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+const NUM_IM = COARSE ? ' inputmode="numeric"' : '';
+const DEC_IM = COARSE ? ' inputmode="decimal"' : '';
 
 // 지닌도구 = **계산에 실제로 걸리는 것만**. PC 헬퍼 /live의 MY_ITEM_GROUPS / OPP_ITEM_GROUPS와 같은 라인업이다.
 // ★master.json의 전체 도구 목록(수백 종)을 그대로 노출하면 대부분이 계산에 아무 영향이 없어
@@ -406,7 +411,7 @@ function renderSide(side) {
           `<option value="${escapeAttr(c.key)}"${String(d.screen) === c.key ? ' selected' : ''}>${escapeHtml(c.ko)}</option>`).join('')}</select>
       </div>
       <div style="flex:0 0 62px"><label>기타</label>
-        <input id="${side}Misc" type="number" step="0.05" min="${meta.miscMin}" max="${meta.miscMax}" value="${d.misc}" inputmode="decimal">
+        <input id="${side}Misc" type="text" maxlength="5" value="${d.misc}" autocomplete="off"${DEC_IM}>
       </div>
       <div style="flex:0 0 52px;display:flex;align-items:flex-end;padding-bottom:5px">
         <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:11px;margin:0">
@@ -443,7 +448,7 @@ function hpBlock(side, d, sp) {
       <div class="hpbar ${cls}" id="${side}HpBar" title="눌러서/끌어서 조절"><i style="width:${pct}%"></i></div>
       <div class="hprow">
         <span>HP</span>
-        <input id="${side}HpNum" type="number" min="1" inputmode="numeric">
+        <input id="${side}HpNum" type="text" maxlength="3" autocomplete="off"${NUM_IM}>
         <span id="${side}HpMax"></span>
         <span id="${side}HpAbil" style="margin-left:auto"></span>
       </div>
@@ -510,7 +515,7 @@ function wireSide(side) {
   });
 
   $(`${side}Status`).onchange = (e) => { d.status = e.target.value; recalc(); };
-  $(`${side}Misc`).oninput = (e) => { d.misc = clamp(+e.target.value || 1, meta.miscMin, meta.miscMax); recalc(); };
+  $(`${side}Misc`).oninput = (e) => { const t = e.target.value.replace(/[^0-9.]/g, ''); if (t !== e.target.value) e.target.value = t; d.misc = clamp(+t || 1, meta.miscMin, meta.miscMax); recalc(); };
   $(`${side}Screen`).onchange = (e) => { d.screen = +e.target.value; recalc(); };
   $(`${side}Tail`).onchange = (e) => { d.tailwind = e.target.checked; recalc(); };
 
@@ -541,9 +546,11 @@ function wireSide(side) {
     bar.onpointermove = (ev) => { if (bar.hasPointerCapture(ev.pointerId)) setFromEvent(ev); };
 
     $(`${side}HpNum`).oninput = (e) => {
+      const t = e.target.value.replace(/[^0-9]/g, '');
+      if (t !== e.target.value) e.target.value = t;
       const max = currentMaxHp(side);
       if (!max) return;
-      const cur = clamp(Math.round(+e.target.value || 0), 1, max);
+      const cur = clamp(Math.round(+t || 0), 1, max);
       d.hp = cur / max;
       paintHp(side, /*skipNum*/ true);
       recalc();
@@ -611,7 +618,7 @@ function renderStatTable(side) {
         <td>${i === 0 ? '' : `<button class="natbtn ${natCls}" data-nat="${i}" title="무보정 → ↑1.1 → ↓0.9">${natTxt}</button>`}</td>
         <td><span class="evcell">
           <button class="evb min" data-evset="${i}" data-val="0" title="0으로" aria-label="0으로">${CHEV.down}</button>
-          <input data-ev="${i}" type="number" min="0" max="${meta.maxEvPerStat}" value="${d.evs[i]}" inputmode="numeric">
+          <input data-ev="${i}" type="text" maxlength="2" value="${d.evs[i]}" autocomplete="off"${NUM_IM}>
           <button class="evb max" data-evset="${i}" data-val="${meta.maxEvPerStat}" title="풀투자 (${meta.maxEvPerStat})" aria-label="풀투자">${CHEV.up}</button>
         </span></td>
         <td class="rl">${rs.real[k]}</td>
@@ -643,10 +650,15 @@ function renderStatTable(side) {
   // ★타이핑 중에는 표를 다시 그리지 않는다.
   //   종전엔 한 글자마다 innerHTML을 갈아끼워 **포커스가 즉시 날아갔다** — "32"를 치려 해도 "3"에서 빠져나왔다.
   //   숫자만 상태에 반영하고, 실수치·합계·체력바처럼 *계산으로 나오는 칸*만 제자리에서 고쳐 쓴다.
+  // 206차(제보) — 노력치 칸을 type="number"에서 순수 text 로(데스크탑). Windows 크롬은 number/inputmode=numeric 칸에 포커스가 오면
+  //   한글 IME를 영문으로 내려놓고 Tab으로 다음 칸에 가도 되돌리지 않아 기술 칸에서 영문 타자가 되던 문제(빌더와 같은 원인).
+  //   숫자 외 글자는 여기서 즉시 걸러낸다(한글 IME가 켜진 채 숫자를 쳐도 숫자는 그대로 들어온다).
   t.oninput = (e) => {
     const ev = e.target.closest('[data-ev]');
     if (!ev) return;
-    setEv(side, +ev.dataset.ev, Math.round(+ev.value || 0));
+    const digits = ev.value.replace(/[^0-9]/g, '');
+    if (digits !== ev.value) ev.value = digits;
+    setEv(side, +ev.dataset.ev, Math.round(+digits || 0));
     refreshComputed(side);
     recalc();
   };
