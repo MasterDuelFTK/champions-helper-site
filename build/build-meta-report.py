@@ -406,6 +406,20 @@ def fmt_dt(t):
     return t.strftime("%Y-%m-%d %H:%M")
 
 
+def month_week(t):
+    """'9월 4주차' — 월요일 시작 주 기준, 그 달 1일이 낀 주가 1주차."""
+    off = t.replace(day=1).weekday()  # Mon=0
+    wk = (t.day - 1 + off) // 7 + 1
+    return f"{t.month}월 {wk}주차"
+
+
+def report_name(x):
+    """목록·요약에 쓰는 사람 눈높이 이름. 옛 항목(label 없음)은 슬러그로."""
+    if x.get("label"):
+        return f"포챔스 {x['year']}년 {x['label']} 메타 리포트"
+    return f"주간 메타 리포트 {x['slug'].upper()}"
+
+
 def build_report(at, days, top):
     ko, sprite = load_dex()
     hist = history(FILES["singles"])
@@ -447,10 +461,13 @@ def build_report(at, days, top):
     s_cur = per["singles"][0]
     season = s_cur.get("season", "")
     n = s_cur.get("count", 0)
-    title = f"주간 메타 리포트 {slug.upper()} — {season} 싱글·더블 순위 변동"
+    mw = month_week(bt)
+    ss = season.replace("Season ", "")
+    # 검색어 눈높이(211차): 사람들은 "포챔스" + "9월 4주차"로 검색한다. ISO 주차는 URL 에만 남긴다.
+    title = f"포챔스 {mw} 메타 리포트 — 포켓몬 챔피언스 랭크배틀 싱글·더블 순위 변동 (시즌 {ss})"
     period = f"{fmt_dt(prev[1]) if prev else '시즌 개막'} → {fmt_dt(bt)}"
-    desc = (f"{season} 공식 랭크배틀 사용률 데이터 자동 집계. {period} KST 기준 싱글·더블 순위, "
-            f"급상승·급하락, 기술·도구·특성 채용 변화, 조합과 상성.")
+    desc = (f"포챔스(포켓몬 챔피언스) {mw} 메타 리포트. 시즌 {ss} 공식 랭크배틀 사용률 데이터를 자동 집계해 "
+            f"{period} KST 기준 싱글·더블 순위 변동, 급상승·급하락, 기술·도구·특성 채용 변화, 조합과 상성을 정리했습니다.")
 
     body = []
     body.append('<div class="auto">이 페이지는 <strong>공식 랭크배틀 사용률 데이터를 매주 자동 집계</strong>해 생성합니다. '
@@ -505,8 +522,8 @@ def build_report(at, days, top):
     style, header, footer = _shell()
     page = PAGE.format(title=esc(title), desc=esc(desc), url=url, pub=bt.strftime("%Y-%m-%d"),
                        style=style, extra=EXTRA_STYLE, header=header, footer=footer,
-                       crumb=f'<a href="/meta/">메타 리포트</a> › {slug.upper()}',
-                       h1=esc(title), lead=esc(f"{period} KST 사이 공식 랭크배틀 사용률 변화를 표로 정리했습니다. "
+                       crumb=f'<a href="/meta/">메타 리포트</a> › {esc(mw)}',
+                       h1=esc(title), lead=esc(f"포켓몬 챔피언스 시즌 {ss} 랭크배틀, {period} KST 사이 공식 사용률 변화를 표로 정리했습니다. "
                                               f"지난주 대비 순위 이동, 기술·도구·특성 채용 변화, 함께 쓰이는 조합과 상성까지 자동 집계입니다."),
                        body="\n".join(body))
     d = os.path.join(SITE, "meta", slug)
@@ -514,6 +531,7 @@ def build_report(at, days, top):
     io.open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page)
 
     entry = {"slug": slug, "date": bt.strftime("%Y-%m-%d"), "season": season, "period": period,
+             "label": mw, "year": bt.year,
              "singles_top1": ko.get(s_top1, s_top1), "doubles_top1": ko.get(d_top1, d_top1),
              "singles_riser": (ko.get(s_r[0], s_r[0]) + f" ▲{s_r[2]}") if s_r else None,
              "doubles_riser": (ko.get(d_r[0], d_r[0]) + f" ▲{d_r[2]}") if d_r else None,
@@ -534,22 +552,23 @@ def build_index(entry, shell):
     latest = reports[0]
     items = []
     for x in reports:
-        items.append(f'<li><a href="/meta/{esc(x["slug"])}/">주간 메타 리포트 {esc(x["slug"].upper())}</a>'
+        items.append(f'<li><a href="/meta/{esc(x["slug"])}/">{esc(report_name(x))}</a>'
                      f'<small>{esc(x["season"])} · {esc(x["period"])} KST · 싱글 1위 {esc(x.get("singles_top1") or "－")} · '
                      f'더블 1위 {esc(x.get("doubles_top1") or "－")}'
                      + (f' · 싱글 최다 상승 {esc(x["singles_riser"])}' if x.get("singles_riser") else "")
                      + '</small></li>')
     body = ('<div class="auto">공식 랭크배틀 사용률 데이터를 <strong>매주 자동 집계</strong>한 리포트 모음입니다. '
             '순위 변동·기술·도구·특성 채용 변화·조합·상성을 표로 정리하며, 지난 주차는 그대로 보관됩니다.</div>'
-            f'<p>최신: <a href="/meta/{esc(latest["slug"])}/">주간 메타 리포트 {esc(latest["slug"].upper())}</a> '
+            f'<p>최신: <a href="/meta/{esc(latest["slug"])}/">{esc(report_name(latest))}</a> '
             f'({esc(latest["period"])} KST)</p>'
             '<ul class="rep-list">' + "".join(items) + '</ul>')
-    title = "주간 메타 리포트 — 포켓몬 챔피언스 랭크배틀 순위·채용 변화 기록"
-    desc = "공식 랭크배틀 사용률 데이터를 매주 자동 집계한 메타 리포트 모음. 싱글·더블 순위 변동, 기술·도구·특성 채용 변화, 조합과 상성."
+    title = "포챔스 주간 메타 리포트 — 포켓몬 챔피언스 랭크배틀 순위·채용률 변화 기록"
+    desc = ("포챔스(포켓몬 챔피언스) 주간 메타 리포트 모음. 공식 랭크배틀 사용률 데이터를 매주 자동 집계해 "
+            "싱글·더블 순위 변동, 기술·도구·특성 채용률 변화, 조합과 상성을 주차별로 기록합니다.")
     page = PAGE.format(title=esc(title), desc=esc(desc), url=f"{BASE}/meta/", pub=latest["date"],
                        style=style, extra=EXTRA_STYLE, header=header, footer=footer,
-                       crumb='<a href="/guide/">가이드</a> › 메타 리포트', h1="주간 메타 리포트",
-                       lead=esc("매주 월요일, 지난 7일의 공식 랭크배틀 데이터를 자동으로 비교해 순위와 채용 변화를 기록합니다."),
+                       crumb='<a href="/guide/">가이드</a> › 메타 리포트', h1="포챔스 주간 메타 리포트",
+                       lead=esc("매주 월요일, 지난 7일의 포켓몬 챔피언스 공식 랭크배틀 데이터를 자동으로 비교해 순위와 채용률 변화를 기록합니다."),
                        body=body)
     io.open(os.path.join(SITE, "meta", "index.html"), "w", encoding="utf-8").write(page)
     return len(reports)
