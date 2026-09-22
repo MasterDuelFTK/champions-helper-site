@@ -443,7 +443,6 @@ PAGE = """<!DOCTYPE html>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <title>{title}</title>
 <meta name="description" content="{desc}" />
-<meta name="robots" content="noindex,follow" />
 <link rel="canonical" href="{canon}" />
 <meta property="og:type" content="article" />
 <meta property="og:site_name" content="Champions Helper" />
@@ -507,10 +506,6 @@ PAGE = """<!DOCTYPE html>
   </section>
   {usage}
   {mega}
-  <section class="card">
-    <h2>{ko} 운용 포인트</h2>
-    <div class="prose">{prose}</div>
-  </section>
 
   <section class="card">
     <h2>관련 페이지</h2>
@@ -683,7 +678,11 @@ def inject_index():
         f.write(html_src)
 
 # ── sitemap 재생성 ────────────────────────────────────────────────────
-# ★183차(AdSense 3차 거절 대응) — 자동생성 페이지는 sitemap에서 뺀다.
+# ★211차 — 183차 noindex 전략 철회(4차 거절 실측: 애드센스는 라이브 사이트를 보므로 noindex 는 심사 이득 0,
+#   도감형 검색어는 노출만 있고 2페이지에 갇혀 클릭 0). 도감 상세·배틀데이터를 다시 색인 대상으로 돌리고
+#   템플릿 "운용 포인트" 문단(종족값을 문장으로 찍어낸 자동생성 텍스트)은 제거했다. 아래 build_sitemap 에
+#   도감 상세·배틀데이터·주간 메타 리포트(meta/reports.json)를 포함한다. /board/ 만 계속 제외.
+# (183차 원문) — 자동생성 페이지는 sitemap에서 뺀다.
 #   도감 상세 236편 + 배틀데이터 2편은 전부 데이터에서 기계 생성한 페이지라
 #   색인되면 사이트의 91%가 템플릿 페이지로 계산돼 "가치 없는 콘텐츠" 판정을 부른다.
 #   페이지는 그대로 살아 있고(nav 링크·직접 접속·헬퍼 데이터 전부 무관), 색인만 빼는 것.
@@ -733,7 +732,20 @@ def build_sitemap():
                     f"    <changefreq>{freq}</changefreq>\n    <priority>{pri}</priority>\n  </url>")
     for loc, freq, pri in STATIC_ROUTES:
         u(loc, freq, pri)
-    # 183차 — 도감 상세 236편 루프 제거(noindex 전환). 되살리면 noindex와 모순되는 sitemap이 된다.
+    # 211차 — 배틀데이터 2편 + 도감 상세 전편 + 주간 메타 리포트 복원(noindex 해제와 한 세트).
+    u("/battle-data/", "daily", "0.8")
+    u("/battle-data/doubles/", "daily", "0.8")
+    for e in DEX:
+        u(f"/pokedex/{e['en']}/", "weekly", "0.6")
+    meta_manifest = os.path.join(SITE, "meta", "reports.json")
+    if os.path.exists(meta_manifest):
+        u("/meta/", "weekly", "0.8")
+        try:
+            with open(meta_manifest, encoding="utf-8") as f:
+                for rep in json.load(f):
+                    u(f"/meta/{rep['slug']}/", "monthly", "0.7")
+        except Exception as ex:
+            print(f"  [warn] meta/reports.json 읽기 실패 — 리포트 URL 생략: {ex}")
     xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
            + "\n".join(urls) + "\n</urlset>\n")
@@ -751,7 +763,6 @@ BD_PAGE = """<!DOCTYPE html>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <title>포켓몬 챔피언스 {fmt_label}배틀 실전 사용률 — 배틀 데이터 | Champions Helper</title>
 <meta name="description" content="포켓몬 챔피언스 {fmt_label}배틀 랭크({season}) 기준, 포켓몬별 자주 채용하는 기술과 채용률 통계. 상대가 무엇을 들고 오는지 예측하세요." />
-<meta name="robots" content="noindex,follow" />
 <link rel="canonical" href="{canon_url}" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Champions Helper" />
@@ -938,7 +949,8 @@ def bd_toggle(active):
     s = ' active' if active == 'single' else ''
     d = ' active' if active == 'double' else ''
     return (f'<div class="bd-toggle"><a href="/battle-data/" class="tab{s}">싱글배틀</a>'
-            f'<a href="/battle-data/doubles/" class="tab{d}">더블배틀</a></div>')
+            f'<a href="/battle-data/doubles/" class="tab{d}">더블배틀</a></div>'
+            f' <span style="margin-left:12px;font-size:14px;"><a href="/meta/">📊 주간 변동은 메타 리포트에서</a></span>')
 
 def build_battle_data_page(usage_map, season, fmt_label, subdir, canon_url, active_tab):
     # 131차 — 싱글/더블 공용. usage_map=USAGE(싱글) or USAGE_D(더블). 없으면 조용히 생략.
@@ -995,4 +1007,4 @@ if __name__ == "__main__":
     build_sitemap()
     print(f"OK — 상세페이지 {n}개 생성 (pokedex/<en>/index.html), 사용률 매칭 {sum(1 for e in DEX if usage_for(e['en']))}종")
     print(f"     배틀데이터 싱글 {bd}종 · 더블 {bd_d}종 · 도감 인덱스 정적목록 주입 · "
-          f"sitemap {len(STATIC_ROUTES)}정적 재생성(도감 상세 {len(seen)}편 = noindex, 색인 제외)")
+          f"sitemap 재생성(정적 {len(STATIC_ROUTES)} + 배틀데이터 2 + 도감 상세 {len(DEX)} + 메타 리포트, 211차부터 전부 색인 대상)")
